@@ -19,10 +19,14 @@ use App\Http\Controllers\BkashController;
 use App\Http\Controllers\SslcommerzController;
 use Illuminate\Support\Facades\Route;
 
-// Admin — invoice printable view (auth-gated in controller)
+// Admin — invoice + label printable views (auth-gated in controller)
 Route::middleware(['web', 'auth'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/orders/{order}/invoice', [\App\Http\Controllers\Admin\OrderInvoiceController::class, 'show'])
         ->name('orders.invoice');
+    Route::get('/orders/{order}/label', [\App\Http\Controllers\Admin\OrderInvoiceController::class, 'label'])
+        ->name('orders.label');
+    Route::get('/orders-labels', [\App\Http\Controllers\Admin\OrderInvoiceController::class, 'labels'])
+        ->name('orders.labels');
 });
 
 // Home
@@ -87,6 +91,7 @@ Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])
 Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
 Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
 Route::get('/checkout/thanas', [CheckoutController::class, 'thanas'])->name('checkout.thanas');
+Route::post('/checkout/apply-coupon', [CheckoutController::class, 'applyCoupon'])->name('checkout.coupon');
 Route::get('/checkout/success/{orderNumber}', [CheckoutController::class, 'success'])->name('checkout.success');
 Route::get('/checkout/invoice/{orderNumber}', [CheckoutController::class, 'invoice'])->name('checkout.invoice');
 Route::get('/bkash/callback', [BkashController::class, 'callback'])->name('bkash.callback');

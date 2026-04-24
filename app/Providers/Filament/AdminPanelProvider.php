@@ -120,6 +120,7 @@ class AdminPanelProvider extends PanelProvider
             ->navigationGroups([
                 NavigationGroup::make('Shop')->icon('heroicon-o-shopping-bag')->collapsible()->collapsed(),
                 NavigationGroup::make('Catalog')->icon('heroicon-o-cube')->collapsible()->collapsed(),
+                NavigationGroup::make('Inventory')->icon('heroicon-o-archive-box')->collapsible()->collapsed(),
                 NavigationGroup::make('Content')->icon('heroicon-o-document-text')->collapsible()->collapsed(),
                 NavigationGroup::make('Blog')->icon('heroicon-o-newspaper')->collapsible()->collapsed(),
                 NavigationGroup::make('Company')->icon('heroicon-o-building-office')->collapsible()->collapsed(),

@@ -386,6 +386,12 @@ class OrderResource extends Resource
                         ->color('gray')
                         ->url(fn ($record) => route('admin.orders.invoice', $record))
                         ->openUrlInNewTab(),
+                    Tables\Actions\Action::make('printLabel')
+                        ->label('Print Courier Label')
+                        ->icon('heroicon-o-ticket')
+                        ->color('gray')
+                        ->url(fn ($record) => route('admin.orders.label', $record))
+                        ->openUrlInNewTab(),
                 ])->label('Quick actions')->icon('heroicon-m-ellipsis-vertical')->color('gray'),
             ])
             ->bulkActions([
@@ -402,6 +408,16 @@ class OrderResource extends Resource
                             foreach ($records as $record) {
                                 $record->update(['status' => $data['status']]);
                             }
+                        })
+                        ->deselectRecordsAfterCompletion(),
+                    Tables\Actions\BulkAction::make('bulkPrintLabels')
+                        ->label('Print Courier Labels')
+                        ->icon('heroicon-o-ticket')
+                        ->color('gray')
+                        ->action(function ($records, $livewire) {
+                            $ids = $records->pluck('id')->implode(',');
+                            $url = route('admin.orders.labels') . '?ids=' . $ids;
+                            $livewire->js('window.open(' . json_encode($url) . ', "_blank");');
                         })
                         ->deselectRecordsAfterCompletion(),
                     Tables\Actions\DeleteBulkAction::make(),

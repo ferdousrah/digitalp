@@ -24,6 +24,7 @@ class RolePermissionSeeder extends Seeder
         'attributes'       => 'Attributes',
         // Shop
         'orders'           => 'Orders',
+        'coupons'          => 'Coupons',
         // Content
         'blog_posts'       => 'Blog Posts',
         'blog_categories'  => 'Blog Categories',
@@ -44,6 +45,10 @@ class RolePermissionSeeder extends Seeder
         'expenses'           => 'Expenses',
         'expense_categories' => 'Expense Categories',
         'accounting'         => 'Accounting Dashboard',
+        // Inventory
+        'suppliers'          => 'Suppliers',
+        'purchase_orders'    => 'Purchase Orders',
+        'stock_movements'    => 'Stock Movements',
         // Reports
         'reports'            => 'Reports',
         // Settings

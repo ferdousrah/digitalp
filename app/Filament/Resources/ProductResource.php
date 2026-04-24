@@ -198,6 +198,33 @@ class ProductResource extends Resource
                 Tables\Filters\SelectFilter::make('brand')->relationship('brand', 'name'),
             ])->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('adjustStock')
+                    ->label('Adjust Stock')
+                    ->icon('heroicon-o-plus-minus')
+                    ->color('warning')
+                    ->form([
+                        Forms\Components\Placeholder::make('current_stock')
+                            ->content(fn ($record) => "Current stock: " . ($record->stock_quantity ?? 0)),
+                        Forms\Components\TextInput::make('delta')
+                            ->label('Change by')
+                            ->numeric()
+                            ->required()
+                            ->helperText('Use a positive number to add, negative to remove.'),
+                        Forms\Components\Textarea::make('reason')
+                            ->label('Reason')
+                            ->rows(2)
+                            ->required()
+                            ->placeholder('e.g. Damaged units removed, stock-take correction'),
+                    ])
+                    ->action(function ($record, array $data) {
+                        \App\Services\InventoryService::move(
+                            product: $record,
+                            delta: (int) $data['delta'],
+                            type: 'adjustment',
+                            reference: null,
+                            notes: $data['reason'],
+                        );
+                    }),
             ])->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),

@@ -26,6 +26,7 @@ class Dashboard extends BaseDashboard
             \App\Filament\Widgets\MonthlySalesChartWidget::class,
             \App\Filament\Widgets\OrdersByStatusWidget::class,
             \App\Filament\Widgets\OrdersByPaymentWidget::class,
+            \App\Filament\Widgets\OrdersByDistrictWidget::class,
             \App\Filament\Widgets\RecentOrdersWidget::class,
             \App\Filament\Widgets\TopProductsWidget::class,
             \App\Filament\Widgets\LowStockWidget::class,

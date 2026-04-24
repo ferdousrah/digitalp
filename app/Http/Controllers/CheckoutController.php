@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Coupon;
+use App\Models\CouponRedemption;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Services\BangladeshGeoService;
@@ -10,6 +12,7 @@ use App\Services\CartService;
 use App\Services\SslcommerzService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class CheckoutController extends Controller
@@ -39,6 +42,43 @@ class CheckoutController extends Controller
         $thanas   = BangladeshGeoService::thanasForDistrict($district);
 
         return response()->json(['thanas' => $thanas]);
+    }
+
+    /**
+     * Validate a coupon code against the current cart + customer phone (optional).
+     * Used by the checkout page's "Apply" button via AJAX. Doesn't mutate state.
+     */
+    public function applyCoupon(Request $request)
+    {
+        $data = $request->validate([
+            'code'  => 'required|string|max:50',
+            'phone' => 'nullable|string|max:20',
+        ]);
+
+        $coupon = Coupon::whereRaw('UPPER(code) = ?', [strtoupper(trim($data['code']))])->first();
+        if (!$coupon) {
+            return response()->json(['ok' => false, 'message' => 'Invalid coupon code.'], 422);
+        }
+
+        $subtotal = (float) CartService::total();
+        if ($subtotal <= 0) {
+            return response()->json(['ok' => false, 'message' => 'Your cart is empty.'], 422);
+        }
+
+        [$valid, $reason] = $coupon->validateFor($subtotal, $data['phone'] ?? null);
+        if (!$valid) {
+            return response()->json(['ok' => false, 'message' => $reason], 422);
+        }
+
+        $discount = $coupon->calculateDiscount($subtotal);
+
+        return response()->json([
+            'ok'       => true,
+            'code'     => $coupon->code,
+            'type'     => $coupon->type,
+            'discount' => $discount,
+            'message'  => 'Coupon applied: ৳' . number_format($discount, 2) . ' off',
+        ]);
     }
 
     public function store(Request $request)
@@ -71,8 +111,28 @@ class CheckoutController extends Controller
             ? self::DELIVERY_INSIDE_DHAKA
             : self::DELIVERY_OUTSIDE_DHAKA;
 
+        // Re-validate coupon server-side (never trust anything from the form).
+        // If the code is invalid here we ignore it silently and apply zero discount,
+        // rather than fail the whole checkout.
         $couponDiscount = 0;
-        $total          = $subtotal + $deliveryCost - $couponDiscount;
+        $resolvedCoupon = null;
+        if (!empty($validated['coupon_code'])) {
+            $resolvedCoupon = Coupon::whereRaw('UPPER(code) = ?', [strtoupper(trim($validated['coupon_code']))])->first();
+            if ($resolvedCoupon) {
+                [$ok] = $resolvedCoupon->validateFor($subtotal, $validated['shipping_phone'] ?? null);
+                if ($ok) {
+                    $couponDiscount = $resolvedCoupon->calculateDiscount($subtotal);
+                } else {
+                    // Coupon failed server-side validation → don't pretend to apply it
+                    $validated['coupon_code'] = null;
+                    $resolvedCoupon = null;
+                }
+            } else {
+                $validated['coupon_code'] = null;
+            }
+        }
+
+        $total = max(0, $subtotal + $deliveryCost - $couponDiscount);
 
         $order = Order::create([
             'order_number'      => 'ORD-' . strtoupper(uniqid()),
@@ -108,6 +168,21 @@ class CheckoutController extends Controller
                 'quantity'      => $item['qty'],
                 'subtotal'      => $item['price'] * $item['qty'],
             ]);
+        }
+
+        // Record coupon redemption + increment counter atomically
+        if ($resolvedCoupon && $couponDiscount > 0) {
+            DB::transaction(function () use ($resolvedCoupon, $order, $validated, $subtotal, $couponDiscount) {
+                CouponRedemption::create([
+                    'coupon_id'        => $resolvedCoupon->id,
+                    'order_id'         => $order->id,
+                    'customer_phone'   => $validated['shipping_phone'],
+                    'subtotal_before'  => $subtotal,
+                    'discount_applied' => $couponDiscount,
+                    'used_at'          => now(),
+                ]);
+                $resolvedCoupon->increment('used_count');
+            });
         }
 
         // bKash: create payment and redirect

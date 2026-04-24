@@ -400,6 +400,13 @@
                                     </span>
                                     <span style="font-weight:600;" x-text="deliveryCost.toFixed(2) + '৳'"></span>
                                 </div>
+                                <div x-show="couponDiscount > 0" style="display:flex; justify-content:space-between; font-size:0.85rem; color:#16a34a;">
+                                    <span>
+                                        Coupon Discount
+                                        <span style="font-size:0.75rem;" x-text="'(' + couponCode + ')'"></span>
+                                    </span>
+                                    <span style="font-weight:600;" x-text="'−' + couponDiscount.toFixed(2) + '৳'"></span>
+                                </div>
                                 <div style="border-top:1px dashed #e5e7eb; padding-top:10px; display:flex; justify-content:space-between; align-items:center;">
                                     <span style="font-size:0.9rem; font-weight:700; color:#111827;">Total</span>
                                     <span style="font-size:1.15rem; font-weight:800; color:#f97316;" x-text="orderTotal.toFixed(2) + '৳'"></span>
@@ -427,10 +434,19 @@
                                 x-transition:leave-end="co-acc-leave-to"
                                 class="co-card-body">
                                 <div style="display:flex; gap:8px;">
-                                    <input class="co-input" type="text" name="coupon_code" value="{{ old('coupon_code') }}" placeholder="{{ sc('checkout', 'coupon_placeholder', 'Enter coupon code') }}" style="flex:1;">
-                                    <button type="button" style="padding:9px 16px; background:#f97316; color:#fff; border:none; border-radius:6px; font-size:0.82rem; font-weight:700; cursor:pointer; white-space:nowrap; transition:background 0.2s;" onmouseover="this.style.background='#ea6c0a'" onmouseout="this.style.background='#f97316'">{{ sc('checkout', 'coupon_btn', 'Apply') }}</button>
+                                    <input class="co-input" type="text" name="coupon_code" x-model="couponCode" placeholder="{{ sc('checkout', 'coupon_placeholder', 'Enter coupon code') }}" style="flex:1;" :disabled="couponApplied">
+                                    <button type="button"
+                                        @click="couponApplied ? clearCoupon() : applyCoupon()"
+                                        :disabled="couponLoading || (!couponApplied && !couponCode)"
+                                        :style="{ padding:'9px 16px', background: couponApplied ? '#64748b' : '#f97316', color:'#fff', border:'none', borderRadius:'6px', fontSize:'0.82rem', fontWeight:700, cursor: couponLoading ? 'wait' : 'pointer', whiteSpace:'nowrap', opacity: (couponLoading || (!couponApplied && !couponCode)) ? 0.7 : 1 }">
+                                        <span x-show="!couponLoading && !couponApplied">{{ sc('checkout', 'coupon_btn', 'Apply') }}</span>
+                                        <span x-show="couponLoading">...</span>
+                                        <span x-show="couponApplied && !couponLoading">Remove</span>
+                                    </button>
                                 </div>
-                                <p style="font-size:0.76rem; color:#6b7280; margin-top:8px; margin-bottom:0;">If you have a discount coupon, enter it above.</p>
+                                <p x-show="couponMessage" x-text="couponMessage"
+                                   :style="{ fontSize:'0.8rem', marginTop:'8px', marginBottom:0, fontWeight:500, color: couponError ? '#dc2626' : '#16a34a' }"></p>
+                                <p x-show="!couponMessage" style="font-size:0.76rem; color:#6b7280; margin-top:8px; margin-bottom:0;">If you have a discount coupon, enter it above.</p>
                             </div>
                         </div>
 
@@ -534,11 +550,20 @@ function checkoutApp() {
         submitting: false,
         shippingDistrict: '{{ old('shipping_district', '') }}',
         billingDistrict: '{{ old('billing_district', '') }}',
+        shippingPhone: '{{ old('shipping_phone', '') }}',
         shippingThanas: @json(old('shipping_district') ? \App\Services\BangladeshGeoService::thanasForDistrict(old('shipping_district')) : []),
         billingThanas: @json(old('billing_district') ? \App\Services\BangladeshGeoService::thanasForDistrict(old('billing_district')) : []),
         cartItems: @json(collect($items)->map(fn($item, $key) => array_merge($item, ['key' => (string)$key]))->values()),
         deliveryInside: {{ $deliveryInside }},
         deliveryOutside: {{ $deliveryOutside }},
+
+        // Coupon state
+        couponCode: '{{ old('coupon_code', '') }}',
+        couponApplied: false,
+        couponLoading: false,
+        couponDiscount: 0,
+        couponMessage: '',
+        couponError: false,
 
         get subtotal() {
             return this.cartItems.reduce((s, i) => s + parseFloat(i.price) * i.qty, 0);
@@ -549,7 +574,52 @@ function checkoutApp() {
         },
 
         get orderTotal() {
-            return this.subtotal + this.deliveryCost;
+            return Math.max(0, this.subtotal + this.deliveryCost - this.couponDiscount);
+        },
+
+        async applyCoupon() {
+            if (!this.couponCode || this.couponLoading) return;
+            this.couponLoading = true;
+            this.couponMessage = '';
+            this.couponError = false;
+            try {
+                const r = await fetch('{{ route('checkout.coupon') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    },
+                    body: JSON.stringify({ code: this.couponCode, phone: this.shippingPhone }),
+                });
+                const data = await r.json();
+                if (r.ok && data.ok) {
+                    this.couponApplied = true;
+                    this.couponDiscount = parseFloat(data.discount || 0);
+                    this.couponCode = data.code || this.couponCode;
+                    this.couponMessage = data.message || 'Coupon applied.';
+                    this.couponError = false;
+                } else {
+                    this.couponApplied = false;
+                    this.couponDiscount = 0;
+                    this.couponMessage = data.message || 'Invalid coupon.';
+                    this.couponError = true;
+                }
+            } catch (e) {
+                this.couponApplied = false;
+                this.couponDiscount = 0;
+                this.couponMessage = 'Could not validate coupon. Try again.';
+                this.couponError = true;
+            }
+            this.couponLoading = false;
+        },
+
+        clearCoupon() {
+            this.couponApplied = false;
+            this.couponDiscount = 0;
+            this.couponCode = '';
+            this.couponMessage = '';
+            this.couponError = false;
         },
 
         async updateQty(key, newQty) {

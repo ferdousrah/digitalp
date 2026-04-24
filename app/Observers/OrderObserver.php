@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\Order;
+use App\Services\InventoryService;
 
 class OrderObserver
 {
@@ -39,6 +40,18 @@ class OrderObserver
             }
             if ($after === 'cancelled' && !$order->cancelled_at) {
                 $order->forceFill(['cancelled_at' => now()])->saveQuietly();
+            }
+
+            // ── Inventory side-effects ──
+            // Deduct stock when an order ships (or is marked delivered from non-shipped state).
+            // Uses InventoryService which checks for dup-deduction automatically.
+            if (in_array($after, ['shipped', 'delivered'])) {
+                InventoryService::deductForOrder($order->load('items'));
+            }
+
+            // Restock on cancel/refund if we had previously deducted
+            if (in_array($after, ['cancelled', 'refunded'])) {
+                InventoryService::returnForOrder($order->load('items'));
             }
         }
 

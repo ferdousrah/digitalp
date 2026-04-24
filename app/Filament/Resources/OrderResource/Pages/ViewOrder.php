@@ -24,6 +24,13 @@ class ViewOrder extends ViewRecord
                 ->url(fn () => route('admin.orders.invoice', $record))
                 ->openUrlInNewTab(),
 
+            Actions\Action::make('printLabel')
+                ->label('Print Courier Label')
+                ->icon('heroicon-o-ticket')
+                ->color('gray')
+                ->url(fn () => route('admin.orders.label', $record))
+                ->openUrlInNewTab(),
+
             Actions\ActionGroup::make([
                 Actions\Action::make('markProcessing')
                     ->label('Mark as Processing')
