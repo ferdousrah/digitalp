@@ -45,30 +45,58 @@ class OrderResource extends Resource
                 ->columns(2)
                 ->schema([
                     Forms\Components\Select::make('status')
-                        ->options([
-                            'pending'    => 'Pending',
-                            'processing' => 'Processing',
-                            'shipped'    => 'Shipped',
-                            'delivered'  => 'Delivered',
-                            'cancelled'  => 'Cancelled',
-                        ])
-                        ->required(),
+                        ->options(\App\Models\Order::statuses())
+                        ->required()
+                        ->live(),
 
                     Forms\Components\Select::make('payment_status')
-                        ->options([
-                            'pending' => 'Pending',
-                            'paid'    => 'Paid',
-                            'failed'  => 'Failed',
-                        ])
+                        ->options(\App\Models\Order::paymentStatuses())
                         ->required(),
                 ]),
 
-            Forms\Components\Section::make('Admin Notes')
+            Forms\Components\Section::make('Shipping & Fulfilment')
+                ->description('Add courier + tracking info when you hand the parcel over.')
+                ->columns(2)
                 ->schema([
-                    Forms\Components\Textarea::make('notes')
-                        ->label('Order Notes')
+                    Forms\Components\Select::make('courier_service')
+                        ->label('Courier')
+                        ->options(\App\Models\Order::couriers())
+                        ->searchable()
+                        ->placeholder('Select courier'),
+                    Forms\Components\TextInput::make('tracking_number')
+                        ->label('Tracking Number')
+                        ->maxLength(100),
+                    Forms\Components\DateTimePicker::make('shipped_at')
+                        ->label('Shipped at')
+                        ->native(false),
+                    Forms\Components\DateTimePicker::make('delivered_at')
+                        ->label('Delivered at')
+                        ->native(false),
+                ]),
+
+            Forms\Components\Section::make('Internal Notes')
+                ->columns(1)
+                ->schema([
+                    Forms\Components\Textarea::make('admin_notes')
+                        ->label('Admin-only notes')
                         ->rows(3)
+                        ->helperText('Visible to staff only. Not shown to customer.'),
+                    Forms\Components\Textarea::make('notes')
+                        ->label('Customer Notes (from checkout)')
+                        ->rows(2)
                         ->disabled(),
+                ]),
+
+            Forms\Components\Section::make('Refund')
+                ->collapsed(fn ($record) => !$record?->refund_amount)
+                ->columns(2)
+                ->schema([
+                    Forms\Components\TextInput::make('refund_amount')
+                        ->numeric()
+                        ->prefix('৳')
+                        ->minValue(0),
+                    Forms\Components\DateTimePicker::make('refunded_at')
+                        ->native(false),
                 ]),
         ]);
     }
@@ -107,6 +135,36 @@ class OrderResource extends Resource
                             default   => 'warning',
                         }),
                 ]),
+
+            Infolists\Components\Section::make('Fulfilment')
+                ->icon('heroicon-o-truck')
+                ->columns(3)
+                ->schema([
+                    Infolists\Components\TextEntry::make('courier_service')
+                        ->label('Courier')
+                        ->formatStateUsing(fn ($state) => $state ? (\App\Models\Order::couriers()[$state] ?? $state) : '—'),
+                    Infolists\Components\TextEntry::make('tracking_number')
+                        ->label('Tracking #')
+                        ->copyable()
+                        ->placeholder('—'),
+                    Infolists\Components\TextEntry::make('shipped_at')
+                        ->label('Shipped at')
+                        ->dateTime('d M Y, h:i A')
+                        ->placeholder('—'),
+                    Infolists\Components\TextEntry::make('delivered_at')
+                        ->label('Delivered at')
+                        ->dateTime('d M Y, h:i A')
+                        ->placeholder('—'),
+                    Infolists\Components\TextEntry::make('cancelled_at')
+                        ->label('Cancelled at')
+                        ->dateTime('d M Y, h:i A')
+                        ->placeholder('—'),
+                    Infolists\Components\TextEntry::make('refund_amount')
+                        ->label('Refund')
+                        ->money('BDT')
+                        ->placeholder('—'),
+                ])
+                ->hidden(fn (Order $record) => !$record->courier_service && !$record->tracking_number && !$record->shipped_at && !$record->cancelled_at && !$record->refund_amount),
 
             Infolists\Components\Section::make('Order Totals')
                 ->columns(4)
@@ -158,6 +216,37 @@ class OrderResource extends Resource
                         ->columnSpanFull(),
                 ])
                 ->hidden(fn (Order $record) => empty($record->notes)),
+
+            Infolists\Components\Section::make('Activity Timeline')
+                ->icon('heroicon-o-clock')
+                ->schema([
+                    Infolists\Components\RepeatableEntry::make('activities')
+                        ->hiddenLabel()
+                        ->columns(12)
+                        ->contained(false)
+                        ->schema([
+                            Infolists\Components\TextEntry::make('created_at')
+                                ->hiddenLabel()
+                                ->since()
+                                ->columnSpan(2),
+                            Infolists\Components\TextEntry::make('title')
+                                ->hiddenLabel()
+                                ->weight('semibold')
+                                ->columnSpan(4),
+                            Infolists\Components\TextEntry::make('description')
+                                ->hiddenLabel()
+                                ->color('gray')
+                                ->columnSpan(4),
+                            Infolists\Components\TextEntry::make('user.name')
+                                ->hiddenLabel()
+                                ->badge()
+                                ->color('gray')
+                                ->prefix('by ')
+                                ->placeholder('System')
+                                ->columnSpan(2),
+                        ]),
+                ])
+                ->hidden(fn (Order $record) => $record->activities()->count() === 0),
         ]);
     }
 
@@ -215,35 +304,106 @@ class OrderResource extends Resource
                     ->sortable(),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('status')
-                    ->options([
-                        'pending'    => 'Pending',
-                        'processing' => 'Processing',
-                        'shipped'    => 'Shipped',
-                        'delivered'  => 'Delivered',
-                        'cancelled'  => 'Cancelled',
-                    ]),
-
-                Tables\Filters\SelectFilter::make('payment_status')
-                    ->options([
-                        'pending' => 'Pending',
-                        'paid'    => 'Paid',
-                        'failed'  => 'Failed',
-                    ]),
-
-                Tables\Filters\SelectFilter::make('payment_method')
-                    ->options([
-                        'cod'    => 'Cash On Delivery',
-                        'bkash'  => 'Bkash',
-                        'online' => 'Online Payment',
-                    ]),
+                Tables\Filters\SelectFilter::make('status')->options(\App\Models\Order::statuses()),
+                Tables\Filters\SelectFilter::make('payment_status')->options(\App\Models\Order::paymentStatuses()),
+                Tables\Filters\SelectFilter::make('payment_method')->options([
+                    'cod'    => 'Cash On Delivery',
+                    'bkash'  => 'Bkash',
+                    'online' => 'Online Payment',
+                ]),
+                Tables\Filters\Filter::make('today')
+                    ->label('Today')
+                    ->query(fn ($q) => $q->whereDate('created_at', today()))
+                    ->toggle(),
+                Tables\Filters\Filter::make('this_week')
+                    ->label('This week')
+                    ->query(fn ($q) => $q->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()]))
+                    ->toggle(),
+                Tables\Filters\Filter::make('awaiting_payment')
+                    ->label('Awaiting payment')
+                    ->query(fn ($q) => $q->where('payment_status', 'pending'))
+                    ->toggle(),
+                Tables\Filters\Filter::make('awaiting_shipment')
+                    ->label('Awaiting shipment')
+                    ->query(fn ($q) => $q->whereIn('status', ['pending', 'processing']))
+                    ->toggle(),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\Action::make('markProcessing')
+                        ->label('Mark as Processing')
+                        ->icon('heroicon-o-cog-6-tooth')
+                        ->color('info')
+                        ->visible(fn ($record) => in_array($record->status, ['pending']))
+                        ->requiresConfirmation()
+                        ->action(fn ($record) => $record->update(['status' => 'processing'])),
+                    Tables\Actions\Action::make('markShipped')
+                        ->label('Mark as Shipped')
+                        ->icon('heroicon-o-truck')
+                        ->color('primary')
+                        ->visible(fn ($record) => in_array($record->status, ['pending', 'processing']))
+                        ->form([
+                            Forms\Components\Select::make('courier_service')
+                                ->label('Courier')
+                                ->options(\App\Models\Order::couriers())
+                                ->required(),
+                            Forms\Components\TextInput::make('tracking_number')
+                                ->label('Tracking number')
+                                ->required()
+                                ->maxLength(100),
+                        ])
+                        ->action(fn ($record, array $data) => $record->update([
+                            'status'          => 'shipped',
+                            'courier_service' => $data['courier_service'],
+                            'tracking_number' => $data['tracking_number'],
+                        ])),
+                    Tables\Actions\Action::make('markDelivered')
+                        ->label('Mark as Delivered')
+                        ->icon('heroicon-o-check-badge')
+                        ->color('success')
+                        ->visible(fn ($record) => $record->status === 'shipped')
+                        ->requiresConfirmation()
+                        ->action(fn ($record) => $record->update(['status' => 'delivered', 'payment_status' => 'paid'])),
+                    Tables\Actions\Action::make('markPaid')
+                        ->label('Mark as Paid')
+                        ->icon('heroicon-o-banknotes')
+                        ->color('success')
+                        ->visible(fn ($record) => $record->payment_status !== 'paid')
+                        ->requiresConfirmation()
+                        ->action(fn ($record) => $record->update(['payment_status' => 'paid'])),
+                    Tables\Actions\Action::make('cancel')
+                        ->label('Cancel Order')
+                        ->icon('heroicon-o-x-circle')
+                        ->color('danger')
+                        ->visible(fn ($record) => !in_array($record->status, ['delivered', 'cancelled', 'refunded']))
+                        ->requiresConfirmation()
+                        ->action(fn ($record) => $record->update(['status' => 'cancelled'])),
+                    Tables\Actions\Action::make('printInvoice')
+                        ->label('Print Invoice')
+                        ->icon('heroicon-o-printer')
+                        ->color('gray')
+                        ->url(fn ($record) => route('admin.orders.invoice', $record))
+                        ->openUrlInNewTab(),
+                ])->label('Quick actions')->icon('heroicon-m-ellipsis-vertical')->color('gray'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\BulkAction::make('bulkUpdateStatus')
+                        ->label('Change Status')
+                        ->icon('heroicon-o-arrow-path')
+                        ->form([
+                            Forms\Components\Select::make('status')
+                                ->options(\App\Models\Order::statuses())
+                                ->required(),
+                        ])
+                        ->action(function ($records, array $data) {
+                            foreach ($records as $record) {
+                                $record->update(['status' => $data['status']]);
+                            }
+                        })
+                        ->deselectRecordsAfterCompletion(),
                     Tables\Actions\DeleteBulkAction::make(),
                     static::csvExportBulkAction(),
                 ]),

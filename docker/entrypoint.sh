@@ -31,6 +31,9 @@ if [ -n "$APP_KEY" ]; then
     # so safe to run on every deploy. Adds new permissions as the catalog grows.
     php artisan db:seed --class=RolePermissionSeeder --force || true
 
+    # Baseline expense categories for the Accounts module — idempotent
+    php artisan db:seed --class=ExpenseCategorySeeder --force || true
+
     php artisan config:cache
     php artisan route:cache
     php artisan view:cache

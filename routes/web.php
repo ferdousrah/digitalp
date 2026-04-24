@@ -19,6 +19,12 @@ use App\Http\Controllers\BkashController;
 use App\Http\Controllers\SslcommerzController;
 use Illuminate\Support\Facades\Route;
 
+// Admin — invoice printable view (auth-gated in controller)
+Route::middleware(['web', 'auth'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/orders/{order}/invoice', [\App\Http\Controllers\Admin\OrderInvoiceController::class, 'show'])
+        ->name('orders.invoice');
+});
+
 // Home
 Route::get('/', [HomeController::class, 'index'])->name('home');
 

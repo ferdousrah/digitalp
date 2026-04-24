@@ -40,6 +40,12 @@ class RolePermissionSeeder extends Seeder
         'menu_items'       => 'Menu Items',
         'home_sections'    => 'Homepage Sections',
         'site_contents'    => 'Site Contents',
+        // Accounts
+        'expenses'           => 'Expenses',
+        'expense_categories' => 'Expense Categories',
+        'accounting'         => 'Accounting Dashboard',
+        // Reports
+        'reports'            => 'Reports',
         // Settings
         'settings'         => 'General Settings',
         'template'         => 'Template / Colors',

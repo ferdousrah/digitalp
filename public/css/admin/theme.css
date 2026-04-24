@@ -9,18 +9,33 @@
     --fi-border-radius-md: 0.5rem;
 }
 
-/* ── Sidebar ───────────────────────────────────────────────────────────── */
+/* ── Sidebar — always dark (regardless of light/dark mode of main content) ─ */
 .fi-sidebar {
-    box-shadow: 1px 0 0 0 rgba(0, 0, 0, 0.04);
+    background: linear-gradient(180deg, #0b1220 0%, #0f172a 100%) !important;
+    box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.04), 2px 0 12px -4px rgba(0, 0, 0, 0.2) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
 }
 
 .fi-sidebar-header {
-    border-bottom: 1px solid rgb(241 245 249);
-    padding: 1.125rem 1.25rem;
+    background: rgba(0, 0, 0, 0.15) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+    padding: 1.125rem 1.25rem !important;
 }
 
-.dark .fi-sidebar-header {
-    border-bottom-color: rgb(30 41 59);
+/* Sidebar close/collapse button (toggle) */
+.fi-sidebar .fi-icon-btn {
+    color: rgba(255, 255, 255, 0.6) !important;
+}
+.fi-sidebar .fi-icon-btn:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: #fff !important;
+}
+
+/* Brand text (when no logo) */
+.fi-sidebar-header .fi-logo,
+.fi-sidebar-header h1,
+.fi-sidebar-header span {
+    color: #fff !important;
 }
 
 .fi-sidebar-group-label {
@@ -28,12 +43,24 @@
     font-weight: 600 !important;
     letter-spacing: 0.08em !important;
     text-transform: uppercase !important;
-    color: rgb(100 116 139) !important;
+    color: rgba(255, 255, 255, 0.45) !important;
     padding: 0.375rem 0.75rem 0.25rem !important;
 }
 
-.dark .fi-sidebar-group-label {
-    color: rgb(148 163 184) !important;
+/* Sidebar group button (the collapsible header row) — make chevron + label light */
+.fi-sidebar-group-button {
+    color: rgba(255, 255, 255, 0.6) !important;
+}
+.fi-sidebar-group-button:hover {
+    background: rgba(255, 255, 255, 0.04) !important;
+    color: #fff !important;
+}
+.fi-sidebar-group-button svg {
+    color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.fi-sidebar-nav-groups {
+    padding: 0.5rem !important;
 }
 
 /* Tighten the vertical gap between sidebar navigation groups */
@@ -64,21 +91,81 @@
     font-size: 0.875rem !important;
     font-weight: 500 !important;
     margin: 0.0625rem 0 !important;
-    padding-top: 0.4rem !important;
-    padding-bottom: 0.4rem !important;
+    padding-top: 0.45rem !important;
+    padding-bottom: 0.45rem !important;
+    color: rgba(255, 255, 255, 0.88) !important;
     transition: all 0.15s ease !important;
 }
 
-.fi-sidebar-item.fi-active .fi-sidebar-item-button {
-    background: linear-gradient(90deg, rgb(16 185 129 / 0.10), rgb(16 185 129 / 0.02)) !important;
-    color: rgb(5 150 105) !important;
-    font-weight: 600 !important;
-    box-shadow: inset 3px 0 0 rgb(16 185 129) !important;
+.fi-sidebar-item-button:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: #fff !important;
 }
 
-.dark .fi-sidebar-item.fi-active .fi-sidebar-item-button {
-    background: rgb(16 185 129 / 0.15) !important;
-    color: rgb(52 211 153) !important;
+.fi-sidebar-item-button svg {
+    color: rgba(255, 255, 255, 0.72) !important;
+    transition: color 0.15s ease !important;
+}
+.fi-sidebar-item-button:hover svg {
+    color: #fff !important;
+}
+
+/* Sub-menu items — comfortably readable, not dazzling */
+.fi-sidebar-group-items .fi-sidebar-item-button,
+.fi-sidebar-group-items .fi-sidebar-item-button span,
+.fi-sidebar-group-items a {
+    color: rgba(255, 255, 255, 0.88) !important;
+    font-weight: 500 !important;
+}
+
+.fi-sidebar-group-items .fi-sidebar-item-button svg {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.fi-sidebar-group-items .fi-sidebar-item-button:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.fi-sidebar-group-items .fi-sidebar-item-button:hover,
+.fi-sidebar-group-items .fi-sidebar-item-button:hover span {
+    color: #ffffff !important;
+}
+
+.fi-sidebar-group-items .fi-sidebar-item-button:hover svg {
+    color: #fff !important;
+}
+
+/* Optional: vertical rail connecting sub-items to the group */
+.fi-sidebar-group-items {
+    position: relative;
+    padding-left: 0.5rem !important;
+}
+.fi-sidebar-group-items::before {
+    content: '';
+    position: absolute;
+    left: 0.75rem;
+    top: 0.25rem;
+    bottom: 0.25rem;
+    width: 1px;
+    background: rgba(255, 255, 255, 0.08);
+    pointer-events: none;
+}
+
+/* Active nav item — green gradient pill, same exact dimensions as inactive */
+.fi-sidebar-item.fi-active .fi-sidebar-item-button {
+    background: linear-gradient(90deg, rgba(16, 185, 129, 0.18) 0%, rgba(16, 185, 129, 0.04) 100%) !important;
+    color: #34d399 !important;
+    font-weight: 600 !important;
+    /* Only the inset left bar — no outer glow that would inflate visual size */
+    box-shadow: inset 3px 0 0 #10b981 !important;
+    /* Match inactive padding exactly so the row height doesn't change */
+    padding-top: 0.45rem !important;
+    padding-bottom: 0.45rem !important;
+    margin: 0.0625rem 0 !important;
+}
+
+.fi-sidebar-item.fi-active .fi-sidebar-item-button svg {
+    color: #34d399 !important;
 }
 
 /* ── Topbar ────────────────────────────────────────────────────────────── */
@@ -189,6 +276,38 @@
     box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.06), 0 3px 6px -2px rgba(0, 0, 0, 0.04) !important;
 }
 
+/* ── 3D-style chart enhancements ───────────────────────────────────────── */
+.fi-wi-chart canvas {
+    filter:
+        drop-shadow(0 2px 3px rgba(0, 0, 0, 0.08))
+        drop-shadow(0 6px 12px rgba(0, 0, 0, 0.06));
+    transition: filter 0.35s cubic-bezier(.4, 0, .2, 1), transform 0.35s cubic-bezier(.4, 0, .2, 1);
+}
+
+.fi-wi-chart:hover canvas {
+    filter:
+        drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1))
+        drop-shadow(0 12px 24px rgba(0, 0, 0, 0.12));
+    transform: translateY(-1px);
+}
+
+.dark .fi-wi-chart canvas {
+    filter:
+        drop-shadow(0 2px 3px rgba(0, 0, 0, 0.3))
+        drop-shadow(0 6px 12px rgba(0, 0, 0, 0.25));
+}
+
+.dark .fi-wi-chart:hover canvas {
+    filter:
+        drop-shadow(0 4px 6px rgba(16, 185, 129, 0.15))
+        drop-shadow(0 12px 24px rgba(0, 0, 0, 0.4));
+}
+
+/* Pie/doughnut specifically — add rim highlight via subtle extra shadow */
+.fi-wi-chart canvas[width] {
+    transform-origin: center bottom;
+}
+
 /* ── Dashboard entrance animation ─────────────────────────────────────── */
 .fi-page-content > .fi-wi > * {
     animation: ds-fade-up 0.45s cubic-bezier(.4,0,.2,1) both;
@@ -254,7 +373,72 @@
     border-radius: 0.375rem !important;
 }
 
-/* ── Scrollbar — thinner, less obtrusive ──────────────────────────────── */
+/* ── Dark-mode aware card surfaces (used by custom widgets) ───────────── */
+.ds-surface {
+    background: #ffffff;
+    border: 1px solid rgb(241 245 249);
+    color: #0f172a;
+}
+.dark .ds-surface {
+    background: rgb(15 23 42) !important;
+    border-color: rgb(30 41 59) !important;
+    color: #e2e8f0 !important;
+}
+
+.ds-surface h3,
+.ds-surface .ds-title {
+    color: #0f172a;
+}
+.dark .ds-surface h3,
+.dark .ds-surface .ds-title {
+    color: #f1f5f9 !important;
+}
+
+.ds-text-muted { color: rgb(100 116 139); }
+.dark .ds-text-muted { color: rgb(148 163 184) !important; }
+
+.ds-text-strong { color: #0f172a; }
+.dark .ds-text-strong { color: #e2e8f0 !important; }
+
+.ds-surface-muted {
+    background: #f8fafc;
+    color: #0f172a;
+}
+.dark .ds-surface-muted {
+    background: rgb(30 41 59) !important;
+    color: #e2e8f0 !important;
+}
+
+.ds-divider { border-top: 1px solid rgb(241 245 249); }
+.dark .ds-divider { border-top-color: rgb(30 41 59) !important; }
+
+.ds-chip {
+    background: #f8fafc;
+    border: 1px solid rgb(226 232 240);
+    color: #475569;
+}
+.dark .ds-chip {
+    background: rgb(30 41 59) !important;
+    border-color: rgb(51 65 85) !important;
+    color: #cbd5e1 !important;
+}
+
+.ds-gauge-track { stroke: #e5e7eb; }
+.dark .ds-gauge-track { stroke: rgb(51 65 85); }
+
+/* Stat card non-featured variant — surface + text respond to dark mode */
+.ds-stat-card:not(.ds-featured) {
+    background: #ffffff;
+    color: #0f172a;
+    border: 1px solid rgb(241 245 249);
+}
+.dark .ds-stat-card:not(.ds-featured) {
+    background: rgb(15 23 42) !important;
+    border-color: rgb(30 41 59) !important;
+    color: #e2e8f0 !important;
+}
+
+/* Scrollbar — thinner, less obtrusive ─────────────────────────────────── */
 .fi-body ::-webkit-scrollbar { width: 8px; height: 8px; }
 .fi-body ::-webkit-scrollbar-track { background: transparent; }
 .fi-body ::-webkit-scrollbar-thumb {

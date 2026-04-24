@@ -25,20 +25,32 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AdminPanelProvider extends PanelProvider
 {
+    /**
+     * Safely read a setting. If the DB isn't ready (e.g. during `route:cache`),
+     * return the fallback without throwing.
+     */
+    protected function safeSetting(string $key, ?string $fallback = null): ?string
+    {
+        try {
+            return SettingService::get($key, $fallback);
+        } catch (\Throwable $e) {
+            return $fallback;
+        }
+    }
+
+    protected function resolveFaviconUrl(): ?string
+    {
+        $path = $this->safeSetting('site_favicon');
+        if (!$path) return null;
+        try {
+            return Storage::disk('public')->url($path);
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
     public function panel(Panel $panel): Panel
     {
-        // Pull brand assets from your Site Settings (falls back gracefully)
-        $brandName = SettingService::get('site_name', 'Digital Support Admin');
-        $logoPath  = SettingService::get('site_logo');
-        $favicon   = SettingService::get('site_favicon');
-
-        $brandLogo = $logoPath
-            ? Storage::disk('public')->url($logoPath)
-            : null;
-        $faviconUrl = $favicon
-            ? Storage::disk('public')->url($favicon)
-            : null;
-
         return $panel
             ->default()
             ->id('admin')
@@ -47,11 +59,19 @@ class AdminPanelProvider extends PanelProvider
             ->profile(isSimple: false)
             ->databaseNotifications()
 
-            // ── Branding ────────────────────────────────────────────────
-            ->brandName($brandName)
-            ->brandLogo($brandLogo)   // null → shows brand name text
+            // ── Branding (closures = deferred to render time, DB-safe) ──
+            ->brandName(fn () => $this->safeSetting('site_name', 'Digital Support Admin'))
+            ->brandLogo(function () {
+                $logoPath = $this->safeSetting('site_logo');
+                if (!$logoPath) return null;
+                try {
+                    return Storage::disk('public')->url($logoPath);
+                } catch (\Throwable $e) {
+                    return null;
+                }
+            })
             ->brandLogoHeight('2.25rem')
-            ->favicon($faviconUrl)
+            ->favicon($this->resolveFaviconUrl())
 
             // ── Color palette ──────────────────────────────────────────
             ->colors([
@@ -104,6 +124,8 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make('Blog')->icon('heroicon-o-newspaper')->collapsible(),
                 NavigationGroup::make('Company')->icon('heroicon-o-building-office')->collapsible(),
                 NavigationGroup::make('Submissions')->icon('heroicon-o-inbox')->collapsible(),
+                NavigationGroup::make('Accounts')->icon('heroicon-o-calculator')->collapsible(),
+                NavigationGroup::make('Reports')->icon('heroicon-o-chart-pie')->collapsible(),
                 NavigationGroup::make('Settings')->icon('heroicon-o-cog-6-tooth')->collapsible(),
             ])
 

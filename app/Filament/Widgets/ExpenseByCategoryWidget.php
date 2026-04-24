@@ -2,13 +2,16 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\Order;
+use App\Models\Expense;
 use Filament\Widgets\ChartWidget;
+use Illuminate\Support\Facades\DB;
 
-class OrdersByStatusWidget extends ChartWidget
+class ExpenseByCategoryWidget extends ChartWidget
 {
-    protected static ?string $heading   = 'Orders by Status';
-    protected static ?int    $sort      = 4;
+    protected static ?string $heading = 'Expenses by Category';
+    protected static ?int $sort = 2;
+    protected array|string|int $columnSpan = ['default' => 'full', 'md' => 1, 'xl' => 2];
+    protected static ?string $maxHeight = '320px';
 
     protected function getType(): string
     {
@@ -17,36 +20,24 @@ class OrdersByStatusWidget extends ChartWidget
 
     protected function getData(): array
     {
-        $statuses = Order::selectRaw('status, COUNT(*) as count')
-            ->groupBy('status')
-            ->pluck('count', 'status')
-            ->toArray();
-
-        $colorMap = [
-            'pending'    => '#f97316',
-            'processing' => '#3b82f6',
-            'shipped'    => '#8b5cf6',
-            'delivered'  => '#10b981',
-            'cancelled'  => '#ef4444',
-            'completed'  => '#22c55e',
-        ];
-
-        $labels = array_map('ucfirst', array_keys($statuses));
-        $data   = array_values($statuses);
-        $colors = array_map(fn ($s) => $colorMap[$s] ?? '#9ca3af', array_keys($statuses));
+        $rows = DB::table('expenses')
+            ->join('expense_categories', 'expense_categories.id', '=', 'expenses.expense_category_id')
+            ->selectRaw('expense_categories.name as name, expense_categories.color as color, SUM(expenses.amount) as total')
+            ->groupBy('expense_categories.id', 'expense_categories.name', 'expense_categories.color')
+            ->orderByDesc('total')
+            ->get();
 
         return [
             'datasets' => [[
-                'data'             => $data,
-                'backgroundColor'  => $colors,
-                // White borders between segments create the "separated 3D slices" look
+                'data'             => $rows->pluck('total')->map(fn ($v) => (float) $v)->toArray(),
+                'backgroundColor'  => $rows->pluck('color')->toArray(),
                 'borderColor'      => '#ffffff',
                 'borderWidth'      => 4,
                 'hoverOffset'      => 14,
                 'hoverBorderWidth' => 6,
                 'spacing'          => 2,
             ]],
-            'labels' => $labels,
+            'labels' => $rows->pluck('name')->toArray(),
         ];
     }
 
@@ -60,7 +51,7 @@ class OrdersByStatusWidget extends ChartWidget
                 ],
                 'tooltip' => [
                     'callbacks' => [
-                        'label' => "function(ctx){return ' '+ctx.label+': '+ctx.raw+' orders';}",
+                        'label' => "function(ctx){return ' '+ctx.label+': ৳'+ctx.raw.toLocaleString();}",
                     ],
                 ],
             ],

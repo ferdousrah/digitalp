@@ -40,9 +40,13 @@ class OrdersByPaymentWidget extends ChartWidget
 
         return [
             'datasets' => [[
-                'data'            => $data,
-                'backgroundColor' => $colors,
-                'hoverOffset'     => 6,
+                'data'             => $data,
+                'backgroundColor'  => $colors,
+                'borderColor'      => '#ffffff',
+                'borderWidth'      => 4,
+                'hoverOffset'      => 14,
+                'hoverBorderWidth' => 6,
+                'spacing'          => 2,
             ]],
             'labels' => $labels,
         ];
@@ -51,13 +55,18 @@ class OrdersByPaymentWidget extends ChartWidget
     protected function getOptions(): array
     {
         return [
-            'plugins' => ['legend' => ['position' => 'bottom']],
-            'cutout' => '65%',
+            'plugins' => [
+                'legend' => [
+                    'position' => 'bottom',
+                    'labels'   => ['usePointStyle' => true, 'padding' => 16, 'boxWidth' => 10],
+                ],
+            ],
+            'cutout' => '68%',
             'animation' => [
                 'animateRotate' => true,
                 'animateScale'  => true,
-                'duration'      => 1000,
-                'easing'        => 'easeOutQuart',
+                'duration'      => 1400,
+                'easing'        => 'easeOutElastic',
             ],
         ];
     }
