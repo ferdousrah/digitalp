@@ -44,6 +44,8 @@ class EditRole extends EditRecord
                 $ids = array_merge($ids, $value);
             }
         }
-        $this->record->syncPermissions(array_unique(array_filter($ids)));
+        $ids = array_values(array_unique(array_map('intval', array_filter($ids))));
+        $permissions = \Spatie\Permission\Models\Permission::whereIn('id', $ids)->get();
+        $this->record->syncPermissions($permissions);
     }
 }

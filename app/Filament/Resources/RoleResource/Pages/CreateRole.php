@@ -12,7 +12,10 @@ class CreateRole extends CreateRecord
     protected function afterCreate(): void
     {
         $ids = $this->collectPermissionIds();
-        $this->record->syncPermissions($ids);
+        if (empty($ids)) return;
+
+        $permissions = \Spatie\Permission\Models\Permission::whereIn('id', $ids)->get();
+        $this->record->syncPermissions($permissions);
     }
 
     /**
@@ -28,6 +31,6 @@ class CreateRole extends CreateRecord
                 $ids = array_merge($ids, $value);
             }
         }
-        return array_unique(array_filter($ids));
+        return array_values(array_unique(array_map('intval', array_filter($ids))));
     }
 }
