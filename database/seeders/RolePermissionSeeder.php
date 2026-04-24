@@ -1,40 +1,105 @@
 <?php
+
 namespace Database\Seeders;
 
+use App\Models\User;
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 class RolePermissionSeeder extends Seeder
 {
+    /**
+     * One permission group per "resource". The key is used to build permission
+     * names (`{key}.view`, `{key}.create`, etc.) and the label is displayed in
+     * the admin UI (grouped checkbox).
+     */
+    protected array $resources = [
+        // Catalog
+        'products'         => 'Products',
+        'categories'       => 'Categories',
+        'brands'           => 'Brands',
+        'attributes'       => 'Attributes',
+        // Shop
+        'orders'           => 'Orders',
+        // Content
+        'blog_posts'       => 'Blog Posts',
+        'blog_categories'  => 'Blog Categories',
+        'pages'            => 'Pages',
+        'faqs'             => 'FAQs',
+        'faq_categories'   => 'FAQ Categories',
+        'services'         => 'Services',
+        'gallery_albums'   => 'Gallery Albums',
+        'testimonials'     => 'Testimonials',
+        'sliders'          => 'Sliders',
+        'newsletter'       => 'Newsletter Subscribers',
+        'contacts'         => 'Contact Submissions',
+        'company_timeline' => 'Company Timeline',
+        'menu_items'       => 'Menu Items',
+        'home_sections'    => 'Homepage Sections',
+        'site_contents'    => 'Site Contents',
+        // Settings
+        'settings'         => 'General Settings',
+        'template'         => 'Template / Colors',
+        'product_card'     => 'Product Card Settings',
+        'payment'          => 'Payment Settings',
+        'font'             => 'Font Settings',
+        'hero_layout'      => 'Hero Layout',
+        'users'            => 'Users',
+        'roles'            => 'Roles & Permissions',
+    ];
+
+    protected array $actions = ['view', 'create', 'update', 'delete'];
+
     public function run(): void
     {
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        $permissions = [
-            'view_products', 'create_products', 'edit_products', 'delete_products',
-            'view_categories', 'create_categories', 'edit_categories', 'delete_categories',
-            'view_pages', 'create_pages', 'edit_pages', 'delete_pages',
-            'view_blog', 'create_blog', 'edit_blog', 'delete_blog',
-            'view_contacts', 'manage_contacts',
-            'view_settings', 'manage_settings',
-            'view_users', 'create_users', 'edit_users', 'delete_users',
-        ];
-
-        foreach ($permissions as $permission) {
-            Permission::create(['name' => $permission]);
+        // Create one permission per (resource, action) pair — idempotent
+        foreach ($this->resources as $key => $label) {
+            foreach ($this->actions as $action) {
+                Permission::firstOrCreate([
+                    'name'       => "{$key}.{$action}",
+                    'guard_name' => 'web',
+                ]);
+            }
         }
 
-        Role::create(['name' => 'super-admin'])->givePermissionTo(Permission::all());
-        Role::create(['name' => 'editor'])->givePermissionTo([
-            'view_products', 'create_products', 'edit_products',
-            'view_categories', 'view_pages', 'create_pages', 'edit_pages',
-            'view_blog', 'create_blog', 'edit_blog',
-            'view_contacts',
-        ]);
-        Role::create(['name' => 'moderator'])->givePermissionTo([
-            'view_products', 'view_categories', 'view_pages',
-            'view_blog', 'view_contacts', 'manage_contacts',
-        ]);
+        // super_admin: bypasses all checks via Gate::before() — no perms attached
+        Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
+
+        // admin: explicitly gets all permissions
+        $admin = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+        $admin->syncPermissions(Permission::all());
+
+        // editor: content + catalog read/write, no deletes, no settings
+        $editor = Role::firstOrCreate(['name' => 'editor', 'guard_name' => 'web']);
+        $editorPerms = Permission::query()
+            ->where(function ($q) {
+                $contentResources = [
+                    'products', 'categories', 'brands',
+                    'blog_posts', 'blog_categories', 'pages',
+                    'faqs', 'faq_categories', 'sliders',
+                    'gallery_albums', 'testimonials',
+                    'home_sections', 'site_contents',
+                ];
+                foreach ($contentResources as $r) {
+                    $q->orWhere('name', 'like', "{$r}.%");
+                }
+            })
+            ->where('name', 'not like', '%.delete')
+            ->get();
+        $editor->syncPermissions($editorPerms);
+
+        // Promote the first user to super_admin (usually the installer-created admin)
+        $firstUser = DB::table('users')->orderBy('id')->first();
+        if ($firstUser) {
+            $user = User::find($firstUser->id);
+            if ($user && !$user->hasRole('super_admin')) {
+                $user->assignRole('super_admin');
+            }
+        }
     }
 }

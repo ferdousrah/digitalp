@@ -33,8 +33,13 @@ class UserResource extends Resource
                 ->dehydrateStateUsing(fn (string $state): string => Hash::make($state))
                 ->dehydrated(fn (?string $state): bool => filled($state))
                 ->required(fn (string $operation): bool => $operation === 'create'),
-            Forms\Components\CheckboxList::make('roles')
-                ->relationship('roles', 'name'),
+            Forms\Components\Select::make('roles')
+                ->label('Roles')
+                ->relationship('roles', 'name')
+                ->multiple()
+                ->preload()
+                ->searchable()
+                ->helperText('Assign one or more roles. Super Admin bypasses every permission check.'),
         ]);
     }
 

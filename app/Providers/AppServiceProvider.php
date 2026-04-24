@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
@@ -22,6 +23,11 @@ class AppServiceProvider extends ServiceProvider
     {
         // Derive URLs from APP_URL (reliable during bootstrap, before TrustProxies runs).
         // Works on XAMPP (http://localhost/digitalp), VPS root (https://app.com), cPanel.
+        // Super Admin bypass — any user with the `super_admin` role passes every Gate check.
+        Gate::before(function ($user, $ability) {
+            return $user->hasRole('super_admin') ? true : null;
+        });
+
         $appUrl = rtrim((string) config('app.url'), '/');
 
         if ($appUrl !== '') {
