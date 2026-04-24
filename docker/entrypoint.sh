@@ -26,6 +26,11 @@ if [ -n "$APP_KEY" ]; then
     rm -rf public/storage
     php artisan storage:link --force
     php artisan migrate --force
+
+    # Sync role/permission catalog — idempotent (firstOrCreate for every entry),
+    # so safe to run on every deploy. Adds new permissions as the catalog grows.
+    php artisan db:seed --class=RolePermissionSeeder --force || true
+
     php artisan config:cache
     php artisan route:cache
     php artisan view:cache
