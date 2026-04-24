@@ -19,6 +19,7 @@ class BlogPostResource extends Resource
     protected static ?string $permissionKey = 'blog_posts';
 
     protected static ?string $model = BlogPost::class;
+    protected static ?string $recordTitleAttribute = 'title';
     protected static ?string $navigationIcon = 'heroicon-o-newspaper';
     protected static ?string $navigationGroup = 'Blog';
     protected static ?int $navigationSort = 1;

@@ -18,6 +18,7 @@ class PageResource extends Resource
     protected static ?string $permissionKey = 'pages';
 
     protected static ?string $model = Page::class;
+    protected static ?string $recordTitleAttribute = 'title';
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
     protected static ?string $navigationGroup = 'Content';
     protected static ?int $navigationSort = 1;

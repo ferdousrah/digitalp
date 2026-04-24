@@ -14,15 +14,32 @@ use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 
 use App\Filament\Concerns\AuthorizesWithPermission;
+use App\Filament\Concerns\ExportsToCsv;
+
 class ProductResource extends Resource
 {
     use AuthorizesWithPermission;
+    use ExportsToCsv;
     protected static ?string $permissionKey = 'products';
 
     protected static ?string $model = Product::class;
     protected static ?string $navigationIcon = 'heroicon-o-cube';
     protected static ?string $navigationGroup = 'Catalog';
     protected static ?int $navigationSort = 1;
+    protected static ?string $recordTitleAttribute = 'name';
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['name', 'sku'];
+    }
+
+    public static function getGlobalSearchResultDetails($record): array
+    {
+        return array_filter([
+            'SKU'   => $record->sku,
+            'Brand' => $record->brand?->name,
+        ]);
+    }
 
     public static function form(Form $form): Form
     {
@@ -164,24 +181,29 @@ class ProductResource extends Resource
 
     public static function table(Table $table): Table
     {
-        return $table->columns([
-            SpatieMediaLibraryImageColumn::make('product_thumbnail')->collection('product_thumbnail')->circular(),
-            Tables\Columns\TextColumn::make('name')->searchable()->sortable(),
-            Tables\Columns\TextColumn::make('sku')->label('SKU')->searchable(),
-            Tables\Columns\TextColumn::make('price')->money('BDT')->sortable(),
-            Tables\Columns\TextColumn::make('brand.name')->sortable(),
-            Tables\Columns\IconColumn::make('is_active')->boolean(),
-            Tables\Columns\IconColumn::make('is_featured')->boolean(),
-            Tables\Columns\TextColumn::make('created_at')->dateTime()->sortable()->toggleable(isToggledHiddenByDefault: true),
-        ])->filters([
-            Tables\Filters\TernaryFilter::make('is_active'),
-            Tables\Filters\TernaryFilter::make('is_featured'),
-            Tables\Filters\SelectFilter::make('brand')->relationship('brand', 'name'),
-        ])->actions([
-            Tables\Actions\EditAction::make(),
-        ])->bulkActions([
-            Tables\Actions\BulkActionGroup::make([Tables\Actions\DeleteBulkAction::make()]),
-        ]);
+        return $table
+            ->recordUrl(fn ($record) => Pages\EditProduct::getUrl(['record' => $record]))
+            ->columns([
+                SpatieMediaLibraryImageColumn::make('product_thumbnail')->collection('product_thumbnail')->circular(),
+                Tables\Columns\TextColumn::make('name')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('sku')->label('SKU')->searchable(),
+                Tables\Columns\TextColumn::make('price')->money('BDT')->sortable(),
+                Tables\Columns\TextColumn::make('brand.name')->sortable(),
+                Tables\Columns\IconColumn::make('is_active')->boolean(),
+                Tables\Columns\IconColumn::make('is_featured')->boolean(),
+                Tables\Columns\TextColumn::make('created_at')->dateTime()->sortable()->toggleable(isToggledHiddenByDefault: true),
+            ])->filters([
+                Tables\Filters\TernaryFilter::make('is_active'),
+                Tables\Filters\TernaryFilter::make('is_featured'),
+                Tables\Filters\SelectFilter::make('brand')->relationship('brand', 'name'),
+            ])->actions([
+                Tables\Actions\EditAction::make(),
+            ])->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                    static::csvExportBulkAction(),
+                ]),
+            ]);
     }
 
     public static function getRelations(): array { return []; }

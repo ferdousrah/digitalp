@@ -13,12 +13,21 @@ use Filament\Infolists;
 use Filament\Infolists\Infolist;
 
 use App\Filament\Concerns\AuthorizesWithPermission;
+use App\Filament\Concerns\ExportsToCsv;
+
 class OrderResource extends Resource
 {
     use AuthorizesWithPermission;
+    use ExportsToCsv;
     protected static ?string $permissionKey = 'orders';
 
     protected static ?string $model = Order::class;
+    protected static ?string $recordTitleAttribute = 'order_number';
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['order_number', 'shipping_name', 'shipping_phone', 'billing_name'];
+    }
     protected static ?string $navigationIcon  = 'heroicon-o-shopping-bag';
     protected static ?string $navigationGroup = 'Shop';
     protected static ?string $navigationLabel = 'Orders';
@@ -155,6 +164,7 @@ class OrderResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->recordUrl(fn ($record) => Pages\EditOrder::getUrl(['record' => $record]))
             ->defaultSort('created_at', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('order_number')
@@ -235,6 +245,7 @@ class OrderResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    static::csvExportBulkAction(),
                 ]),
             ]);
     }

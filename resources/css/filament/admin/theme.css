@@ -1,0 +1,251 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@config '../../../../tailwind.config.js';
+
+/* =========================================================================
+   Digital Support — Custom Admin Theme
+   Clean, modern SaaS look: tighter spacing, subtle shadows, refined type.
+   ========================================================================= */
+
+:root {
+    --fi-border-radius-lg: 0.75rem;
+    --fi-border-radius-md: 0.5rem;
+    --fi-sidebar-width: 17rem;
+}
+
+/* ── Sidebar ───────────────────────────────────────────────────────────── */
+.fi-sidebar {
+    box-shadow: 1px 0 0 0 rgba(0, 0, 0, 0.04);
+}
+
+.fi-sidebar-header {
+    border-bottom: 1px solid rgb(241 245 249);
+    padding: 1.125rem 1.25rem;
+}
+
+.dark .fi-sidebar-header {
+    border-bottom-color: rgb(30 41 59);
+}
+
+.fi-sidebar-nav-groups {
+    padding: 0.75rem;
+}
+
+.fi-sidebar-group-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgb(100 116 139);
+    padding: 0.5rem 0.75rem 0.375rem;
+}
+
+.dark .fi-sidebar-group-label {
+    color: rgb(148 163 184);
+}
+
+.fi-sidebar-item-button {
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.5rem 0.75rem;
+    margin: 0.125rem 0;
+    transition: all 0.15s ease;
+}
+
+.fi-sidebar-item-button:hover {
+    background: rgb(241 245 249);
+}
+
+.dark .fi-sidebar-item-button:hover {
+    background: rgb(30 41 59);
+}
+
+.fi-sidebar-item.fi-active .fi-sidebar-item-button {
+    background: linear-gradient(90deg, rgb(16 185 129 / 0.08), rgb(16 185 129 / 0.02));
+    color: rgb(5 150 105);
+    font-weight: 600;
+    box-shadow: inset 3px 0 0 rgb(16 185 129);
+}
+
+.dark .fi-sidebar-item.fi-active .fi-sidebar-item-button {
+    background: rgb(16 185 129 / 0.15);
+    color: rgb(52 211 153);
+}
+
+/* ── Topbar ────────────────────────────────────────────────────────────── */
+.fi-topbar {
+    box-shadow: 0 1px 0 0 rgba(0, 0, 0, 0.04);
+    backdrop-filter: blur(8px);
+    background: rgba(255, 255, 255, 0.85);
+}
+
+.dark .fi-topbar {
+    background: rgba(15, 23, 42, 0.85);
+    box-shadow: 0 1px 0 0 rgb(30 41 59);
+}
+
+/* ── Page header (big title row) ───────────────────────────────────────── */
+.fi-header-heading {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: rgb(15 23 42);
+}
+
+.dark .fi-header-heading {
+    color: rgb(241 245 249);
+}
+
+/* ── Sections / cards ──────────────────────────────────────────────────── */
+.fi-section {
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03), 0 1px 3px 0 rgba(0, 0, 0, 0.04);
+    border: 1px solid rgb(241 245 249);
+    transition: box-shadow 0.2s ease;
+}
+
+.fi-section:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 2px 4px -2px rgba(0, 0, 0, 0.03);
+}
+
+.dark .fi-section {
+    border-color: rgb(30 41 59);
+    background: rgb(15 23 42);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+}
+
+.fi-section-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid rgb(241 245 249);
+}
+
+.dark .fi-section-header {
+    border-bottom-color: rgb(30 41 59);
+}
+
+/* ── Tables ────────────────────────────────────────────────────────────── */
+.fi-ta-table thead th {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: rgb(71 85 105);
+    padding-top: 0.625rem;
+    padding-bottom: 0.625rem;
+}
+
+.dark .fi-ta-table thead th {
+    color: rgb(148 163 184);
+}
+
+.fi-ta-table tbody tr {
+    transition: background-color 0.15s ease;
+}
+
+.fi-ta-table tbody tr:hover {
+    background: rgb(248 250 252);
+}
+
+.dark .fi-ta-table tbody tr:hover {
+    background: rgb(30 41 59 / 0.5);
+}
+
+.fi-ta-cell {
+    font-size: 0.875rem;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+}
+
+/* ── Widgets / stats ───────────────────────────────────────────────────── */
+.fi-wi-stats-overview-stat {
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    border: 1px solid rgb(241 245 249);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.fi-wi-stats-overview-stat:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.06);
+}
+
+.dark .fi-wi-stats-overview-stat {
+    border-color: rgb(30 41 59);
+}
+
+.fi-wi-stats-overview-stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+/* ── Buttons ───────────────────────────────────────────────────────────── */
+.fi-btn {
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    transition: all 0.15s ease;
+}
+
+.fi-btn.fi-btn-color-primary {
+    box-shadow: 0 1px 2px rgba(5, 150, 105, 0.2);
+}
+
+.fi-btn.fi-btn-color-primary:hover {
+    box-shadow: 0 4px 8px rgba(5, 150, 105, 0.25);
+    transform: translateY(-1px);
+}
+
+/* ── Form inputs — more breathing room, softer borders ────────────────── */
+.fi-input-wrp {
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.fi-input-wrp:focus-within {
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+}
+
+/* ── Login page — centered, branded, softer background ────────────────── */
+.fi-simple-layout {
+    background:
+        radial-gradient(circle at 0% 0%, rgba(16, 185, 129, 0.06) 0%, transparent 50%),
+        radial-gradient(circle at 100% 100%, rgba(14, 165, 233, 0.05) 0%, transparent 50%),
+        rgb(248 250 252);
+}
+
+.dark .fi-simple-layout {
+    background:
+        radial-gradient(circle at 0% 0%, rgba(16, 185, 129, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 100% 100%, rgba(14, 165, 233, 0.06) 0%, transparent 50%),
+        rgb(2 6 23);
+}
+
+.fi-simple-main {
+    border-radius: 1rem;
+    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.1), 0 4px 8px -2px rgba(0, 0, 0, 0.04);
+    border: 1px solid rgb(241 245 249);
+    padding: 2.5rem;
+}
+
+.dark .fi-simple-main {
+    border-color: rgb(30 41 59);
+    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.5);
+}
+
+/* ── Badges — refined ──────────────────────────────────────────────────── */
+.fi-badge {
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    border-radius: 0.375rem;
+}
+
+/* ── Scrollbar — thinner, less obtrusive ──────────────────────────────── */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+    background: rgb(203 213 225);
+    border-radius: 4px;
+}
+.dark ::-webkit-scrollbar-thumb { background: rgb(51 65 85); }
+::-webkit-scrollbar-thumb:hover { background: rgb(148 163 184); }

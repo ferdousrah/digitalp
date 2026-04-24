@@ -1,0 +1,265 @@
+/* =========================================================================
+   Digital Support — Custom Admin Theme Overrides
+   Served as a plain <link> via Filament render hook — appended AFTER
+   Filament's own stylesheet so these rules win without !important.
+   ========================================================================= */
+
+:root {
+    --fi-border-radius-lg: 0.75rem;
+    --fi-border-radius-md: 0.5rem;
+}
+
+/* ── Sidebar ───────────────────────────────────────────────────────────── */
+.fi-sidebar {
+    box-shadow: 1px 0 0 0 rgba(0, 0, 0, 0.04);
+}
+
+.fi-sidebar-header {
+    border-bottom: 1px solid rgb(241 245 249);
+    padding: 1.125rem 1.25rem;
+}
+
+.dark .fi-sidebar-header {
+    border-bottom-color: rgb(30 41 59);
+}
+
+.fi-sidebar-group-label {
+    font-size: 0.7rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+    color: rgb(100 116 139) !important;
+    padding: 0.375rem 0.75rem 0.25rem !important;
+}
+
+.dark .fi-sidebar-group-label {
+    color: rgb(148 163 184) !important;
+}
+
+/* Tighten the vertical gap between sidebar navigation groups */
+.fi-sidebar-nav > ul,
+.fi-sidebar-nav-groups {
+    gap: 0.125rem !important;
+}
+
+.fi-sidebar-nav > ul > li + li,
+.fi-sidebar-nav-groups > * + * {
+    margin-top: 0.125rem !important;
+}
+
+.fi-sidebar-group {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    margin-top: 0.125rem !important;
+    margin-bottom: 0 !important;
+}
+
+.fi-sidebar-group-button {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+}
+
+.fi-sidebar-item-button {
+    border-radius: 0.5rem !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    margin: 0.0625rem 0 !important;
+    padding-top: 0.4rem !important;
+    padding-bottom: 0.4rem !important;
+    transition: all 0.15s ease !important;
+}
+
+.fi-sidebar-item.fi-active .fi-sidebar-item-button {
+    background: linear-gradient(90deg, rgb(16 185 129 / 0.10), rgb(16 185 129 / 0.02)) !important;
+    color: rgb(5 150 105) !important;
+    font-weight: 600 !important;
+    box-shadow: inset 3px 0 0 rgb(16 185 129) !important;
+}
+
+.dark .fi-sidebar-item.fi-active .fi-sidebar-item-button {
+    background: rgb(16 185 129 / 0.15) !important;
+    color: rgb(52 211 153) !important;
+}
+
+/* ── Topbar ────────────────────────────────────────────────────────────── */
+.fi-topbar {
+    box-shadow: 0 1px 0 0 rgba(0, 0, 0, 0.04);
+    backdrop-filter: blur(8px);
+    background: rgba(255, 255, 255, 0.85);
+}
+
+.dark .fi-topbar {
+    background: rgba(15, 23, 42, 0.85);
+    box-shadow: 0 1px 0 0 rgb(30 41 59);
+}
+
+/* ── Page header ───────────────────────────────────────────────────────── */
+.fi-header-heading {
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.02em !important;
+}
+
+/* ── Sections / cards ──────────────────────────────────────────────────── */
+.fi-section {
+    border-radius: 0.75rem !important;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03), 0 1px 3px 0 rgba(0, 0, 0, 0.04) !important;
+    transition: box-shadow 0.2s ease;
+}
+
+.fi-section:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 2px 4px -2px rgba(0, 0, 0, 0.03) !important;
+}
+
+/* ── Tables ────────────────────────────────────────────────────────────── */
+.fi-ta-header-cell {
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.04em !important;
+    text-transform: uppercase !important;
+    color: rgb(71 85 105) !important;
+}
+
+.dark .fi-ta-header-cell {
+    color: rgb(148 163 184) !important;
+}
+
+.fi-ta-row:hover {
+    background: rgb(248 250 252) !important;
+}
+
+.dark .fi-ta-row:hover {
+    background: rgb(30 41 59 / 0.5) !important;
+}
+
+/* ── Stats overview widgets ────────────────────────────────────────────── */
+.fi-wi-stats-overview-stat {
+    border-radius: 0.75rem !important;
+    transition: transform 0.25s cubic-bezier(.4,0,.2,1), box-shadow 0.25s cubic-bezier(.4,0,.2,1), border-color 0.25s ease !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.fi-wi-stats-overview-stat::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, rgb(16 185 129), rgb(59 130 246));
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+.fi-wi-stats-overview-stat:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.08), 0 4px 8px -2px rgba(0, 0, 0, 0.04) !important;
+}
+
+.fi-wi-stats-overview-stat:hover::before {
+    opacity: 1;
+}
+
+.fi-wi-stats-overview-stat-value {
+    font-size: 1.85rem !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.025em !important;
+    line-height: 1.1 !important;
+}
+
+.fi-wi-stats-overview-stat-label {
+    font-size: 0.8rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.02em !important;
+    color: rgb(71 85 105) !important;
+}
+
+.dark .fi-wi-stats-overview-stat-label {
+    color: rgb(148 163 184) !important;
+}
+
+/* ── Chart widgets ─────────────────────────────────────────────────────── */
+.fi-wi-chart {
+    border-radius: 0.75rem !important;
+    transition: box-shadow 0.25s ease;
+}
+
+.fi-wi-chart:hover {
+    box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.06), 0 3px 6px -2px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* ── Dashboard entrance animation ─────────────────────────────────────── */
+.fi-page-content > .fi-wi > * {
+    animation: ds-fade-up 0.45s cubic-bezier(.4,0,.2,1) both;
+}
+.fi-page-content > .fi-wi > *:nth-child(1) { animation-delay: 0.03s; }
+.fi-page-content > .fi-wi > *:nth-child(2) { animation-delay: 0.06s; }
+.fi-page-content > .fi-wi > *:nth-child(3) { animation-delay: 0.09s; }
+.fi-page-content > .fi-wi > *:nth-child(4) { animation-delay: 0.12s; }
+.fi-page-content > .fi-wi > *:nth-child(5) { animation-delay: 0.15s; }
+.fi-page-content > .fi-wi > *:nth-child(6) { animation-delay: 0.18s; }
+.fi-page-content > .fi-wi > *:nth-child(7) { animation-delay: 0.21s; }
+.fi-page-content > .fi-wi > *:nth-child(8) { animation-delay: 0.24s; }
+
+@keyframes ds-fade-up {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Buttons ───────────────────────────────────────────────────────────── */
+.fi-btn {
+    font-weight: 600 !important;
+    transition: all 0.15s ease !important;
+}
+
+.fi-btn.fi-color-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(5, 150, 105, 0.25) !important;
+}
+
+/* ── Form inputs focus ring ────────────────────────────────────────────── */
+.fi-input-wrp:focus-within {
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15) !important;
+}
+
+/* ── Login page — branded gradient background ──────────────────────────── */
+.fi-simple-layout {
+    background:
+        radial-gradient(circle at 0% 0%, rgba(16, 185, 129, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 100% 100%, rgba(14, 165, 233, 0.06) 0%, transparent 50%),
+        rgb(248 250 252) !important;
+}
+
+.dark .fi-simple-layout {
+    background:
+        radial-gradient(circle at 0% 0%, rgba(16, 185, 129, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 100% 100%, rgba(14, 165, 233, 0.08) 0%, transparent 50%),
+        rgb(2 6 23) !important;
+}
+
+.fi-simple-main {
+    border-radius: 1rem !important;
+    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.1), 0 4px 8px -2px rgba(0, 0, 0, 0.04) !important;
+    padding: 2.5rem !important;
+}
+
+.dark .fi-simple-main {
+    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* ── Badges — tighter radius ──────────────────────────────────────────── */
+.fi-badge {
+    font-weight: 600 !important;
+    border-radius: 0.375rem !important;
+}
+
+/* ── Scrollbar — thinner, less obtrusive ──────────────────────────────── */
+.fi-body ::-webkit-scrollbar { width: 8px; height: 8px; }
+.fi-body ::-webkit-scrollbar-track { background: transparent; }
+.fi-body ::-webkit-scrollbar-thumb {
+    background: rgb(203 213 225);
+    border-radius: 4px;
+}
+.fi-body.dark ::-webkit-scrollbar-thumb { background: rgb(51 65 85); }
+.fi-body ::-webkit-scrollbar-thumb:hover { background: rgb(148 163 184); }

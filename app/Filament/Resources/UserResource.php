@@ -12,12 +12,22 @@ use Filament\Tables\Table;
 use Illuminate\Support\Facades\Hash;
 
 use App\Filament\Concerns\AuthorizesWithPermission;
+use App\Filament\Concerns\ExportsToCsv;
+
 class UserResource extends Resource
 {
     use AuthorizesWithPermission;
+    use ExportsToCsv;
     protected static ?string $permissionKey = 'users';
 
     protected static ?string $model = User::class;
+    protected static ?string $recordTitleAttribute = 'name';
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['name', 'email'];
+    }
+
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
     protected static ?string $navigationGroup = 'Settings';
     protected static ?int $navigationSort = 2;
@@ -49,16 +59,21 @@ class UserResource extends Resource
 
     public static function table(Table $table): Table
     {
-        return $table->columns([
-            Tables\Columns\TextColumn::make('name')->searchable()->sortable(),
-            Tables\Columns\TextColumn::make('email')->searchable()->sortable(),
-            Tables\Columns\TextColumn::make('roles.name')->badge(),
-            Tables\Columns\TextColumn::make('created_at')->dateTime()->sortable()->toggleable(isToggledHiddenByDefault: true),
-        ])->filters([])->actions([
-            Tables\Actions\EditAction::make(),
-        ])->bulkActions([
-            Tables\Actions\BulkActionGroup::make([Tables\Actions\DeleteBulkAction::make()]),
-        ]);
+        return $table
+            ->recordUrl(fn ($record) => Pages\EditUser::getUrl(['record' => $record]))
+            ->columns([
+                Tables\Columns\TextColumn::make('name')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('email')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('roles.name')->badge(),
+                Tables\Columns\TextColumn::make('created_at')->dateTime()->sortable()->toggleable(isToggledHiddenByDefault: true),
+            ])->filters([])->actions([
+                Tables\Actions\EditAction::make(),
+            ])->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                    static::csvExportBulkAction(),
+                ]),
+            ]);
     }
 
     public static function getRelations(): array { return []; }

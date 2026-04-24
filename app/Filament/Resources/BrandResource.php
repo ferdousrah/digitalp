@@ -19,6 +19,7 @@ class BrandResource extends Resource
     protected static ?string $permissionKey = 'brands';
 
     protected static ?string $model = Brand::class;
+    protected static ?string $recordTitleAttribute = 'name';
 
     protected static ?string $navigationIcon = 'heroicon-o-bookmark';
 
