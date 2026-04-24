@@ -15,6 +15,10 @@ mkdir -p storage/framework/cache/data \
 chown -R www-data:www-data storage bootstrap/cache
 chmod -R 775 storage bootstrap/cache
 
+# nginx on Alpine creates its tmp dirs owned by "nginx" user, but our nginx.conf
+# runs workers as "www-data" — fix so uploads can write body buffers.
+chown -R www-data:www-data /var/lib/nginx /var/log/nginx 2>/dev/null || true
+
 # Run artisan commands that need .env (only when APP_KEY is set)
 if [ -n "$APP_KEY" ]; then
     echo "Running Laravel setup commands..."

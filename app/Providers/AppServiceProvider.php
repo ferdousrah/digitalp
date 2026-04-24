@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,13 +20,20 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Auto-detect storage URL from the actual HTTP request.
-        // Works on XAMPP subdirectory (http://localhost/digitalp),
-        // VPS root (https://myapp.com), cPanel subdomain — no env changes needed.
-        if (!app()->runningInConsole()) {
-            $request = request();
-            $base    = rtrim($request->getSchemeAndHttpHost() . $request->getBasePath(), '/');
-            config(['filesystems.disks.public.url' => $base . '/storage']);
+        // Derive URLs from APP_URL (reliable during bootstrap, before TrustProxies runs).
+        // Works on XAMPP (http://localhost/digitalp), VPS root (https://app.com), cPanel.
+        $appUrl = rtrim((string) config('app.url'), '/');
+
+        if ($appUrl !== '') {
+            // Override the public disk URL so Storage::url() returns the correct absolute URL
+            config(['filesystems.disks.public.url' => $appUrl . '/storage']);
+
+            // Force https scheme for all URL generation when app is configured as HTTPS.
+            // Fixes mixed-content blocks when behind a proxy (Coolify/Traefik/Cloudflare)
+            // that terminates TLS and sends internal HTTP to the container.
+            if (str_starts_with($appUrl, 'https://')) {
+                URL::forceScheme('https');
+            }
         }
 
         view()->composer('layouts.partials.header', function ($view) {
