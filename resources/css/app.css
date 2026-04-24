@@ -1,0 +1,33 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+
+@import "tailwindcss";
+@config "../../tailwind.config.js";
+@plugin "@tailwindcss/forms";
+@plugin "@tailwindcss/typography";
+
+@layer base {
+    html { @apply scroll-smooth; }
+    body { @apply bg-white text-surface-800 font-sans antialiased; }
+    h1, h2, h3, h4, h5, h6 { @apply font-display font-bold text-surface-900; }
+}
+
+@layer components {
+    .btn-primary {
+        @apply inline-flex items-center justify-center px-6 py-3 bg-primary-500 text-white font-semibold rounded-lg hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-all duration-200;
+    }
+    .btn-accent {
+        @apply inline-flex items-center justify-center px-6 py-3 bg-accent-500 text-white font-semibold rounded-lg hover:bg-accent-600 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-offset-2 transition-all duration-200;
+    }
+    .btn-outline {
+        @apply inline-flex items-center justify-center px-6 py-3 border-2 border-primary-500 text-primary-600 font-semibold rounded-lg hover:bg-primary-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-all duration-200;
+    }
+    .section-padding { @apply py-16 md:py-24 px-4 sm:px-6 lg:px-8; }
+    .container-custom { max-width: 1536px; margin-left: auto; margin-right: auto; }
+}
+
+/* Barba.js transitions */
+.barba-leave-active, .barba-enter-active { transition: opacity 0.4s ease; }
+.barba-leave-to, .barba-enter { opacity: 0; }
+
+/* GSAP animation classes — initial states set by JS, not CSS.
+   This ensures content remains visible if JS fails to load. */

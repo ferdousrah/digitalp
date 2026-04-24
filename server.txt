@@ -1,0 +1,60 @@
+The symlink was created pointing to the wrong path. The setup.php used dirname(__DIR__) which went to /home/digitalsupportco (parent of public_html), but your Laravel root is actually at /home/digitalsupportco/digitalp/ (one level deeper).
+
+Fix: Upload this corrected fixstorage.php to public_html
+
+<?php
+// TEMPORARY - DELETE AFTER USE
+
+$correctTarget = '/home/digitalsupportco/digitalp/storage/app/public';
+$link = __DIR__ . '/storage';
+
+echo '<pre style="font-family:monospace; padding:20px; font-size:14px;">';
+
+// Step 1: Remove wrong symlink
+if (is_link($link) || file_exists($link)) {
+    unlink($link);
+    echo "✓ Old symlink removed\n\n";
+}
+
+// Step 2: Create correct symlink
+if (symlink($correctTarget, $link)) {
+    echo "✓ New symlink created:\n";
+    echo "  public_html/storage → $correctTarget\n\n";
+} else {
+    echo "✗ Failed to create symlink\n\n";
+}
+
+// Step 3: Verify target directory exists
+if (is_dir($correctTarget)) {
+    echo "✓ Target directory EXISTS: $correctTarget\n\n";
+} else {
+    echo "✗ Target directory NOT FOUND: $correctTarget\n";
+    echo "  Check if this path is correct!\n\n";
+}
+
+// Step 4: List files in storage to confirm
+$files = @scandir($correctTarget);
+if ($files) {
+    echo "✓ Files in storage/app/public:\n";
+    foreach (array_slice($files, 2, 10) as $f) {
+        echo "  - $f\n";
+    }
+} else {
+    echo "  (empty or not accessible)\n";
+}
+
+echo "\n";
+echo "Test URL: https://digitalsupport.com.bd/storage/\n";
+echo '</pre>';
+echo '<p style="color:red; font-weight:bold; padding:0 20px;">DELETE this file immediately after use!</p>';
+Steps:
+
+Save as fixstorage.php, upload to public_html/
+Visit https://digitalsupport.com.bd/fixstorage.php
+Check results — should show green checkmarks
+Delete fixstorage.php immediately
+Also add Options +FollowSymLinks to your public_html/.htaccess — open it in File Manager and add this line at the very top:
+
+
+Options +FollowSymLinks
+This tells Apache to follow symlinks when serving files.

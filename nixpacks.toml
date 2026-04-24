@@ -1,0 +1,13 @@
+# This file is kept for reference only.
+# Coolify uses the Dockerfile in this repo instead of Nixpacks.
+# If you want to use Nixpacks, delete the Dockerfile and use the config below:
+#
+# [phases.build]
+# cmds = [
+#   "composer install --no-dev --optimize-autoloader --no-interaction",
+#   "npm ci",
+#   "npm run build",
+# ]
+#
+# [start]
+# cmd = "php artisan serve --host=0.0.0.0 --port=80"

@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir:*)",
+      "Bash(powershell:*)",
+      "Bash(php:*)",
+      "Bash(composer:*)",
+      "Bash(mysql:*)",
+      "Bash(\"f:\\\\xampp\\\\mysql\\\\bin\\\\mysql\" --version)",
+      "Bash(\"f:\\\\xampp\\\\mysql\\\\bin\\\\mysql\" -u root -e \"SELECT VERSION\\(\\);\")",
+      "Bash(redis-cli ping:*)",
+      "Bash(findstr:*)",
+      "Bash(F:\\\\xampp\\\\mysql\\\\bin\\\\mysql.exe:*)",
+      "Bash(\"F:/xampp/mysql/bin/mysql.exe\":*)",
+      "Bash(npm install:*)",
+      "Bash(npx npm list:*)",
+      "Bash(curl:*)",
+      "WebFetch(domain:www.ryans.com)",
+      "WebFetch(domain:web.ryanssoft.com)",
+      "WebFetch(domain:www.ryanscomputers.com)",
+      "WebFetch(domain:www.startech.com.bd)",
+      "Bash(del \"f:\\\\xampp\\\\htdocs\\\\digitalp\\\\storage\\\\temp_home.html\")",
+      "Bash(del:*)",
+      "Bash(test:*)",
+      "Bash(F:\\\\xampp\\\\php\\\\php.exe:*)",
+      "Bash(\"F:/xampp/php/php.exe\":*)",
+      "Bash(\"F:/xampp/php/php.exe\" \"f:/xampp/htdocs/digitalp/artisan\" migrate)",
+      "Bash(npm run build)"
+    ]
+  }
+}
