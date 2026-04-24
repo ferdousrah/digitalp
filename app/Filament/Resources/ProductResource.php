@@ -13,8 +13,12 @@ use Filament\Tables\Table;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 
+use App\Filament\Concerns\AuthorizesWithPermission;
 class ProductResource extends Resource
 {
+    use AuthorizesWithPermission;
+    protected static ?string $permissionKey = 'products';
+
     protected static ?string $model = Product::class;
     protected static ?string $navigationIcon = 'heroicon-o-cube';
     protected static ?string $navigationGroup = 'Catalog';

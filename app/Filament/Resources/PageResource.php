@@ -11,8 +11,12 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 
+use App\Filament\Concerns\AuthorizesWithPermission;
 class PageResource extends Resource
 {
+    use AuthorizesWithPermission;
+    protected static ?string $permissionKey = 'pages';
+
     protected static ?string $model = Page::class;
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
     protected static ?string $navigationGroup = 'Content';

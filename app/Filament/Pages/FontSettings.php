@@ -16,6 +16,17 @@ class FontSettings extends Page implements HasForms
 {
     use InteractsWithForms;
 
+
+    public static function canAccess(): bool
+    {
+        $user = auth()->user();
+        return $user && $user->can('font.view');
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canAccess();
+    }
     protected static ?string $navigationIcon  = 'heroicon-o-language';
     protected static ?string $navigationGroup = 'Settings';
     protected static ?string $navigationLabel = 'Font Settings';

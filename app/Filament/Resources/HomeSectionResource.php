@@ -11,8 +11,12 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 
+use App\Filament\Concerns\AuthorizesWithPermission;
 class HomeSectionResource extends Resource
 {
+    use AuthorizesWithPermission;
+    protected static ?string $permissionKey = 'home_sections';
+
     protected static ?string $model = HomeSection::class;
     protected static ?string $navigationIcon = 'heroicon-o-home';
     protected static ?string $navigationGroup = 'Content';

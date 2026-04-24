@@ -10,8 +10,12 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 
+use App\Filament\Concerns\AuthorizesWithPermission;
 class FaqCategoryResource extends Resource
 {
+    use AuthorizesWithPermission;
+    protected static ?string $permissionKey = 'faq_categories';
+
     protected static ?string $model = FaqCategory::class;
     protected static ?string $navigationIcon = 'heroicon-o-folder';
     protected static ?string $navigationGroup = 'Content';

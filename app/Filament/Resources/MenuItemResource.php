@@ -12,8 +12,12 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 
+use App\Filament\Concerns\AuthorizesWithPermission;
 class MenuItemResource extends Resource
 {
+    use AuthorizesWithPermission;
+    protected static ?string $permissionKey = 'menu_items';
+
     protected static ?string $model = MenuItem::class;
     protected static ?string $navigationIcon = 'heroicon-o-bars-3';
     protected static ?string $navigationGroup = 'Settings';

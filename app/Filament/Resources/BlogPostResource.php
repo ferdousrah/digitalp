@@ -12,8 +12,12 @@ use Filament\Tables\Table;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 
+use App\Filament\Concerns\AuthorizesWithPermission;
 class BlogPostResource extends Resource
 {
+    use AuthorizesWithPermission;
+    protected static ?string $permissionKey = 'blog_posts';
+
     protected static ?string $model = BlogPost::class;
     protected static ?string $navigationIcon = 'heroicon-o-newspaper';
     protected static ?string $navigationGroup = 'Blog';

@@ -18,6 +18,17 @@ class ProductCardSettings extends Page implements HasForms
 {
     use InteractsWithForms;
 
+
+    public static function canAccess(): bool
+    {
+        $user = auth()->user();
+        return $user && $user->can('product_card.view');
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canAccess();
+    }
     protected static ?string $navigationIcon  = 'heroicon-o-squares-plus';
     protected static ?string $navigationGroup = 'Settings';
     protected static ?string $navigationLabel = 'Product Card';

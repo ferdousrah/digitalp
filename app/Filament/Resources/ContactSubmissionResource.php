@@ -10,8 +10,12 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 
+use App\Filament\Concerns\AuthorizesWithPermission;
 class ContactSubmissionResource extends Resource
 {
+    use AuthorizesWithPermission;
+    protected static ?string $permissionKey = 'contacts';
+
     protected static ?string $model = ContactSubmission::class;
     protected static ?string $navigationIcon = 'heroicon-o-envelope';
     protected static ?string $navigationGroup = 'Submissions';

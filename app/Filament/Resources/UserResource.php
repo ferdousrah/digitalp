@@ -11,8 +11,12 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Hash;
 
+use App\Filament\Concerns\AuthorizesWithPermission;
 class UserResource extends Resource
 {
+    use AuthorizesWithPermission;
+    protected static ?string $permissionKey = 'users';
+
     protected static ?string $model = User::class;
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
     protected static ?string $navigationGroup = 'Settings';

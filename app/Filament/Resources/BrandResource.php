@@ -12,8 +12,12 @@ use Filament\Tables\Table;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 
+use App\Filament\Concerns\AuthorizesWithPermission;
 class BrandResource extends Resource
 {
+    use AuthorizesWithPermission;
+    protected static ?string $permissionKey = 'brands';
+
     protected static ?string $model = Brand::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-bookmark';

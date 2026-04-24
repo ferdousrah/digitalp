@@ -10,8 +10,12 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 
+use App\Filament\Concerns\AuthorizesWithPermission;
 class ProductAttributeResource extends Resource
 {
+    use AuthorizesWithPermission;
+    protected static ?string $permissionKey = 'attributes';
+
     protected static ?string $model = ProductAttribute::class;
     protected static ?string $navigationIcon = 'heroicon-o-adjustments-horizontal';
     protected static ?string $navigationGroup = 'Catalog';

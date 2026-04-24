@@ -15,6 +15,17 @@ class TemplateSettings extends Page implements HasForms
 {
     use InteractsWithForms;
 
+
+    public static function canAccess(): bool
+    {
+        $user = auth()->user();
+        return $user && $user->can('template.view');
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canAccess();
+    }
     protected static ?string $navigationIcon  = 'heroicon-o-swatch';
     protected static ?string $navigationGroup = 'Settings';
     protected static ?string $navigationLabel = 'Template / Colors';

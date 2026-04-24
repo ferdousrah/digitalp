@@ -11,8 +11,12 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 
+use App\Filament\Concerns\AuthorizesWithPermission;
 class ServiceResource extends Resource
 {
+    use AuthorizesWithPermission;
+    protected static ?string $permissionKey = 'services';
+
     protected static ?string $model = Service::class;
     protected static ?string $navigationIcon = 'heroicon-o-wrench-screwdriver';
     protected static ?string $navigationGroup = 'Content';

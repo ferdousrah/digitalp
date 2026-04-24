@@ -10,6 +10,17 @@ use Illuminate\Support\Facades\Artisan;
 
 class PaymentSettings extends Page
 {
+
+    public static function canAccess(): bool
+    {
+        $user = auth()->user();
+        return $user && $user->can('payment.view');
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canAccess();
+    }
     protected static ?string $navigationIcon  = 'heroicon-o-credit-card';
     protected static ?string $navigationLabel = 'Payment Settings';
     protected static ?string $navigationGroup = 'Settings';

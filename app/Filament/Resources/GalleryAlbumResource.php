@@ -13,8 +13,12 @@ use Filament\Tables\Table;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 
+use App\Filament\Concerns\AuthorizesWithPermission;
 class GalleryAlbumResource extends Resource
 {
+    use AuthorizesWithPermission;
+    protected static ?string $permissionKey = 'gallery_albums';
+
     protected static ?string $model = GalleryAlbum::class;
     protected static ?string $navigationIcon = 'heroicon-o-photo';
     protected static ?string $navigationGroup = 'Content';

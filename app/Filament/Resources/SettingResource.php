@@ -13,8 +13,12 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Storage;
 
+use App\Filament\Concerns\AuthorizesWithPermission;
 class SettingResource extends Resource
 {
+    use AuthorizesWithPermission;
+    protected static ?string $permissionKey = 'settings';
+
     protected static ?string $model = Setting::class;
     protected static ?string $navigationIcon = 'heroicon-o-cog-6-tooth';
     protected static ?string $navigationGroup = 'Settings';

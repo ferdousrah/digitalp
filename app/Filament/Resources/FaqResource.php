@@ -10,8 +10,12 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 
+use App\Filament\Concerns\AuthorizesWithPermission;
 class FaqResource extends Resource
 {
+    use AuthorizesWithPermission;
+    protected static ?string $permissionKey = 'faqs';
+
     protected static ?string $model = Faq::class;
     protected static ?string $navigationIcon = 'heroicon-o-question-mark-circle';
     protected static ?string $navigationGroup = 'Content';

@@ -11,8 +11,12 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 
+use App\Filament\Concerns\AuthorizesWithPermission;
 class TestimonialResource extends Resource
 {
+    use AuthorizesWithPermission;
+    protected static ?string $permissionKey = 'testimonials';
+
     protected static ?string $model = Testimonial::class;
     protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-left-right';
     protected static ?string $navigationGroup = 'Content';

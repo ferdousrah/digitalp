@@ -12,8 +12,12 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
+use App\Filament\Concerns\AuthorizesWithPermission;
 class RoleResource extends Resource
 {
+    use AuthorizesWithPermission;
+    protected static ?string $permissionKey = 'roles';
+
     protected static ?string $model = Role::class;
     protected static ?string $navigationIcon = 'heroicon-o-shield-check';
     protected static ?string $navigationGroup = 'Settings';

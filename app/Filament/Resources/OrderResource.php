@@ -12,8 +12,12 @@ use Filament\Tables\Table;
 use Filament\Infolists;
 use Filament\Infolists\Infolist;
 
+use App\Filament\Concerns\AuthorizesWithPermission;
 class OrderResource extends Resource
 {
+    use AuthorizesWithPermission;
+    protected static ?string $permissionKey = 'orders';
+
     protected static ?string $model = Order::class;
     protected static ?string $navigationIcon  = 'heroicon-o-shopping-bag';
     protected static ?string $navigationGroup = 'Shop';

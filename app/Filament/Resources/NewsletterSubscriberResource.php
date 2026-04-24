@@ -10,8 +10,12 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 
+use App\Filament\Concerns\AuthorizesWithPermission;
 class NewsletterSubscriberResource extends Resource
 {
+    use AuthorizesWithPermission;
+    protected static ?string $permissionKey = 'newsletter';
+
     protected static ?string $model = NewsletterSubscriber::class;
     protected static ?string $navigationIcon = 'heroicon-o-at-symbol';
     protected static ?string $navigationGroup = 'Submissions';

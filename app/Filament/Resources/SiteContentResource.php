@@ -9,8 +9,12 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use App\Filament\Concerns\AuthorizesWithPermission;
 class SiteContentResource extends Resource
 {
+    use AuthorizesWithPermission;
+    protected static ?string $permissionKey = 'site_contents';
+
     protected static ?string $model = SiteContent::class;
 
     protected static ?string $navigationIcon  = 'heroicon-o-language';

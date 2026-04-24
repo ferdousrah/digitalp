@@ -11,8 +11,12 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 
+use App\Filament\Concerns\AuthorizesWithPermission;
 class CompanyTimelineResource extends Resource
 {
+    use AuthorizesWithPermission;
+    protected static ?string $permissionKey = 'company_timeline';
+
     protected static ?string $model = CompanyTimeline::class;
     protected static ?string $navigationIcon = 'heroicon-o-clock';
     protected static ?string $navigationGroup = 'Company';
