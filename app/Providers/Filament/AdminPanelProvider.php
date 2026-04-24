@@ -118,15 +118,15 @@ class AdminPanelProvider extends PanelProvider
 
             // ── Navigation groups (order + collapsibility) ──────────────
             ->navigationGroups([
-                NavigationGroup::make('Shop')->icon('heroicon-o-shopping-bag')->collapsible(),
-                NavigationGroup::make('Catalog')->icon('heroicon-o-cube')->collapsible(),
-                NavigationGroup::make('Content')->icon('heroicon-o-document-text')->collapsible(),
-                NavigationGroup::make('Blog')->icon('heroicon-o-newspaper')->collapsible(),
-                NavigationGroup::make('Company')->icon('heroicon-o-building-office')->collapsible(),
-                NavigationGroup::make('Submissions')->icon('heroicon-o-inbox')->collapsible(),
-                NavigationGroup::make('Accounts')->icon('heroicon-o-calculator')->collapsible(),
-                NavigationGroup::make('Reports')->icon('heroicon-o-chart-pie')->collapsible(),
-                NavigationGroup::make('Settings')->icon('heroicon-o-cog-6-tooth')->collapsible(),
+                NavigationGroup::make('Shop')->icon('heroicon-o-shopping-bag')->collapsible()->collapsed(),
+                NavigationGroup::make('Catalog')->icon('heroicon-o-cube')->collapsible()->collapsed(),
+                NavigationGroup::make('Content')->icon('heroicon-o-document-text')->collapsible()->collapsed(),
+                NavigationGroup::make('Blog')->icon('heroicon-o-newspaper')->collapsible()->collapsed(),
+                NavigationGroup::make('Company')->icon('heroicon-o-building-office')->collapsible()->collapsed(),
+                NavigationGroup::make('Submissions')->icon('heroicon-o-inbox')->collapsible()->collapsed(),
+                NavigationGroup::make('Accounts')->icon('heroicon-o-calculator')->collapsible()->collapsed(),
+                NavigationGroup::make('Reports')->icon('heroicon-o-chart-pie')->collapsible()->collapsed(),
+                NavigationGroup::make('Settings')->icon('heroicon-o-cog-6-tooth')->collapsible()->collapsed(),
             ])
 
             // ── Global search ───────────────────────────────────────────
