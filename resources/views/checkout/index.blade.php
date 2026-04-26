@@ -2,6 +2,22 @@
 
 @section('title', 'Checkout')
 @section('meta_description', 'Complete your order securely')
+@php app(\App\Services\SeoService::class)->noindex(); @endphp
+
+@push('scripts')
+<script>
+    // Analytics: fire begin_checkout when this page loads
+    window.dsTrack && window.dsTrack('begin_checkout', {
+        value: {{ (float) (\App\Services\CartService::total() ?? 0) }},
+        items: @json(collect(\App\Services\CartService::get())->map(fn ($i) => [
+            'id'    => $i['id'] ?? null,
+            'name'  => $i['name'] ?? null,
+            'price' => (float) ($i['price'] ?? 0),
+            'qty'   => (int) ($i['qty'] ?? 1),
+        ])->values()),
+    });
+</script>
+@endpush
 
 @push('styles')
 <style>

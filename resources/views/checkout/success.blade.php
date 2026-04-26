@@ -2,6 +2,33 @@
 
 @section('title', 'Order Confirmed - ' . $order->order_number)
 @section('meta_description', 'Your order has been placed successfully.')
+@php app(\App\Services\SeoService::class)->noindex(); @endphp
+
+@push('scripts')
+<script>
+    // Analytics: PURCHASE event — the most important conversion signal.
+    // Wrapped in a session-storage guard so refreshing the success page
+    // doesn't double-count the conversion.
+    (function () {
+        var key = 'ds_purchase_' + {{ (int) $order->id }};
+        if (sessionStorage.getItem(key)) return;
+        sessionStorage.setItem(key, '1');
+
+        window.dsTrack && window.dsTrack('purchase', {
+            order_number: @json($order->order_number),
+            total: {{ (float) $order->total }},
+            shipping: {{ (float) $order->delivery_cost }},
+            coupon: @json($order->coupon_code),
+            items: @json($order->items->map(fn ($i) => [
+                'id'    => $i->product_id,
+                'name'  => $i->product_name,
+                'price' => (float) $i->price,
+                'qty'   => (int) $i->quantity,
+            ])->values()),
+        });
+    })();
+</script>
+@endpush
 
 @section('content')
 <div style="background:#f3f4f6; min-height:100vh; padding:1px 0;">
@@ -27,6 +54,23 @@
             <div style="font-size:0.9rem; font-weight:600; color:#111827;">{{ $order->created_at->format('d M Y, h:i A') }}</div>
         </div>
     </div>
+
+    {{-- Sign-in CTA — guests only --}}
+    @guest
+        <div style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%); color:#fff; border-radius:14px; padding:22px 26px; margin-bottom:28px; display:flex; align-items:center; gap:20px; flex-wrap:wrap; box-shadow:0 8px 24px rgba(15,23,42,0.15);">
+            <div style="flex-shrink:0; width:52px; height:52px; border-radius:50%; background:rgba(249,115,22,0.15); border:1px solid rgba(249,115,22,0.4); display:flex; align-items:center; justify-content:center;">
+                <svg style="width:24px; height:24px; color:#f97316;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            </div>
+            <div style="flex:1; min-width:240px;">
+                <p style="margin:0 0 4px; font-size:1.05rem; font-weight:800; color:#fff; letter-spacing:-0.01em;">Want to track this order?</p>
+                <p style="margin:0; font-size:0.86rem; color:#94a3b8; line-height:1.5;">Sign in with the phone you used at checkout to see this and all future orders in one place — no password needed.</p>
+            </div>
+            <a href="{{ route('login') }}?phone={{ urlencode($order->shipping_phone) }}" style="flex-shrink:0; display:inline-flex; align-items:center; gap:8px; padding:12px 22px; background:#f97316; color:#fff; font-size:0.86rem; font-weight:800; letter-spacing:0.06em; text-transform:uppercase; text-decoration:none; border-radius:10px; transition:background 0.2s; box-shadow:0 4px 14px rgba(249,115,22,0.35);" onmouseover="this.style.background='#ea6c0a'" onmouseout="this.style.background='#f97316'">
+                Sign in
+                <svg style="width:14px; height:14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+            </a>
+        </div>
+    @endguest
 
     {{-- Status + Payment --}}
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:28px;">

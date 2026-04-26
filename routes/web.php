@@ -17,6 +17,8 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\BkashController;
 use App\Http\Controllers\SslcommerzController;
+use App\Http\Controllers\Auth\PhoneAuthController;
+use App\Http\Controllers\AccountController;
 use Illuminate\Support\Facades\Route;
 
 // Admin — invoice + label printable views (auth-gated in controller)
@@ -28,6 +30,9 @@ Route::middleware(['web', 'auth'])->prefix('admin')->name('admin.')->group(funct
     Route::get('/orders-labels', [\App\Http\Controllers\Admin\OrderInvoiceController::class, 'labels'])
         ->name('orders.labels');
 });
+
+// SEO
+Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
 
 // Home
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -86,6 +91,19 @@ Route::get('/gallery/{galleryAlbum:slug}', [GalleryController::class, 'show'])->
 
 // Newsletter
 Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
+
+// Customer auth — phone + OTP
+Route::get('/login',           [PhoneAuthController::class, 'showLogin'])->name('login');
+Route::post('/auth/otp/send',  [PhoneAuthController::class, 'sendOtp'])->name('auth.otp.send');
+Route::post('/auth/otp/verify',[PhoneAuthController::class, 'verifyOtp'])->name('auth.otp.verify');
+Route::post('/logout',         [PhoneAuthController::class, 'logout'])->name('logout');
+
+// Customer account (auth required)
+Route::middleware('auth')->prefix('account')->name('account.')->group(function () {
+    Route::get('/',         [AccountController::class, 'index'])->name('index');
+    Route::get('/orders',   [AccountController::class, 'orders'])->name('orders');
+    Route::post('/profile', [AccountController::class, 'updateProfile'])->name('profile.update');
+});
 
 // Checkout
 Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');

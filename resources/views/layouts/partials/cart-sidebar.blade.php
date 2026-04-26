@@ -11,32 +11,40 @@
 }
 @keyframes checkoutAttract {
     0%, 22%, 100% { transform: scale3d(1,1,1) rotate(0deg); }
-    2%   { transform: scale3d(0.92,0.92,0.92) rotate(-2deg); }
-    5%   { transform: scale3d(1.05,1.05,1.05) rotate(3deg); }
-    8%   { transform: scale3d(1.05,1.05,1.05) rotate(-3deg); }
-    11%  { transform: scale3d(1.05,1.05,1.05) rotate(3deg); }
-    14%  { transform: scale3d(1.05,1.05,1.05) rotate(-3deg); }
-    17%  { transform: scale3d(1.05,1.05,1.05) rotate(3deg); }
+    2%   { transform: scale3d(0.94,0.94,0.94) rotate(-1.5deg); }
+    5%   { transform: scale3d(1.04,1.04,1.04) rotate(2deg); }
+    8%   { transform: scale3d(1.04,1.04,1.04) rotate(-2deg); }
+    11%  { transform: scale3d(1.04,1.04,1.04) rotate(2deg); }
+    14%  { transform: scale3d(1.04,1.04,1.04) rotate(-2deg); }
+    17%  { transform: scale3d(1.04,1.04,1.04) rotate(2deg); }
     19%  { transform: scale3d(1.02,1.02,1.02) rotate(-1deg); }
     21%  { transform: scale3d(1,1,1) rotate(0deg); }
 }
+#cart-items::-webkit-scrollbar { width:6px; }
+#cart-items::-webkit-scrollbar-track { background:transparent; }
+#cart-items::-webkit-scrollbar-thumb { background:#e2e8f0; border-radius:3px; }
+#cart-items::-webkit-scrollbar-thumb:hover { background:#cbd5e1; }
+.cart-item-row { transition:background 0.15s; }
+.cart-item-row:hover { background:#fafbfc; }
 </style>
 
 {{-- Cart Sidebar --}}
 <div id="cart-overlay"
     onclick="if(event.target===this)cartClose()"
-    style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:9998; opacity:0; transition:opacity 0.3s ease;">
+    style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.55); z-index:9998; opacity:0; transition:opacity 0.3s ease; backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px);">
 </div>
 
 <div id="cart-sidebar"
-    style="position:fixed; top:0; right:0; bottom:0; width:380px; max-width:100vw; background:#fff; z-index:9999; display:flex; flex-direction:column; transform:translateX(100%); transition:transform 0.35s cubic-bezier(.4,0,.2,1); box-shadow:-8px 0 40px rgba(0,0,0,0.15);">
+    style="position:fixed; top:0; right:0; bottom:0; width:400px; max-width:100vw; background:#fff; z-index:9999; display:flex; flex-direction:column; transform:translateX(100%); transition:transform 0.35s cubic-bezier(.4,0,.2,1); box-shadow:-12px 0 48px rgba(15,23,42,0.18);">
 
     {{-- Header --}}
-    <div style="display:flex; align-items:center; justify-content:space-between; padding:18px 20px; border-bottom:1px solid #e5e7eb; flex-shrink:0;">
-        <h2 style="font-size:0.9rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#111827; margin:0;">Shopping Cart</h2>
-        <button onclick="cartClose()" style="display:flex; align-items:center; gap:6px; background:none; border:none; cursor:pointer; font-size:0.8rem; font-weight:600; color:#6b7280; transition:color 0.2s; padding:4px 0;" onmouseover="this.style.color='#111827'" onmouseout="this.style.color='#6b7280'">
-            Close
-            <svg style="width:16px; height:16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+    <div style="display:flex; align-items:center; justify-content:space-between; padding:18px 20px; border-bottom:1px solid #f1f5f9; flex-shrink:0;">
+        <div style="display:flex; align-items:center; gap:10px;">
+            <h2 style="font-size:0.92rem; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:#0f172a; margin:0;">Your Cart</h2>
+            <span id="cart-header-badge" style="display:none; font-size:0.7rem; font-weight:700; color:#f97316; background:#fff7ed; padding:3px 9px; border-radius:999px; line-height:1;">0</span>
+        </div>
+        <button onclick="cartClose()" aria-label="Close cart" style="display:flex; align-items:center; justify-content:center; width:32px; height:32px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; cursor:pointer; color:#64748b; transition:all 0.2s;" onmouseover="this.style.background='#f1f5f9';this.style.color='#0f172a'" onmouseout="this.style.background='#f8fafc';this.style.color='#64748b'">
+            <svg style="width:16px; height:16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
     </div>
 
@@ -46,50 +54,51 @@
     </div>
 
     {{-- You May Also Like --}}
-    <div id="cart-suggestions" style="display:none; border-top:1px solid #e5e7eb; background:#f9fafb; flex-shrink:0;">
-
-        {{-- Header row --}}
-        <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 16px 8px;">
-            <div>
-                <span style="font-size:0.8rem; font-weight:700; color:#111827; padding-bottom:3px; border-bottom:2px solid #f97316;">You May Also Like</span>
-            </div>
-            <div style="display:flex; gap:5px;">
+    <div id="cart-suggestions" style="display:none; border-top:1px solid #f1f5f9; background:#fafbfc; flex-shrink:0;">
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 16px 8px;">
+            <span style="font-size:0.78rem; font-weight:700; color:#0f172a; letter-spacing:0.02em;">You may also like</span>
+            <div style="display:flex; gap:6px;">
                 <button id="sugg-prev" onclick="suggPrev()"
-                    style="width:26px; height:26px; border-radius:50%; background:#f97316; border:none; color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0.4; transition:opacity 0.2s; flex-shrink:0;">
+                    style="width:28px; height:28px; border-radius:50%; background:#fff; border:1px solid #e2e8f0; color:#475569; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0.5; transition:all 0.2s; flex-shrink:0;">
                     <svg style="width:13px;height:13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
                 </button>
                 <button id="sugg-next" onclick="suggNext()"
-                    style="width:26px; height:26px; border-radius:50%; background:#f97316; border:none; color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:opacity 0.2s; flex-shrink:0;">
+                    style="width:28px; height:28px; border-radius:50%; background:#fff; border:1px solid #e2e8f0; color:#475569; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s; flex-shrink:0;">
                     <svg style="width:13px;height:13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
                 </button>
             </div>
         </div>
-
-        {{-- Peek carousel: overflow hidden wrapper + sliding track --}}
-        <div id="sugg-wrapper" style="overflow:hidden; padding:0 16px 10px;">
+        <div id="sugg-wrapper" style="overflow:hidden; padding:0 16px 14px;">
             <div id="sugg-track" style="display:flex; gap:10px; transition:transform 0.35s cubic-bezier(.4,0,.2,1); will-change:transform;">
-                {{-- All cards rendered by JS --}}
+                {{-- Cards rendered by JS --}}
             </div>
-        </div>
-
-        {{-- Free Delivery Banner --}}
-        <div style="margin:0 16px 12px; background:linear-gradient(90deg,#f97316 0%,#ea580c 100%); color:#fff; padding:9px 14px; border-radius:8px; font-size:0.78rem; font-weight:700; display:flex; align-items:center; gap:8px; letter-spacing:0.01em;">
-            <svg style="width:18px;height:18px;flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            Free Delivery Unlocked!
         </div>
     </div>
 
     {{-- Footer (total + checkout) --}}
-    <div id="cart-footer" style="display:none; border-top:1px solid #e5e7eb; padding:14px 20px; flex-shrink:0;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-            <span style="font-size:0.9rem; font-weight:600; color:#374151;">Subtotal</span>
-            <span id="cart-sidebar-total" style="font-size:1.1rem; font-weight:700; color:#111827;">0৳</span>
+    <div id="cart-footer" style="display:none; border-top:1px solid #f1f5f9; padding:14px 20px 16px; flex-shrink:0; background:#fff;">
+        {{-- Free delivery strip --}}
+        <div style="display:flex; align-items:center; gap:8px; padding:8px 12px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; font-size:0.74rem; font-weight:600; color:#166534; margin-bottom:14px;">
+            <svg style="width:14px;height:14px;flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+            Free delivery unlocked
         </div>
-        <a id="cart-checkout-btn" href="{{ route('checkout.index') }}" style="display:block; text-align:center; padding:15px; background:#f97316; color:#fff; font-size:0.88rem; font-weight:800; letter-spacing:0.12em; text-transform:uppercase; text-decoration:none; border-radius:6px; margin-bottom:10px; animation:checkoutAttract 5s ease-in-out infinite 2s;" onmouseover="this.style.background='#ea6c0a'" onmouseout="this.style.background='#f97316'">
+
+        {{-- Subtotal --}}
+        <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:2px;">
+            <span style="font-size:0.78rem; font-weight:600; color:#64748b; text-transform:uppercase; letter-spacing:0.06em;">Subtotal</span>
+            <span id="cart-sidebar-total" style="font-size:1.25rem; font-weight:800; color:#0f172a; letter-spacing:-0.01em;">0৳</span>
+        </div>
+        <div style="font-size:0.7rem; color:#94a3b8; margin-bottom:14px;">Shipping &amp; taxes calculated at checkout</div>
+
+        {{-- Checkout --}}
+        <a id="cart-checkout-btn" href="{{ route('checkout.index') }}" style="display:flex; align-items:center; justify-content:center; gap:8px; padding:14px; background:#f97316; color:#fff; font-size:0.86rem; font-weight:800; letter-spacing:0.1em; text-transform:uppercase; text-decoration:none; border-radius:10px; box-shadow:0 4px 14px rgba(249,115,22,0.25); animation:checkoutAttract 5s ease-in-out infinite 2s; transition:all 0.2s;" onmouseover="this.style.background='#ea6c0a';this.style.boxShadow='0 6px 20px rgba(249,115,22,0.35)'" onmouseout="this.style.background='#f97316';this.style.boxShadow='0 4px 14px rgba(249,115,22,0.25)'">
             Checkout
+            <svg style="width:16px;height:16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
         </a>
-        <button onclick="cartClear()" style="display:block; width:100%; text-align:center; padding:9px; background:transparent; border:1px solid #e5e7eb; color:#6b7280; font-size:0.8rem; font-weight:500; cursor:pointer; border-radius:4px; transition:all 0.2s;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='transparent'">
-            Clear Cart
+
+        {{-- Clear cart text link --}}
+        <button onclick="cartClear()" style="display:block; width:100%; text-align:center; padding:10px 0 0; background:none; border:none; color:#94a3b8; font-size:0.74rem; font-weight:500; cursor:pointer; transition:color 0.15s;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#94a3b8'">
+            Clear cart
         </button>
     </div>
 </div>

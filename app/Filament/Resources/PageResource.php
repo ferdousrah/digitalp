@@ -38,10 +38,7 @@ class PageResource extends Resource
             Forms\Components\Toggle::make('is_active')->default(true),
             Forms\Components\TextInput::make('sort_order')->numeric()->default(0),
             SpatieMediaLibraryFileUpload::make('page_image')->collection('page_image')->image(),
-            Forms\Components\Section::make('SEO')->schema([
-                Forms\Components\TextInput::make('meta_title')->maxLength(255),
-                Forms\Components\Textarea::make('meta_description')->rows(3),
-            ]),
+            \App\Filament\Forms\SeoSection::make(),
         ]);
     }
 

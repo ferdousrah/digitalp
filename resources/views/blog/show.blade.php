@@ -1,5 +1,22 @@
 @extends('layouts.app')
 @section('title', $blogPost->meta_title ?? $blogPost->title . ' - Digital Support Blog')
+@section('meta_description', $blogPost->meta_description ?? \Illuminate\Support\Str::limit(strip_tags((string) ($blogPost->excerpt ?? $blogPost->content)), 160))
+
+@php
+    app(\App\Services\SeoService::class)
+        ->ogType('article')
+        ->image($blogPost->getFirstMediaUrl('blog_image', 'large') ?: $blogPost->getFirstMediaUrl('featured_image', 'large'))
+        ->canonical(route('blog.show', $blogPost));
+@endphp
+
+@push('seo')
+    @include('partials.schema.article', ['post' => $blogPost])
+    @include('partials.schema.breadcrumbs', ['items' => [
+        ['label' => 'Home', 'url' => url('/')],
+        ['label' => 'Blog', 'url' => route('blog.index')],
+        ['label' => $blogPost->title],
+    ]])
+@endpush
 
 @section('content')
 @include('components.breadcrumb', ['items' => [['label' => 'Blog', 'url' => route('blog.index')], ['label' => $blogPost->title]]])

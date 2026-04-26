@@ -175,22 +175,30 @@ class Product extends Model implements HasMedia
 
     /**
      * Register media conversions.
+     *
+     * Each conversion is registered twice — once in the original format (jpg/png
+     * for browser-fallback) and once as WebP (~25–35% smaller). The Blade
+     * component <x-product-image> emits a <picture> tag that prefers WebP and
+     * falls back to the original.
      */
     public function registerMediaConversions(?Media $media = null): void
     {
-        $this->addMediaConversion('thumb')
-            ->width(300)
-            ->height(300)
-            ->sharpen(10);
+        $sizes = ['thumb' => 300, 'medium' => 600, 'large' => 1200];
 
-        $this->addMediaConversion('medium')
-            ->width(600)
-            ->height(600)
-            ->sharpen(10);
+        foreach ($sizes as $name => $size) {
+            $this->addMediaConversion($name)
+                ->width($size)
+                ->height($size)
+                ->sharpen(10)
+                ->quality(82)
+                ->nonOptimized();
 
-        $this->addMediaConversion('large')
-            ->width(1200)
-            ->height(1200)
-            ->sharpen(10);
+            $this->addMediaConversion($name . '_webp')
+                ->width($size)
+                ->height($size)
+                ->sharpen(10)
+                ->quality(78)
+                ->format('webp');
+        }
     }
 }

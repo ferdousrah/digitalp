@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\Order;
 use App\Observers\OrderObserver;
+use App\Observers\SlugChangeRedirectObserver;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
@@ -15,7 +16,21 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(\App\Services\SeoService::class);
+
+        // SMS driver — resolved from config/sms.php
+        $this->app->singleton(\App\Services\Sms\SmsManager::class, function ($app) {
+            $cfg = $app['config']['sms'];
+            $driver = match ($cfg['driver']) {
+                'bulksmsbd' => new \App\Services\Sms\BulkSmsBdDriver(
+                    apiKey:   (string) ($cfg['bulksmsbd']['api_key'] ?? ''),
+                    senderId: (string) ($cfg['bulksmsbd']['sender_id'] ?? ''),
+                    endpoint: (string) ($cfg['bulksmsbd']['endpoint'] ?? 'https://bulksmsbd.net/api/smsapi'),
+                ),
+                default => new \App\Services\Sms\LogSmsDriver(),
+            };
+            return new \App\Services\Sms\SmsManager($driver);
+        });
     }
 
     /**
@@ -32,6 +47,32 @@ class AppServiceProvider extends ServiceProvider
 
         // Auto-log order activity (status changes, payment updates, shipping, refunds)
         Order::observe(OrderObserver::class);
+
+        // Auto-create 301 redirects when a content model's slug changes.
+        // Path prefix is resolved by class inside the observer (see its $prefixMap).
+        \App\Models\Product::observe(SlugChangeRedirectObserver::class);
+        \App\Models\Category::observe(SlugChangeRedirectObserver::class);
+        \App\Models\BlogPost::observe(SlugChangeRedirectObserver::class);
+        \App\Models\Page::observe(SlugChangeRedirectObserver::class);
+        \App\Models\Brand::observe(SlugChangeRedirectObserver::class);
+
+        // Bust the redirect lookup cache when admins edit redirects directly
+        \App\Models\Redirect::saved(fn () => \Illuminate\Support\Facades\Cache::forget('redirects.lookup'));
+        \App\Models\Redirect::deleted(fn () => \Illuminate\Support\Facades\Cache::forget('redirects.lookup'));
+
+        // Bust the sitemap cache whenever any indexed model changes
+        $bustSitemap = fn () => \Illuminate\Support\Facades\Cache::forget('sitemap.xml');
+        foreach ([
+            \App\Models\Product::class,
+            \App\Models\Category::class,
+            \App\Models\Brand::class,
+            \App\Models\BlogPost::class,
+            \App\Models\Page::class,
+            \App\Models\Service::class,
+        ] as $cls) {
+            $cls::saved($bustSitemap);
+            $cls::deleted($bustSitemap);
+        }
 
         $appUrl = rtrim((string) config('app.url'), '/');
 

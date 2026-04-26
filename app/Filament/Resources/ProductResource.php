@@ -64,6 +64,9 @@ class ProductResource extends Resource
                         Forms\Components\TextInput::make('min_stock_quantity')->numeric()->default(5)->label('Min Stock (Low Stock Alert)')->helperText('Alert shows when stock falls at or below this number'),
                     ]),
                     Forms\Components\Tabs\Tab::make('Media')->schema([
+                        Forms\Components\Actions::make([
+                            \App\Filament\Forms\Actions\PickFromLibraryAction::make('product_thumbnail', 'Pick thumbnail from Library'),
+                        ]),
                         SpatieMediaLibraryFileUpload::make('product_thumbnail')
                             ->collection('product_thumbnail')
                             ->image()
@@ -96,6 +99,9 @@ class ProductResource extends Resource
                                     ->visible(fn (Forms\Get $get) => $get('thumbnail_video.type') === 'upload')
                                     ->helperText('Short silent loop works best (5–10 seconds, muted). Max 50 MB.'),
                             ]),
+                        Forms\Components\Actions::make([
+                            \App\Filament\Forms\Actions\PickFromLibraryAction::make('product_images', 'Add gallery image from Library'),
+                        ]),
                         SpatieMediaLibraryFileUpload::make('product_images')->collection('product_images')->multiple()->reorderable()->image(),
                         Forms\Components\Repeater::make('videos')
                             ->label('Product Videos')
@@ -140,8 +146,7 @@ class ProductResource extends Resource
                             ),
                     ]),
                     Forms\Components\Tabs\Tab::make('SEO')->schema([
-                        Forms\Components\TextInput::make('meta_title')->maxLength(255),
-                        Forms\Components\Textarea::make('meta_description')->rows(3),
+                        \App\Filament\Forms\SeoSection::make(),
                     ]),
                     Forms\Components\Tabs\Tab::make('Attributes')->schema([
                         Forms\Components\Repeater::make('attributeValues')
@@ -200,7 +205,7 @@ class ProductResource extends Resource
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\Action::make('adjustStock')
                     ->label('Adjust Stock')
-                    ->icon('heroicon-o-plus-minus')
+                    ->icon('heroicon-o-adjustments-horizontal')
                     ->color('warning')
                     ->form([
                         Forms\Components\Placeholder::make('current_stock')

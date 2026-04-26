@@ -5,9 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>@yield('title', config('app.name', 'Digital Support'))</title>
-    <meta name="description" content="@yield('meta_description', 'Digital Support - Your Digital Products Partner')">
+    {{-- Apply page-set @section('title') / @section('meta_description') to the central SeoService --}}
+    @php
+        $__pageTitle = trim((string) ($__env->yieldContent('title')));
+        $__pageDesc  = trim((string) ($__env->yieldContent('meta_description')));
+        $seoService  = app(\App\Services\SeoService::class);
+        if ($__pageTitle !== '' && !$seoService->get('title'))       $seoService->title($__pageTitle);
+        if ($__pageDesc  !== '' && !$seoService->get('description')) $seoService->description($__pageDesc);
+    @endphp
 
+    @include('partials.seo-head')
+    @stack('seo')
+
+    {{-- E-commerce tracking helper (window.dsTrack) — fires GA4 + FB Pixel events --}}
+    <script src="{{ asset('js/tracking.js') }}?v={{ filemtime(public_path('js/tracking.js')) }}"></script>
+
+    {{-- DNS prefetch + preconnect to cut RTT on first request to fonts CDN --}}
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     @php
@@ -113,16 +128,24 @@
         Skip to main content
     </a>
 
-    @include('layouts.partials.header')
+    @hasSection('hide_chrome')
+    @else
+        @include('layouts.partials.header')
+    @endif
 
     <main id="main-content" class="flex-1">
         @yield('content')
     </main>
 
-    @include('layouts.partials.footer')
+    @hasSection('hide_chrome')
+    @else
+        @include('layouts.partials.footer')
+        @include('layouts.partials.cart-sidebar')
+    @endif
 
-    @include('layouts.partials.cart-sidebar')
-
+    @hasSection('hide_chrome')
+        {{-- chrome hidden on this page --}}
+    @else
     <!-- Floating buttons: Back to Top + WhatsApp -->
     @php $whatsapp = \App\Services\SettingService::get('contact_whatsapp', ''); @endphp
     <div style="position: fixed; bottom: 24px; right: 24px; z-index: 50; display: flex; flex-direction: column; align-items: center; gap: 12px;">
@@ -138,6 +161,7 @@
         </a>
         @endif
     </div>
+    @endif
 
     <script>
     (function () {
@@ -189,6 +213,8 @@
         content.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;padding:60px 0;"><svg style="width:32px;height:32px;animation:spin 1s linear infinite;" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-opacity="0.2"/><path d="M12 2a10 10 0 019.8 8" stroke-linecap="round"/></svg></div>';
         overlay.style.display = 'flex';
         setTimeout(function() { overlay.style.opacity = '1'; modal.style.transform = 'scale(1) translateY(0)'; }, 10);
+        var sbw = window.innerWidth - document.documentElement.clientWidth;
+        if (sbw > 0) document.body.style.paddingRight = sbw + 'px';
         document.body.style.overflow = 'hidden';
         fetch(url)
             .then(function(res) { return res.text(); })
@@ -200,7 +226,11 @@
         var modal = document.getElementById('quick-view-modal');
         overlay.style.opacity = '0';
         modal.style.transform = 'scale(0.95) translateY(10px)';
-        setTimeout(function() { overlay.style.display = 'none'; document.body.style.overflow = ''; }, 250);
+        setTimeout(function() {
+            overlay.style.display = 'none';
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+        }, 250);
     }
     document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeQuickView(); });
     </script>
@@ -296,10 +326,17 @@
         }
 
         /* ── sidebar open / close ── */
+        // Measure once to avoid jitter if invoked repeatedly mid-animation
+        function getScrollbarWidth() {
+            return window.innerWidth - document.documentElement.clientWidth;
+        }
         window.cartOpen = function () {
             var overlay = document.getElementById('cart-overlay');
             var sidebar = document.getElementById('cart-sidebar');
             overlay.style.display = 'block';
+            // Compensate for the disappearing scrollbar so layout stays steady
+            var sbw = getScrollbarWidth();
+            if (sbw > 0) document.body.style.paddingRight = sbw + 'px';
             document.body.style.overflow = 'hidden';
             setTimeout(function () { overlay.style.opacity = '1'; sidebar.style.transform = 'translateX(0)'; }, 10);
         };
@@ -308,10 +345,20 @@
             var sidebar = document.getElementById('cart-sidebar');
             overlay.style.opacity = '0';
             sidebar.style.transform = 'translateX(100%)';
-            setTimeout(function () { overlay.style.display = 'none'; document.body.style.overflow = ''; }, 350);
+            setTimeout(function () {
+                overlay.style.display = 'none';
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
+            }, 350);
         };
 
         /* ── render cart items ── */
+        function fmtBdt(n) {
+            var num = parseFloat(n);
+            if (isNaN(num)) return '0.00';
+            return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
         function renderCart(data) {
             var items   = data.items || [];
             var total   = data.total || '0.00';
@@ -323,9 +370,12 @@
             if (floatLabel) floatLabel.textContent = count + (count === 1 ? ' Item' : ' Items');
             if (floatTotal) floatTotal.textContent = total + '৳';
 
-            // header badge
+            // header badge — show item count with label
             var hdrBadge = document.getElementById('cart-header-badge');
-            if (hdrBadge) { hdrBadge.textContent = count; hdrBadge.style.display = count > 0 ? 'flex' : 'none'; }
+            if (hdrBadge) {
+                hdrBadge.textContent = count + (count === 1 ? ' item' : ' items');
+                hdrBadge.style.display = count > 0 ? 'inline-block' : 'none';
+            }
 
             var container = document.getElementById('cart-items');
             var footer    = document.getElementById('cart-footer');
@@ -336,9 +386,14 @@
             if (items.length === 0) {
                 footer.style.display = 'none';
                 if (suggSection) suggSection.style.display = 'none';
-                container.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:16px;">'
-                    + '<svg style="width:80px;height:80px;color:#e5e7eb;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>'
-                    + '<p style="font-size:0.875rem;color:#9ca3af;font-weight:500;margin:0;">No items in your cart!</p>'
+                container.innerHTML = '<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:60px 24px; gap:18px; height:100%;">'
+                    + '<div style="width:88px; height:88px; border-radius:50%; background:#f8fafc; display:flex; align-items:center; justify-content:center;">'
+                    +   '<svg style="width:42px; height:42px; color:#cbd5e1;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>'
+                    + '</div>'
+                    + '<div style="text-align:center;">'
+                    +   '<p style="font-size:0.95rem; font-weight:700; color:#0f172a; margin:0 0 4px;">Your cart is empty</p>'
+                    +   '<p style="font-size:0.8rem; color:#94a3b8; margin:0;">Browse our products to get started.</p>'
+                    + '</div>'
                     + '</div>';
                 return;
             }
@@ -355,51 +410,82 @@
 
             container.innerHTML = items.map(function (item) {
                 var img = item.image
-                    ? '<img src="' + item.image + '" alt="' + esc(item.name) + '" style="width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid #f0f0f0;flex-shrink:0;">'
-                    : '<span style="width:64px;height:64px;border-radius:8px;background:#f3f4f6;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg style="width:28px;height:28px;color:#d1d5db;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></span>';
+                    ? '<img src="' + item.image + '" alt="' + esc(item.name) + '" style="width:72px; height:72px; object-fit:cover; border-radius:10px; background:#f8fafc; flex-shrink:0;">'
+                    : '<span style="width:72px; height:72px; border-radius:10px; background:#f1f5f9; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><svg style="width:28px; height:28px; color:#cbd5e1;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></span>';
 
-                var itemTotal = (parseFloat(item.price) * item.qty).toFixed(2);
+                var lineTotal = fmtBdt(parseFloat(item.price) * item.qty);
+                var unitPrice = fmtBdt(item.price);
 
-                return '<div style="display:flex;gap:12px;padding:14px 20px;border-bottom:1px solid #f3f4f6;align-items:flex-start;">'
+                return '<div class="cart-item-row" style="display:flex; gap:12px; padding:14px 20px; border-bottom:1px solid #f1f5f9; align-items:flex-start;">'
                     + img
-                    + '<div style="flex:1;min-width:0;">'
-                    +   '<div style="font-size:0.82rem;font-weight:600;color:#111827;line-height:1.4;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(item.name) + '</div>'
-                    +   '<div style="font-size:0.8rem;color:#f97316;font-weight:700;margin-bottom:8px;">' + parseFloat(item.price).toFixed(2) + '৳</div>'
-                    +   '<div style="display:flex;align-items:center;gap:8px;">'
-                    +     '<div style="display:flex;align-items:center;border:1px solid #e5e7eb;border-radius:6px;overflow:hidden;">'
-                    +       '<button onclick="cartUpdateQty(\'' + item.id + '\',' + (item.qty - 1) + ')" style="width:28px;height:28px;background:none;border:none;cursor:pointer;font-size:1rem;color:#374151;display:flex;align-items:center;justify-content:center;transition:background 0.15s;" onmouseover="this.style.background=\'#f3f4f6\'" onmouseout="this.style.background=\'none\'">−</button>'
-                    +       '<span style="width:32px;text-align:center;font-size:0.8rem;font-weight:600;color:#111827;">' + item.qty + '</span>'
-                    +       '<button onclick="cartUpdateQty(\'' + item.id + '\',' + (item.qty + 1) + ')" style="width:28px;height:28px;background:none;border:none;cursor:pointer;font-size:1rem;color:#374151;display:flex;align-items:center;justify-content:center;transition:background 0.15s;" onmouseover="this.style.background=\'#f3f4f6\'" onmouseout="this.style.background=\'none\'">+</button>'
+                    + '<div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:6px;">'
+                    +   '<div style="display:flex; align-items:flex-start; gap:8px;">'
+                    +     '<div style="font-size:0.82rem; font-weight:600; color:#0f172a; line-height:1.35; flex:1; min-width:0; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">' + esc(item.name) + '</div>'
+                    +     '<button onclick="cartRemove(\'' + item.id + '\')" aria-label="Remove" style="background:none; border:none; cursor:pointer; padding:0; color:#cbd5e1; flex-shrink:0; transition:color 0.15s; line-height:0;" onmouseover="this.style.color=\'#ef4444\'" onmouseout="this.style.color=\'#cbd5e1\'">'
+                    +       '<svg style="width:14px; height:14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>'
+                    +     '</button>'
+                    +   '</div>'
+                    +   '<div style="font-size:0.72rem; color:#64748b;">' + unitPrice + '৳ each</div>'
+                    +   '<div style="display:flex; align-items:center; justify-content:space-between; margin-top:2px;">'
+                    +     '<div style="display:inline-flex; align-items:center; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; overflow:hidden;">'
+                    +       '<button onclick="cartUpdateQty(\'' + item.id + '\',' + (item.qty - 1) + ')" aria-label="Decrease" style="width:28px; height:28px; background:none; border:none; cursor:pointer; font-size:0.95rem; color:#475569; display:flex; align-items:center; justify-content:center; transition:background 0.15s;" onmouseover="this.style.background=\'#e2e8f0\'" onmouseout="this.style.background=\'transparent\'">−</button>'
+                    +       '<span style="width:32px; text-align:center; font-size:0.78rem; font-weight:700; color:#0f172a;">' + item.qty + '</span>'
+                    +       '<button onclick="cartUpdateQty(\'' + item.id + '\',' + (item.qty + 1) + ')" aria-label="Increase" style="width:28px; height:28px; background:none; border:none; cursor:pointer; font-size:0.95rem; color:#475569; display:flex; align-items:center; justify-content:center; transition:background 0.15s;" onmouseover="this.style.background=\'#e2e8f0\'" onmouseout="this.style.background=\'transparent\'">+</button>'
                     +     '</div>'
-                    +     '<span style="font-size:0.82rem;font-weight:600;color:#374151;margin-left:auto;">' + itemTotal + '৳</span>'
+                    +     '<span style="font-size:0.92rem; font-weight:700; color:#0f172a; letter-spacing:-0.01em;">' + lineTotal + '৳</span>'
                     +   '</div>'
                     + '</div>'
-                    + '<button onclick="cartRemove(\'' + item.id + '\')" style="background:none;border:none;cursor:pointer;padding:2px;color:#9ca3af;flex-shrink:0;transition:color 0.2s;" onmouseover="this.style.color=\'#ef4444\'" onmouseout="this.style.color=\'#9ca3af\'">'
-                    +   '<svg style="width:16px;height:16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>'
-                    + '</button>'
                     + '</div>';
             }).join('');
         }
 
         /* ── public actions ── */
-        window.addToCart = function (productId, btn) {
+        // addToCart(productId)                — qty 1, no button feedback
+        // addToCart(productId, btn)           — qty 1, button shows loading state
+        // addToCart(productId, btn, qty)      — explicit qty (used on product detail page)
+        // For Alpine bindings without a btn ref: addToCart(id, null, qty)
+        window.addToCart = function (productId, btn, qty) {
+            // Backwards-compat: if 2nd arg is a number, treat it as qty
+            if (typeof btn === 'number') { qty = btn; btn = null; }
+            qty = Math.max(1, parseInt(qty || 1, 10));
+
             var orig = btn ? btn.textContent : '';
             if (btn) { btn.textContent = '...'; btn.disabled = true; }
-            apiPost(CART_ADD_URL + '/' + productId, 'POST')
+            apiPost(CART_ADD_URL + '/' + productId, 'POST', qty > 1 ? { qty: qty } : undefined)
                 .then(function (data) {
                     renderCart(data);
                     shakeCartFloat();
                     showToast(data.message, 'success');
+                    if (window.dsTrack && data.product) {
+                        window.dsTrack('add_to_cart', {
+                            id:    data.product.id ?? productId,
+                            name:  data.product.name,
+                            price: data.product.price,
+                            qty:   data.product.qty ?? qty,
+                        });
+                    } else if (window.dsTrack) {
+                        window.dsTrack('add_to_cart', { id: productId, qty: qty });
+                    }
                 })
                 .catch(function () { showToast('Could not add to cart.', 'error'); })
                 .finally(function () { if (btn) { btn.textContent = orig; btn.disabled = false; } });
         };
 
-        window.orderNow = function (productId, btn) {
+        window.orderNow = function (productId, btn, qty) {
+            if (typeof btn === 'number') { qty = btn; btn = null; }
+            qty = Math.max(1, parseInt(qty || 1, 10));
             if (btn) { btn.disabled = true; btn.style.opacity = '0.7'; }
-            apiPost(CART_ADD_URL + '/' + productId, 'POST')
+            apiPost(CART_ADD_URL + '/' + productId, 'POST', qty > 1 ? { qty: qty } : undefined)
                 .then(function (data) {
                     renderCart(data);
+                    if (window.dsTrack && data.product) {
+                        window.dsTrack('add_to_cart', {
+                            id: data.product.id ?? productId,
+                            name: data.product.name,
+                            price: data.product.price,
+                            qty: data.product.qty ?? qty,
+                        });
+                    }
                     window.location.href = '{{ route("checkout.index") }}';
                 })
                 .catch(function () {
@@ -457,21 +543,23 @@
             // Render ALL cards; carousel slides via CSS transform
             track.innerHTML = sugg_products.map(function (p) {
                 var img = p.image
-                    ? '<img src="' + p.image + '" alt="' + esc(p.name) + '" style="width:62px;height:62px;object-fit:cover;border-radius:6px;flex-shrink:0;">'
-                    : '<span style="width:62px;height:62px;border-radius:6px;background:#f3f4f6;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg style="width:22px;height:22px;color:#d1d5db;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></span>';
+                    ? '<img src="' + p.image + '" alt="' + esc(p.name) + '" style="width:62px; height:62px; object-fit:cover; border-radius:8px; flex-shrink:0; background:#f8fafc;">'
+                    : '<span style="width:62px; height:62px; border-radius:8px; background:#f1f5f9; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><svg style="width:22px; height:22px; color:#cbd5e1;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></span>';
 
                 var priceHtml = '';
                 if (p.compare_price) {
-                    priceHtml += '<span style="font-size:0.67rem;color:#9ca3af;text-decoration:line-through;margin-right:4px;">' + p.compare_price + '৳</span>';
+                    priceHtml += '<span style="font-size:0.66rem; color:#94a3b8; text-decoration:line-through; margin-right:5px;">' + p.compare_price + '৳</span>';
                 }
-                priceHtml += '<span style="font-size:0.75rem;color:#f97316;font-weight:700;">' + p.price + '৳</span>';
+                priceHtml += '<span style="font-size:0.78rem; color:#f97316; font-weight:800;">' + p.price + '৳</span>';
 
-                return '<div style="min-width:' + SUGG_CARD_W + 'px;max-width:' + SUGG_CARD_W + 'px;background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:8px;display:flex;gap:8px;align-items:flex-start;box-shadow:0 1px 3px rgba(0,0,0,0.05);">'
+                return '<div style="min-width:' + SUGG_CARD_W + 'px; max-width:' + SUGG_CARD_W + 'px; background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:10px; display:flex; gap:10px; align-items:flex-start; box-shadow:0 1px 2px rgba(0,0,0,0.04); transition:all 0.2s;" onmouseover="this.style.borderColor=\'#fed7aa\';this.style.boxShadow=\'0 2px 8px rgba(249,115,22,0.08)\'" onmouseout="this.style.borderColor=\'#e2e8f0\';this.style.boxShadow=\'0 1px 2px rgba(0,0,0,0.04)\'">'
                     + img
-                    + '<div style="flex:1;min-width:0;">'
-                    +   '<div style="font-size:0.72rem;font-weight:600;color:#111827;line-height:1.4;margin-bottom:4px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">' + esc(p.name) + '</div>'
-                    +   '<div style="margin-bottom:5px;">' + priceHtml + '</div>'
-                    +   '<button onclick="addToCart(' + p.id + ',this)" style="padding:3px 10px;background:#f97316;color:#fff;border:none;border-radius:4px;font-size:0.68rem;font-weight:700;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background=\'#ea6c0a\'" onmouseout="this.style.background=\'#f97316\'">+ Add</button>'
+                    + '<div style="flex:1; min-width:0;">'
+                    +   '<div style="font-size:0.72rem; font-weight:600; color:#0f172a; line-height:1.4; margin-bottom:5px; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">' + esc(p.name) + '</div>'
+                    +   '<div style="margin-bottom:6px;">' + priceHtml + '</div>'
+                    +   '<button onclick="addToCart(' + p.id + ',this)" style="display:inline-flex; align-items:center; gap:4px; padding:4px 10px; background:#fff7ed; color:#f97316; border:1px solid #fed7aa; border-radius:6px; font-size:0.7rem; font-weight:700; cursor:pointer; transition:all 0.15s;" onmouseover="this.style.background=\'#f97316\';this.style.color=\'#fff\';this.style.borderColor=\'#f97316\'" onmouseout="this.style.background=\'#fff7ed\';this.style.color=\'#f97316\';this.style.borderColor=\'#fed7aa\'">'
+                    +     '<svg style="width:11px;height:11px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"/></svg>Add'
+                    +   '</button>'
                     + '</div>'
                     + '</div>';
             }).join('');
@@ -601,7 +689,7 @@
             setTimeout(type, idx * 180);
         }
 
-        document.querySelectorAll('input[placeholder]:not([type=hidden]):not([type=checkbox]):not([type=radio]), textarea[placeholder]').forEach(function(el) {
+        document.querySelectorAll('input[placeholder]:not([type=hidden]):not([type=checkbox]):not([type=radio]):not([data-no-type]), textarea[placeholder]:not([data-no-type])').forEach(function(el) {
             // skip if already focused / has value
             el.addEventListener('focus', function() { el.setAttribute('placeholder', ''); });
             el.addEventListener('blur', function() {

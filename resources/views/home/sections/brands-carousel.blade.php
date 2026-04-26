@@ -12,7 +12,7 @@
                     onmouseover="this.style.borderColor='var(--color-primary,#16a34a)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'"
                     onmouseout="this.style.borderColor='#e5e7eb';this.style.boxShadow='none'">
                     @if($brand->getFirstMediaUrl('brand_logo'))
-                        <img src="{{ $brand->getFirstMediaUrl('brand_logo') }}" alt="{{ $brand->name }}" style="max-height:48px; max-width:100%; object-fit:contain; filter:grayscale(1); transition:filter 0.2s;"
+                        <img src="{{ $brand->getFirstMediaUrl('brand_logo') }}" loading="lazy" decoding="async" alt="{{ $brand->name }}" style="max-height:48px; max-width:100%; object-fit:contain; filter:grayscale(1); transition:filter 0.2s;"
                             onmouseover="this.style.filter='grayscale(0)'" onmouseout="this.style.filter='grayscale(1)'">
                     @else
                         <span style="font-weight:700; font-size:1rem; color:#374151;">{{ $brand->name }}</span>

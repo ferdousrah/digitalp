@@ -53,6 +53,9 @@ class CategoryResource extends Resource
                                 Forms\Components\TextInput::make('sort_order')
                                     ->numeric()
                                     ->default(0),
+                                Forms\Components\Actions::make([
+                                    \App\Filament\Forms\Actions\PickFromLibraryAction::make('category_image', 'Pick image from Library'),
+                                ]),
                                 SpatieMediaLibraryFileUpload::make('category_image')
                                     ->collection('category_image')
                                     ->image(),
@@ -68,10 +71,7 @@ class CategoryResource extends Resource
                             ]),
                         Forms\Components\Tabs\Tab::make('SEO')
                             ->schema([
-                                Forms\Components\TextInput::make('meta_title')
-                                    ->maxLength(255),
-                                Forms\Components\Textarea::make('meta_description')
-                                    ->rows(3),
+                                \App\Filament\Forms\SeoSection::make(),
                             ]),
                     ])
                     ->columnSpanFull(),

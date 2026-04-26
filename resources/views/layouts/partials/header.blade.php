@@ -77,11 +77,43 @@
                     <span style="font-size:0.7125rem; font-weight:500; white-space:nowrap;">{{ sc('navbar', 'track_order', 'Track Order') }}</span>
                 </a>
 
-                <!-- Sign In (desktop only) -->
-                <a href="{{ url('/admin') }}" style="display:none; flex-direction:column; align-items:center; gap:2px; padding:8px 12px; color:#374151; text-decoration:none; transition:color 0.2s;" class="lg-flex-col" onmouseover="this.style.color='#16a34a'" onmouseout="this.style.color='#374151'">
-                    <i class="fi fi-rr-user" style="font-size:22px; line-height:1;"></i>
-                    <span style="font-size:0.7125rem; font-weight:500; white-space:nowrap;">{{ sc('navbar', 'sign_in', 'Sign In') }}</span>
-                </a>
+                <!-- Sign In / Account (desktop only) -->
+                @auth
+                    <div x-data="{ open:false }" @click.outside="open=false" class="lg-flex-col" style="display:none; position:relative;">
+                        <button @click="open=!open" style="display:flex; flex-direction:column; align-items:center; gap:2px; padding:8px 12px; color:#374151; background:none; border:none; cursor:pointer; transition:color 0.2s;" onmouseover="this.style.color='#16a34a'" onmouseout="this.style.color='#374151'" aria-label="Account">
+                            <i class="fi fi-rr-user" style="font-size:22px; line-height:1;"></i>
+                            <span style="font-size:0.7125rem; font-weight:500; white-space:nowrap; max-width:90px; overflow:hidden; text-overflow:ellipsis;">{{ explode(' ', auth()->user()->name ?? 'Account')[0] ?: 'Account' }}</span>
+                        </button>
+                        <div x-show="open" x-cloak x-transition style="position:absolute; top:100%; right:0; min-width:200px; background:#fff; border:1px solid #e5e7eb; border-radius:10px; box-shadow:0 12px 28px rgba(15,23,42,0.12); padding:6px; z-index:60;">
+                            <a href="{{ route('account.index') }}" style="display:flex; align-items:center; gap:10px; padding:10px 12px; color:#0f172a; text-decoration:none; font-size:0.88rem; font-weight:600; border-radius:6px;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                                <svg style="width:16px;height:16px; color:#64748b;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                My Account
+                            </a>
+                            <a href="{{ route('account.orders') }}" style="display:flex; align-items:center; gap:10px; padding:10px 12px; color:#0f172a; text-decoration:none; font-size:0.88rem; font-weight:600; border-radius:6px;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                                <svg style="width:16px;height:16px; color:#64748b;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                                My Orders
+                            </a>
+                            @if(!auth()->user()->isCustomer())
+                                <a href="{{ url('/admin') }}" style="display:flex; align-items:center; gap:10px; padding:10px 12px; color:#0f172a; text-decoration:none; font-size:0.88rem; font-weight:600; border-radius:6px; border-top:1px solid #f1f5f9; margin-top:4px;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                                    <svg style="width:16px;height:16px; color:#64748b;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                    Admin Panel
+                                </a>
+                            @endif
+                            <form method="POST" action="{{ route('logout') }}" style="margin:0; border-top:1px solid #f1f5f9; padding-top:4px; margin-top:4px;">
+                                @csrf
+                                <button type="submit" style="display:flex; align-items:center; gap:10px; padding:10px 12px; color:#ef4444; background:none; border:none; cursor:pointer; font-size:0.88rem; font-weight:600; width:100%; text-align:left; border-radius:6px;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='transparent'">
+                                    <svg style="width:16px;height:16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                                    Log out
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                @else
+                    <a href="{{ route('login') }}" style="display:none; flex-direction:column; align-items:center; gap:2px; padding:8px 12px; color:#374151; text-decoration:none; transition:color 0.2s;" class="lg-flex-col" onmouseover="this.style.color='#16a34a'" onmouseout="this.style.color='#374151'">
+                        <i class="fi fi-rr-user" style="font-size:22px; line-height:1;"></i>
+                        <span style="font-size:0.7125rem; font-weight:500; white-space:nowrap;">{{ sc('navbar', 'sign_in', 'Sign In') }}</span>
+                    </a>
+                @endauth
 
                 <!-- Wishlist -->
                 <a href="{{ route('wishlist.index') }}" style="display:flex; flex-direction:column; align-items:center; gap:2px; padding:8px 10px; color:#374151; text-decoration:none; transition:color 0.2s; position:relative;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#374151'" aria-label="Wishlist">

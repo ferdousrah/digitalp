@@ -1,5 +1,14 @@
 @extends('layouts.app')
 @section('title', 'Search Results - Digital Support')
+@php app(\App\Services\SeoService::class)->noindex(); @endphp
+
+@push('scripts')
+<script>
+    @if(request('q'))
+        window.dsTrack && window.dsTrack('search', { query: @json(request('q')) });
+    @endif
+</script>
+@endpush
 
 @section('content')
 @include('components.breadcrumb', ['items' => [['label' => 'Search Results']]])

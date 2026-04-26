@@ -24,6 +24,9 @@ class SettingSeeder extends Seeder
             ['group' => 'social', 'key' => 'social_linkedin', 'value' => '#', 'type' => 'text'],
             ['group' => 'seo', 'key' => 'meta_title', 'value' => 'Digital Support - Computer Accessories, Laptops & Printers', 'type' => 'text'],
             ['group' => 'seo', 'key' => 'meta_description', 'value' => 'Shop the latest computer accessories, laptops, printers, and digital products at Digital Support. Quality products, great prices.', 'type' => 'textarea'],
+            ['group' => 'seo', 'key' => 'google_site_verification', 'value' => '', 'type' => 'text'],
+            ['group' => 'seo', 'key' => 'google_analytics_id',     'value' => '', 'type' => 'text'],
+            ['group' => 'seo', 'key' => 'facebook_pixel_id',       'value' => '', 'type' => 'text'],
         ];
 
         foreach ($settings as $setting) {

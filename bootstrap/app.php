@@ -18,6 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'sslcommerz/*',
         ]);
+        $middleware->web(prepend: [
+            \App\Http\Middleware\HandleRedirects::class,
+        ]);
         $middleware->web(append: [
             \App\Http\Middleware\SetLocale::class,
             \App\Http\Middleware\TrackVisitor::class,

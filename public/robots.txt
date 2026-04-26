@@ -1,2 +1,25 @@
 User-agent: *
-Disallow:
+Allow: /
+
+# Block admin + system endpoints
+Disallow: /admin/
+Disallow: /admin
+Disallow: /livewire/
+Disallow: /cart
+Disallow: /cart/
+Disallow: /checkout
+Disallow: /checkout/
+Disallow: /storage/livewire-tmp/
+Disallow: /install.php
+Disallow: /storage-link.php
+Disallow: /fix.php
+
+# Block search-result pages with query params (often duplicates)
+Disallow: /search?
+Disallow: /*?utm_
+
+# Crawl rate hint
+Crawl-delay: 1
+
+# Sitemap
+Sitemap: https://digitalsupport.com.bd/sitemap.xml

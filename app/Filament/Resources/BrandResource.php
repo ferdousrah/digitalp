@@ -46,6 +46,9 @@ class BrandResource extends Resource
                 Forms\Components\TextInput::make('sort_order')
                     ->numeric()
                     ->default(0),
+                Forms\Components\Actions::make([
+                    \App\Filament\Forms\Actions\PickFromLibraryAction::make('brand_logo', 'Pick logo from Library'),
+                ]),
                 SpatieMediaLibraryFileUpload::make('brand_logo')
                     ->collection('brand_logo')
                     ->image(),

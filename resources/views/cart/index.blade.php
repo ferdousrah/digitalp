@@ -1,5 +1,21 @@
 @extends('layouts.app')
 @section('title', 'Shopping Cart - Digital Support')
+@php app(\App\Services\SeoService::class)->noindex(); @endphp
+
+@push('scripts')
+<script>
+    // Analytics: fire view_cart on page load
+    window.dsTrack && window.dsTrack('view_cart', {
+        value: {{ (float) (\App\Services\CartService::total() ?? 0) }},
+        items: @json(collect(\App\Services\CartService::get())->map(fn ($i) => [
+            'id'    => $i['id'] ?? null,
+            'name'  => $i['name'] ?? null,
+            'price' => (float) ($i['price'] ?? 0),
+            'qty'   => (int) ($i['qty'] ?? 1),
+        ])->values()),
+    });
+</script>
+@endpush
 
 @section('content')
 @include('components.breadcrumb', ['items' => [['label' => 'Cart']]])

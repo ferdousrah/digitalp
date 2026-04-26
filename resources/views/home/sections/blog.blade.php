@@ -10,7 +10,7 @@
                 onmouseout="this.style.boxShadow='none';this.style.transform='none'">
                 @if($post->getFirstMediaUrl('featured_image'))
                 <div style="aspect-ratio:16/9; overflow:hidden;">
-                    <img src="{{ $post->getFirstMediaUrl('featured_image') }}" alt="{{ $post->title }}" style="width:100%;height:100%;object-fit:cover;transition:transform 0.4s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    <img src="{{ $post->getFirstMediaUrl('featured_image') }}" loading="lazy" decoding="async" alt="{{ $post->title }}" style="width:100%;height:100%;object-fit:cover;transition:transform 0.4s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
                 </div>
                 @endif
                 <div style="padding:20px;">

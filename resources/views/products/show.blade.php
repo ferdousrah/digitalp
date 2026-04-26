@@ -1,6 +1,22 @@
 @extends('layouts.app')
 @section('title', $product->meta_title ?? $product->name . ' - Digital Support')
-@section('meta_description', $product->meta_description ?? $product->short_description)
+@section('meta_description', $product->meta_description ?? \Illuminate\Support\Str::limit(strip_tags((string) ($product->short_description ?? $product->description)), 160))
+
+@php
+    app(\App\Services\SeoService::class)
+        ->ogType('product')
+        ->image($product->getFirstMediaUrl('product_thumbnail', 'large') ?: $product->getFirstMediaUrl('product_images', 'large'))
+        ->canonical(route('products.show', $product));
+@endphp
+
+@push('seo')
+    @include('partials.schema.product', ['product' => $product])
+    @include('partials.schema.breadcrumbs', ['items' => [
+        ['label' => 'Home',     'url' => url('/')],
+        ['label' => 'Products', 'url' => route('products.index')],
+        ['label' => $product->name],
+    ]])
+@endpush
 
 @section('content')
 @php
@@ -341,44 +357,10 @@
 
 @push('scripts')
 <script>
-// Add to Cart from product detail page
-function addToCart(productId, qty) {
-    fetch('/cart/add/' + productId, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') },
-        body: JSON.stringify({ qty: qty }),
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.count !== undefined && window.updateCartCount) window.updateCartCount(data.count);
-        // Show toast if available, else alert briefly
-        if (window.showToast) {
-            window.showToast(data.message || 'Added to cart!', 'success');
-        } else {
-            const t = document.createElement('div');
-            t.textContent = data.message || 'Added to cart!';
-            Object.assign(t.style, { position:'fixed', bottom:'24px', left:'50%', transform:'translateX(-50%)', background:'#111827', color:'#fff', padding:'12px 24px', borderRadius:'8px', fontSize:'0.88rem', fontWeight:'600', zIndex:'9999', boxShadow:'0 4px 20px rgba(0,0,0,0.3)' });
-            document.body.appendChild(t);
-            setTimeout(() => t.remove(), 2800);
-        }
-    })
-    .catch(() => {});
-}
-
 // Buy Now: add to cart (with qty) then redirect to checkout
 function buyNow(productId, qty) {
     var btn = document.querySelector('.btn-buy');
-    if (btn) { btn.disabled = true; btn.style.opacity = '0.7'; }
-    fetch('{{ route("cart.add", "") }}/' + productId, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') },
-        body: JSON.stringify({ qty: qty }),
-    })
-    .then(r => r.json())
-    .then(() => { window.location.href = '{{ route('checkout.index') }}'; })
-    .catch(() => {
-        if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
-    });
+    window.orderNow(productId, btn, qty);
 }
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -669,6 +651,15 @@ document.addEventListener('DOMContentLoaded', function () {
         if (e.key === 'ArrowLeft')  gotoPrev();
         if (e.key === 'ArrowRight') gotoNext();
     });
+});
+
+// ── Analytics: fire view_item on every product page view ──
+window.dsTrack && window.dsTrack('view_item', {
+    id:    {{ (int) $product->id }},
+    name:  @json($product->name),
+    price: {{ (float) $product->price }},
+    brand: @json($product->brand?->name),
+    category: @json($product->categories->first()?->name),
 });
 </script>
 @endpush

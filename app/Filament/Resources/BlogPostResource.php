@@ -40,12 +40,12 @@ class BlogPostResource extends Resource
                     'archived' => 'Archived',
                 ])->default('draft'),
                 Forms\Components\DateTimePicker::make('published_at'),
+                Forms\Components\Actions::make([
+                    \App\Filament\Forms\Actions\PickFromLibraryAction::make('featured_image', 'Pick featured image from Library'),
+                ]),
                 SpatieMediaLibraryFileUpload::make('featured_image')->collection('featured_image')->image(),
             ]),
-            Forms\Components\Section::make('SEO')->schema([
-                Forms\Components\TextInput::make('meta_title')->maxLength(255),
-                Forms\Components\Textarea::make('meta_description')->rows(3),
-            ]),
+            \App\Filament\Forms\SeoSection::make(),
         ]);
     }
 

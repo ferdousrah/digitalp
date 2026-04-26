@@ -15,7 +15,7 @@
                     @if($t->content)<p style="font-size:0.9rem; color:#374151; line-height:1.6; margin:0 0 16px; font-style:italic;">"{{ Str::limit($t->content, 160) }}"</p>@endif
                     <div style="display:flex; align-items:center; gap:10px;">
                         @if($t->getFirstMediaUrl('testimonial_image'))
-                            <img src="{{ $t->getFirstMediaUrl('testimonial_image') }}" alt="{{ $t->name }}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;">
+                            <img src="{{ $t->getFirstMediaUrl('testimonial_image') }}" loading="lazy" decoding="async" alt="{{ $t->name }}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;">
                         @else
                             <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#16a34a,#22c55e);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1rem;">{{ strtoupper(substr($t->name,0,1)) }}</div>
                         @endif

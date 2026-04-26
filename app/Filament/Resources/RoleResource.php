@@ -138,6 +138,8 @@ class RoleResource extends Resource
             'purchase_orders'    => 'Purchase Orders',
             'stock_movements'    => 'Stock Movements',
             'reports'            => 'Reports',
+            'redirects'          => 'URL Redirects',
+            'media_library'      => 'Media Library',
             'settings'         => 'General Settings',
             'template'         => 'Template / Colors',
             'product_card'     => 'Product Card Settings',

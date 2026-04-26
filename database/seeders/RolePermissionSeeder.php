@@ -51,6 +51,9 @@ class RolePermissionSeeder extends Seeder
         'stock_movements'    => 'Stock Movements',
         // Reports
         'reports'            => 'Reports',
+        // SEO infrastructure
+        'redirects'          => 'URL Redirects',
+        'media_library'      => 'Media Library',
         // Settings
         'settings'         => 'General Settings',
         'template'         => 'Template / Colors',

@@ -9,7 +9,7 @@
             @php $img = $banner->getFirstMediaUrl('slide_image'); @endphp
             @if($img)
             <div style="position:relative; border-radius:12px; overflow:hidden; aspect-ratio:{{ $cols == 1 ? '3/1' : '2/1' }};">
-                <img src="{{ $img }}" alt="{{ $banner->title ?? '' }}" style="width:100%; height:100%; object-fit:cover; transition:transform 0.4s ease;"
+                <img src="{{ $img }}" loading="lazy" decoding="async" alt="{{ $banner->title ?? '' }}" style="width:100%; height:100%; object-fit:cover; transition:transform 0.4s ease;"
                     onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'">
                 @if($banner->link_url)
                 <a href="{{ $banner->link_url }}" style="position:absolute;inset:0;" aria-label="{{ $banner->title ?? 'Offer' }}"></a>

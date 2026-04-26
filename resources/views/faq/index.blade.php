@@ -1,5 +1,16 @@
 @extends('layouts.app')
 @section('title', 'FAQ - Digital Support')
+@section('meta_description', 'Frequently asked questions — products, orders, delivery, payment, and more.')
+
+@push('seo')
+    @if(isset($faqs))
+        @include('partials.schema.faq', ['faqs' => $faqs])
+    @endif
+    @include('partials.schema.breadcrumbs', ['items' => [
+        ['label' => 'Home', 'url' => url('/')],
+        ['label' => 'FAQ'],
+    ]])
+@endpush
 
 @section('content')
 @include('components.breadcrumb', ['items' => [['label' => 'FAQ']]])

@@ -29,7 +29,7 @@
                                 <svg style="width:12px; height:12px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/></svg>
                             </button>
                             @if($product->getFirstMediaUrl('product_thumbnail', 'medium'))
-                                <img src="{{ $product->getFirstMediaUrl('product_thumbnail', 'medium') }}" alt="{{ $product->name }}" style="width:140px; height:140px; object-fit:contain; border-radius:12px; background:#f9fafb; border:1px solid #f3f4f6;">
+                                <img src="{{ $product->getFirstMediaUrl('product_thumbnail', 'medium') }}" loading="lazy" decoding="async" alt="{{ $product->name }}" style="width:140px; height:140px; object-fit:contain; border-radius:12px; background:#f9fafb; border:1px solid #f3f4f6;">
                             @else
                                 <div style="width:140px; height:140px; background:#f3f4f6; border-radius:12px; display:flex; align-items:center; justify-content:center;">
                                     <svg style="width:48px; height:48px; color:#d1d5db;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>

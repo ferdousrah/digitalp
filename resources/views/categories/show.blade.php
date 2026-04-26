@@ -1,5 +1,14 @@
 @extends('layouts.app')
 @section('title', $category->meta_title ?? $category->name . ' - Digital Support')
+@section('meta_description', $category->meta_description ?? \Illuminate\Support\Str::limit(strip_tags((string) $category->description), 160))
+
+@push('seo')
+    @include('partials.schema.breadcrumbs', ['items' => [
+        ['label' => 'Home',     'url' => url('/')],
+        ['label' => 'Products', 'url' => route('products.index')],
+        ['label' => $category->name],
+    ]])
+@endpush
 
 @section('content')
 @include('components.breadcrumb', ['items' => [['label' => 'Products', 'url' => route('products.index')], ['label' => $category->name]]])
