@@ -16,12 +16,12 @@
     </div>
     @endif
 
-    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 gsap-stagger-grid">
         @forelse($posts as $post)
-        <article class="bg-white rounded-xl shadow-sm border border-surface-200 overflow-hidden group">
+        <article class="bg-white rounded-xl shadow-sm border border-surface-200 overflow-hidden group gsap-stagger-item">
             <a href="{{ route('blog.show', $post) }}" class="block aspect-video overflow-hidden bg-surface-100">
                 @if($post->getFirstMediaUrl('featured_image'))
-                    <img src="{{ $post->getFirstMediaUrl('featured_image') }}" alt="{{ $post->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy">
+                    <img src="{{ $post->getFirstMediaUrl('featured_image') }}" alt="{{ $post->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" decoding="async">
                 @endif
             </a>
             <div class="p-6">
@@ -35,7 +35,13 @@
             </div>
         </article>
         @empty
-        <div class="col-span-full text-center py-16"><p class="text-surface-500">No blog posts yet.</p></div>
+        <div class="col-span-full">
+            <x-empty-state
+                icon="inbox"
+                title="No blog posts yet"
+                body="Check back soon — we're working on great content."
+                variant="plain" />
+        </div>
         @endforelse
     </div>
     <div class="mt-8">{{ $posts->links() }}</div>

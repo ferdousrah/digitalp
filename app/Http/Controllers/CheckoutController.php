@@ -6,10 +6,12 @@ use App\Models\Coupon;
 use App\Models\CouponRedemption;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Rules\BangladeshiPhone;
 use App\Services\BangladeshGeoService;
 use App\Services\BkashService;
 use App\Services\CartService;
 use App\Services\SslcommerzService;
+use App\Support\PhoneNormalizer;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -52,8 +54,11 @@ class CheckoutController extends Controller
     {
         $data = $request->validate([
             'code'  => 'required|string|max:50',
-            'phone' => 'nullable|string|max:20',
+            'phone' => ['nullable', 'string', 'max:20', new BangladeshiPhone],
         ]);
+        if (!empty($data['phone'])) {
+            $data['phone'] = PhoneNormalizer::normalize($data['phone']);
+        }
 
         $coupon = Coupon::whereRaw('UPPER(code) = ?', [strtoupper(trim($data['code']))])->first();
         if (!$coupon) {
@@ -91,12 +96,12 @@ class CheckoutController extends Controller
 
         $validated = $request->validate([
             'shipping_name'     => 'required|string|max:255',
-            'shipping_phone'    => 'required|string|max:20',
+            'shipping_phone'    => ['required', 'string', 'max:20', new BangladeshiPhone],
             'shipping_district' => 'required|string|max:100',
             'shipping_thana'    => 'required|string|max:100',
             'shipping_address'  => 'required|string|max:500',
             'billing_name'      => 'nullable|string|max:255',
-            'billing_phone'     => 'nullable|string|max:20',
+            'billing_phone'     => ['nullable', 'string', 'max:20', new BangladeshiPhone],
             'billing_district'  => 'nullable|string|max:100',
             'billing_thana'     => 'nullable|string|max:100',
             'billing_address'   => 'nullable|string|max:500',
@@ -105,6 +110,13 @@ class CheckoutController extends Controller
             'notes'             => 'nullable|string|max:1000',
             'terms'             => 'accepted',
         ]);
+
+        // Normalise to E.164 (+8801XXXXXXXXX) so every order stores phones in one canonical form.
+        // Existing /admin filtering, /track-order lookups, and /account order matching all benefit.
+        $validated['shipping_phone'] = PhoneNormalizer::normalize($validated['shipping_phone']);
+        if (!empty($validated['billing_phone'])) {
+            $validated['billing_phone'] = PhoneNormalizer::normalize($validated['billing_phone']);
+        }
 
         $subtotal     = CartService::total();
         $deliveryCost = ($validated['shipping_district'] === 'Dhaka')
@@ -136,6 +148,7 @@ class CheckoutController extends Controller
 
         $order = Order::create([
             'order_number'      => 'ORD-' . strtoupper(uniqid()),
+            'user_id'           => auth()->id(),
             'status'            => 'pending',
             'shipping_name'     => $validated['shipping_name'],
             'shipping_phone'    => $validated['shipping_phone'],

@@ -5,6 +5,8 @@ namespace App\Providers;
 use App\Models\Order;
 use App\Observers\OrderObserver;
 use App\Observers\SlugChangeRedirectObserver;
+use App\Support\Money;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
@@ -44,6 +46,11 @@ class AppServiceProvider extends ServiceProvider
         Gate::before(function ($user, $ability) {
             return $user->hasRole('super_admin') ? true : null;
         });
+
+        // @bdt($amount)     → "59,990৳"     (display, no decimals)
+        // @bdtFull($amount) → "59,990.00৳" (invoices, accounting, refunds)
+        Blade::directive('bdt',     fn ($expr) => "<?php echo \\App\\Support\\Money::format($expr); ?>");
+        Blade::directive('bdtFull', fn ($expr) => "<?php echo \\App\\Support\\Money::full($expr); ?>");
 
         // Auto-log order activity (status changes, payment updates, shipping, refunds)
         Order::observe(OrderObserver::class);

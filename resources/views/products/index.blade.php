@@ -4,21 +4,64 @@
 @section('content')
 @include('components.breadcrumb', ['items' => [['label' => 'Products']]])
 
-<div class="container-custom px-4 sm:px-6 lg:px-8 pb-16">
+<h1 class="sr-only">Products</h1>
+
+<div class="container-custom px-4 sm:px-6 lg:px-8 pb-16"
+     x-data="{ filterOpen: false }"
+     @keydown.escape.window="if (filterOpen) { filterOpen = false; document.body.style.overflow=''; }">
+
+    {{-- Mobile-only toolbar: filter trigger + count --}}
+    <div class="filter-mobile-toolbar lg:hidden">
+        <button type="button"
+            @click="filterOpen = true; document.body.style.overflow='hidden';"
+            class="filter-trigger-btn">
+            <svg style="width:16px; height:16px;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+            Filter &amp; Sort
+        </button>
+        <span class="filter-count-pill">{{ $products->total() }} products</span>
+    </div>
+
+    {{-- Overlay (mobile only) --}}
+    <div x-show="filterOpen" x-cloak x-transition.opacity
+        @click="filterOpen = false; document.body.style.overflow='';"
+        class="filter-overlay lg:hidden"></div>
+
     <div id="product-listing" class="flex flex-col lg:flex-row gap-8">
-        @include('components.product-filter-sidebar', [
-            'action' => route('products.index'),
-            'categories' => $categories,
-            'brands' => $brands,
-            'filterAttributes' => $filterAttributes,
-            'priceRange' => $priceRange,
-        ])
+        <div class="filter-pane" :class="filterOpen ? 'is-open' : ''">
+            {{-- Mobile drawer header --}}
+            <div class="filter-drawer-header lg:hidden">
+                <h3 class="font-semibold text-lg text-surface-900">Filter &amp; Sort</h3>
+                <button type="button"
+                    @click="filterOpen = false; document.body.style.overflow='';"
+                    aria-label="Close filters"
+                    class="filter-close-btn">
+                    <svg style="width:18px;height:18px;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            @include('components.product-filter-sidebar', [
+                'action' => route('products.index'),
+                'categories' => $categories,
+                'brands' => $brands,
+                'filterAttributes' => $filterAttributes,
+                'priceRange' => $priceRange,
+            ])
+
+            {{-- Mobile drawer footer: apply CTA --}}
+            <div class="filter-drawer-footer lg:hidden">
+                <button type="button"
+                    @click="filterOpen = false; document.body.style.overflow='';"
+                    class="filter-apply-btn">
+                    Show <span id="filter-apply-count">{{ $products->total() }}</span> products
+                </button>
+            </div>
+        </div>
 
         <!-- Products Grid -->
         <div class="flex-1" id="products-area">
             <div class="flex justify-between items-center mb-6">
-                <p class="text-surface-600" id="products-count">{{ $products->total() }} products found</p>
-                <select id="sort-select" class="border-surface-300 rounded-lg text-sm">
+                <p class="text-surface-600 hidden sm:block" id="products-count">{{ $products->total() }} products found</p>
+                <select id="sort-select" class="border-surface-300 rounded-lg text-sm w-full sm:w-auto">
                     <option value="" {{ !request('sort') ? 'selected' : '' }}>Default Sort</option>
                     <option value="newest" {{ request('sort') == 'newest' ? 'selected' : '' }}>Newest</option>
                     <option value="price_asc" {{ request('sort') == 'price_asc' ? 'selected' : '' }}>Price: Low to High</option>
@@ -32,9 +75,14 @@
                 @forelse($products as $product)
                     @include('components.product-card', ['product' => $product])
                 @empty
-                    <div class="col-span-full text-center py-16">
-                        <p class="text-surface-500 text-lg">No products found matching your criteria.</p>
-                        <a href="{{ route('products.index') }}" class="btn-primary mt-4 inline-block">View All Products</a>
+                    <div class="col-span-full">
+                        <x-empty-state
+                            icon="search"
+                            title="No products match your filters"
+                            body="Try removing a filter or two — or browse our full catalogue."
+                            ctaLabel="View All Products"
+                            :ctaHref="route('products.index')"
+                            variant="plain" />
                     </div>
                 @endforelse
             </div>
@@ -65,7 +113,158 @@
         <span style="color:#374151; font-size:0.95rem;">Filtering...</span>
     </div>
 </div>
-<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+<style>
+@keyframes spin{to{transform:rotate(360deg)}}
+[x-cloak] { display: none !important; }
+
+/* Skeleton placeholder cards — shown while AJAX filter is in flight */
+@keyframes skel-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+.skel-shimmer {
+    background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+    background-size: 200% 100%;
+    animation: skel-shimmer 1.4s ease-in-out infinite;
+}
+.product-card-skel {
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+}
+
+/* ─── Mobile filter toolbar (visible <1024px) ─── */
+.filter-mobile-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding: 12px 0;
+}
+.filter-trigger-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: #fff;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #111827;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.filter-trigger-btn:hover { border-color: #16a34a; color: #16a34a; }
+.filter-count-pill {
+    font-size: 0.85rem;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+/* ─── Mobile drawer ─── */
+@media (max-width: 1023px) {
+    .filter-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.55);
+        z-index: 60;
+        backdrop-filter: blur(2px);
+    }
+    .filter-pane {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 320px;
+        max-width: 90vw;
+        background: #fff;
+        z-index: 70;
+        overflow-y: auto;
+        transform: translateX(-100%);
+        transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+        box-shadow: 8px 0 32px rgba(0, 0, 0, 0.15);
+        display: flex;
+        flex-direction: column;
+    }
+    .filter-pane.is-open { transform: translateX(0); }
+
+    /* Override the partial's inner sticky positioning inside the drawer */
+    .filter-pane aside { width: 100% !important; flex: 1; }
+    .filter-pane aside > form > div {
+        position: static !important;
+        border: none !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+    }
+    .filter-pane aside .sticky { position: static !important; }
+    /* Drop the partial's header (we use our own) */
+    .filter-pane aside form > div > div:first-child {
+        display: none !important;
+    }
+    .filter-pane aside [style*="max-height: calc"] {
+        max-height: none !important;
+        overflow-y: visible !important;
+    }
+
+    .filter-drawer-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 20px;
+        border-bottom: 1px solid #f1f5f9;
+        position: sticky;
+        top: 0;
+        background: #fff;
+        z-index: 1;
+    }
+    .filter-close-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        color: #64748b;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .filter-close-btn:hover { background: #f1f5f9; color: #0f172a; }
+
+    .filter-drawer-footer {
+        position: sticky;
+        bottom: 0;
+        padding: 14px 20px;
+        background: #fff;
+        border-top: 1px solid #f1f5f9;
+        box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.04);
+    }
+    .filter-apply-btn {
+        width: 100%;
+        padding: 14px;
+        background: #f97316;
+        color: #fff;
+        font-size: 0.88rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .filter-apply-btn:hover { background: #ea6c0a; }
+}
+
+/* Desktop: hide drawer-only chrome */
+@media (min-width: 1024px) {
+    .filter-mobile-toolbar { display: none; }
+    .filter-drawer-header,
+    .filter-drawer-footer,
+    .filter-overlay { display: none !important; }
+}
+</style>
 @endsection
 
 @push('scripts')
@@ -159,12 +358,31 @@
         scrollObserver.observe(sentinel);
     }
 
+    // Render N skeleton placeholder cards into the grid while waiting for results
+    function showSkeleton(count) {
+        var grid = document.getElementById('products-grid');
+        if (!grid) return;
+        var skel = '<div class="product-card-skel" style="background:#fff; border:1px solid #e5e7eb; border-radius:8px; overflow:hidden;">'
+            +   '<div class="skel-shimmer" style="aspect-ratio:1/1;"></div>'
+            +   '<div style="padding:16px;">'
+            +     '<div class="skel-shimmer" style="height:12px; width:50%; border-radius:4px; margin-bottom:10px;"></div>'
+            +     '<div class="skel-shimmer" style="height:14px; width:85%; border-radius:4px; margin-bottom:10px;"></div>'
+            +     '<div class="skel-shimmer" style="height:14px; width:60%; border-radius:4px; margin-bottom:14px;"></div>'
+            +     '<div class="skel-shimmer" style="height:22px; width:45%; border-radius:4px;"></div>'
+            +   '</div>'
+            + '</div>';
+        var html = '';
+        for (var i = 0; i < count; i++) html += skel;
+        grid.innerHTML = html;
+    }
+
     // Filter: replaces the entire grid (resets to page 1)
     function doFilter() {
         var url = buildUrl();
         if (fetchController) fetchController.abort();
         fetchController = new AbortController();
-        loading.style.display = 'flex';
+        // Skeleton cards in the grid feel snappier than a centered spinner overlay
+        showSkeleton(8);
         scrollLoading = false;
 
         fetch(url, {
@@ -180,12 +398,16 @@
                 if (window.Alpine) Alpine.initTree(listing);
                 rebind();
             }
+            // Sync mobile toolbar pill + drawer "Show X products" CTA
+            var newCountEl = doc.getElementById('products-count');
+            var newCount   = newCountEl ? (newCountEl.textContent.match(/\d+/) || ['0'])[0] : '0';
+            var pill = document.querySelector('.filter-count-pill');
+            var apply = document.getElementById('filter-apply-count');
+            if (pill)  pill.textContent  = newCount + ' products';
+            if (apply) apply.textContent = newCount;
             history.pushState(null, '', url);
-            loading.style.display = 'none';
         })
-        .catch(function (err) {
-            if (err.name !== 'AbortError') loading.style.display = 'none';
-        });
+        .catch(function (err) { /* AbortError is expected when filter changes mid-flight */ });
     }
 
     function onChange(e) {

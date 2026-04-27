@@ -4,6 +4,17 @@
 @section('meta_description', 'Your order has been placed successfully.')
 @php app(\App\Services\SeoService::class)->noindex(); @endphp
 
+@php
+    // Pre-build the items array — Blade's @json() arg parser can't handle
+    // an arrow function with an array literal inside as a directive argument.
+    $purchaseItems = $order->items->map(fn ($i) => [
+        'id'    => $i->product_id,
+        'name'  => $i->product_name,
+        'price' => (float) $i->price,
+        'qty'   => (int) $i->quantity,
+    ])->values();
+@endphp
+
 @push('scripts')
 <script>
     // Analytics: PURCHASE event — the most important conversion signal.
@@ -19,12 +30,7 @@
             total: {{ (float) $order->total }},
             shipping: {{ (float) $order->delivery_cost }},
             coupon: @json($order->coupon_code),
-            items: @json($order->items->map(fn ($i) => [
-                'id'    => $i->product_id,
-                'name'  => $i->product_name,
-                'price' => (float) $i->price,
-                'qty'   => (int) $i->quantity,
-            ])->values()),
+            items: @json($purchaseItems),
         });
     })();
 </script>
@@ -108,7 +114,7 @@
                     <td style="padding:12px 20px;">
                         <div style="display:flex; align-items:center; gap:12px;">
                             @if($item->product_image)
-                            <img src="{{ $item->product_image }}" alt="{{ $item->product_name }}" style="width:46px; height:46px; object-fit:cover; border-radius:6px; border:1px solid #e5e7eb; flex-shrink:0;">
+                            <img src="{{ $item->product_image }}" alt="{{ $item->product_name }}" loading="lazy" decoding="async" width="46" height="46" style="width:46px; height:46px; object-fit:cover; border-radius:6px; border:1px solid #e5e7eb; flex-shrink:0;">
                             @else
                             <div style="width:46px; height:46px; background:#f3f4f6; border-radius:6px; border:1px solid #e5e7eb; flex-shrink:0;"></div>
                             @endif
@@ -116,28 +122,28 @@
                         </div>
                     </td>
                     <td style="padding:12px; text-align:center; color:#374151; font-weight:600;">{{ $item->quantity }}</td>
-                    <td style="padding:12px 20px; text-align:right; font-weight:700; color:#111827;">{{ number_format($item->subtotal, 2) }}৳</td>
+                    <td style="padding:12px 20px; text-align:right; font-weight:700; color:#111827;">@bdtFull($item->subtotal)</td>
                 </tr>
                 @endforeach
             </tbody>
             <tfoot>
                 <tr style="background:#fafafa; border-top:1px solid #e5e7eb;">
                     <td colspan="2" style="padding:10px 20px; font-size:0.82rem; color:#6b7280; font-weight:600;">Items Subtotal</td>
-                    <td style="padding:10px 20px; text-align:right; font-weight:700; color:#111827;">{{ number_format($order->subtotal, 2) }}৳</td>
+                    <td style="padding:10px 20px; text-align:right; font-weight:700; color:#111827;">@bdtFull($order->subtotal)</td>
                 </tr>
                 <tr style="background:#fafafa; border-top:1px solid #f3f4f6;">
                     <td colspan="2" style="padding:10px 20px; font-size:0.82rem; color:#6b7280; font-weight:600;">Delivery Charge</td>
-                    <td style="padding:10px 20px; text-align:right; font-weight:700; color:#111827;">{{ number_format($order->delivery_cost, 2) }}৳</td>
+                    <td style="padding:10px 20px; text-align:right; font-weight:700; color:#111827;">@bdtFull($order->delivery_cost)</td>
                 </tr>
                 @if($order->coupon_discount > 0)
                 <tr style="background:#f0fdf4; border-top:1px solid #f3f4f6;">
                     <td colspan="2" style="padding:10px 20px; font-size:0.82rem; color:#15803d; font-weight:600;">Coupon Discount ({{ $order->coupon_code }})</td>
-                    <td style="padding:10px 20px; text-align:right; font-weight:700; color:#15803d;">-{{ number_format($order->coupon_discount, 2) }}৳</td>
+                    <td style="padding:10px 20px; text-align:right; font-weight:700; color:#15803d;">-@bdtFull($order->coupon_discount)</td>
                 </tr>
                 @endif
                 <tr style="background:#fff7ed; border-top:2px solid #f97316;">
                     <td colspan="2" style="padding:12px 20px; font-size:0.95rem; font-weight:800; color:#111827;">Total</td>
-                    <td style="padding:12px 20px; text-align:right; font-size:1.1rem; font-weight:800; color:#f97316;">{{ number_format($order->total, 2) }}৳</td>
+                    <td style="padding:12px 20px; text-align:right; font-size:1.1rem; font-weight:800; color:#f97316;">@bdtFull($order->total)</td>
                 </tr>
             </tfoot>
         </table>
@@ -199,21 +205,28 @@
 </style>
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 <script>
 (function launchConfetti() {
-    var duration = 3200;
-    var end = Date.now() + duration;
-    var colors = ['#f97316', '#16a34a', '#3b82f6', '#f59e0b', '#ec4899'];
+    // Skip the celebration for users who prefer reduced motion
+    if (window.dsReducedMotion && window.dsReducedMotion()) return;
 
-    confetti({ particleCount: 120, spread: 90, origin: { y: 0.55 }, colors: colors, ticks: 200 });
+    var s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js';
+    s.onload = function () {
+        var duration = 3200;
+        var end = Date.now() + duration;
+        var colors = ['#f97316', '#16a34a', '#3b82f6', '#f59e0b', '#ec4899'];
 
-    var frame = function () {
-        confetti({ particleCount: 4, angle: 60,  spread: 55, origin: { x: 0, y: 0.6 }, colors: colors });
-        confetti({ particleCount: 4, angle: 120, spread: 55, origin: { x: 1, y: 0.6 }, colors: colors });
-        if (Date.now() < end) requestAnimationFrame(frame);
+        confetti({ particleCount: 120, spread: 90, origin: { y: 0.55 }, colors: colors, ticks: 200 });
+
+        var frame = function () {
+            confetti({ particleCount: 4, angle: 60,  spread: 55, origin: { x: 0, y: 0.6 }, colors: colors });
+            confetti({ particleCount: 4, angle: 120, spread: 55, origin: { x: 1, y: 0.6 }, colors: colors });
+            if (Date.now() < end) requestAnimationFrame(frame);
+        };
+        frame();
     };
-    frame();
+    document.head.appendChild(s);
 }());
 </script>
 @endpush

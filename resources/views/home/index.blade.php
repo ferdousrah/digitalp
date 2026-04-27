@@ -1,7 +1,19 @@
 @extends('layouts.app')
 @section('title', 'Digital Support - Your Digital Products Partner')
 
+{{-- Preload the first hero slide image — usually the page's LCP element, worth prioritising --}}
+@php $__heroImg = optional($sliders->first())->getFirstMediaUrl('slide_image'); @endphp
+@if($__heroImg)
+    @push('seo')
+        <link rel="preload" as="image" href="{{ $__heroImg }}" fetchpriority="high">
+    @endpush
+@endif
+
 @section('content')
+{{-- Visually-hidden page heading — gives the page a single h1 for screen readers / SEO without
+     duplicating the hero slide titles in the visible UI. --}}
+<h1 class="sr-only">{{ \App\Services\SettingService::get('site_name', config('app.name')) }} — Online store</h1>
+
 <!-- Hero Section -->
 <section class="hero-section bg-surface-100" style="padding: 12px 0;">
     <div class="container-custom">
@@ -54,6 +66,7 @@
                      style="position:absolute; inset:0; opacity:{{ $i === 0 ? 1 : 0 }}; transition:opacity 0.6s ease; z-index:{{ $i === 0 ? 1 : 0 }};">
                     @if($img)
                         <img src="{{ $img }}" alt="{{ $slide->title }}"
+                             @if($i === 0) decoding="async" fetchpriority="high" @else loading="lazy" decoding="async" @endif
                              style="width:100%; height:100%; object-fit:cover; display:block;">
                     @else
                         <div style="width:100%; height:100%; background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460); display:flex; align-items:center; justify-content:center;">
@@ -117,7 +130,7 @@
                 @if($banner1)
                 @php $b1img = $banner1->getFirstMediaUrl('slide_image'); @endphp
                 <div style="flex:1; border-radius:10px; overflow:hidden; position:relative; min-height:120px;">
-                    <img src="{{ $b1img }}" alt="{{ $banner1->title ?? '' }}"
+                    <img src="{{ $b1img }}" alt="{{ $banner1->title ?? '' }}" decoding="async"
                          style="width:100%; height:100%; object-fit:cover; display:block;">
                     @if($banner1->link_url)
                     <a href="{{ $banner1->link_url }}" style="position:absolute; inset:0; cursor:pointer;"
@@ -130,7 +143,7 @@
                 @if($banner2)
                 @php $b2img = $banner2->getFirstMediaUrl('slide_image'); @endphp
                 <div style="flex:1; border-radius:10px; overflow:hidden; position:relative; min-height:120px;">
-                    <img src="{{ $b2img }}" alt="{{ $banner2->title ?? '' }}"
+                    <img src="{{ $b2img }}" alt="{{ $banner2->title ?? '' }}" decoding="async"
                          style="width:100%; height:100%; object-fit:cover; display:block;">
                     @if($banner2->link_url)
                     <a href="{{ $banner2->link_url }}" style="position:absolute; inset:0; cursor:pointer;"
@@ -167,7 +180,9 @@
             dots[current].style.background = '#fff';
         }
 
-        function autoPlay() { timer = setInterval(() => goTo(current + 1), 5000); }
+        // Skip auto-advance for users who prefer reduced motion (manual nav still works)
+        var reducedMotion = window.dsReducedMotion && window.dsReducedMotion();
+        function autoPlay() { if (reducedMotion) return; timer = setInterval(() => goTo(current + 1), 5000); }
         function resetTimer() { clearInterval(timer); autoPlay(); }
 
         document.getElementById('slide-prev').addEventListener('click', () => { goTo(current - 1); resetTimer(); });

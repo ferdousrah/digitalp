@@ -1,4 +1,9 @@
 export function initScrollReveal() {
+    // Bail out entirely for users who prefer reduced motion — elements remain in
+    // their natural CSS state (visible, no transform). No JS animation runs at all.
+    const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion) return;
+
     const reveals = document.querySelectorAll('.gsap-fade-up, .gsap-fade-left, .gsap-fade-right, .gsap-scale-in');
 
     reveals.forEach((el) => {

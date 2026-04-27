@@ -9,7 +9,7 @@
     <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
         @forelse($albums as $album)
         <a href="{{ route('gallery.show', $album) }}" class="group relative aspect-video bg-surface-100 rounded-xl overflow-hidden">
-            @if($album->getFirstMediaUrl('album_cover'))<img src="{{ $album->getFirstMediaUrl('album_cover') }}" alt="{{ $album->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy">@endif
+            @if($album->getFirstMediaUrl('album_cover'))<img src="{{ $album->getFirstMediaUrl('album_cover') }}" alt="{{ $album->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" decoding="async">@endif
             <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
             <div class="absolute bottom-0 left-0 right-0 p-4 text-white">
                 <h3 class="font-semibold text-lg">{{ $album->title }}</h3>

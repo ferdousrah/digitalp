@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>You're offline — Digital Support</title>
+<style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: linear-gradient(180deg, #f8fafc 0%, #fff 100%);
+        color: #0f172a;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 32px 20px;
+    }
+    .wrap {
+        text-align: center;
+        max-width: 440px;
+        width: 100%;
+    }
+    .icon-chip {
+        width: 84px; height: 84px;
+        margin: 0 auto 24px;
+        border-radius: 22px;
+        background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+        border: 1px solid #fed7aa;
+        display: flex; align-items: center; justify-content: center;
+        color: #f97316;
+        box-shadow: 0 8px 24px -8px rgba(249, 115, 22, 0.4);
+    }
+    .icon-chip svg { width: 38px; height: 38px; }
+    h1 {
+        font-size: 1.7rem; font-weight: 800;
+        letter-spacing: -0.02em; margin: 0 0 10px;
+    }
+    p {
+        font-size: 0.95rem; color: #64748b;
+        line-height: 1.6; margin: 0 0 28px;
+    }
+    .actions {
+        display: flex; gap: 10px;
+        justify-content: center; flex-wrap: wrap;
+    }
+    button, a.btn {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 13px 22px;
+        font-size: 0.86rem; font-weight: 800;
+        letter-spacing: 0.06em; text-transform: uppercase;
+        border-radius: 10px;
+        cursor: pointer;
+        text-decoration: none;
+        border: none;
+        transition: all 0.2s;
+    }
+    .btn-primary {
+        background: #0f172a; color: #fff;
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.18);
+    }
+    .btn-primary:hover {
+        background: #f97316;
+        box-shadow: 0 6px 20px rgba(249, 115, 22, 0.32);
+    }
+    .btn-secondary {
+        background: #fff; color: #475569;
+        border: 1px solid #e2e8f0;
+    }
+    .btn-secondary:hover {
+        border-color: #f97316; color: #f97316;
+    }
+    .status {
+        display: inline-flex; align-items: center; gap: 8px;
+        margin-top: 32px;
+        padding: 8px 14px;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        color: #64748b;
+    }
+    .dot {
+        width: 8px; height: 8px; border-radius: 50%;
+        background: #ef4444;
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.45);
+        animation: pulse 1.8s ease-in-out infinite;
+    }
+    @keyframes pulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.45); }
+        50%      { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .dot { animation: none; }
+        button, a.btn { transition: none; }
+    }
+</style>
+</head>
+<body>
+<div class="wrap">
+    <div class="icon-chip" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l4-4 4 4M7 4v12m0 0l-4-4m4 4l4-4m6 0l4 4-4 4m4-4H10"/></svg>
+    </div>
+
+    <h1>You're offline</h1>
+    <p>Looks like there's no connection right now. Check your network and try again — pages you've already visited still work.</p>
+
+    <div class="actions">
+        <button class="btn-primary" onclick="window.location.reload()">
+            Try again
+            <svg style="width:14px; height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        </button>
+        <a class="btn btn-secondary" href="/">Home</a>
+    </div>
+
+    <div class="status">
+        <span class="dot"></span>
+        <span id="net-status">No internet</span>
+    </div>
+</div>
+
+<script>
+    // Reflect online/offline state in the status pill so users see when they're back
+    function updateStatus() {
+        var el = document.getElementById('net-status');
+        var dot = document.querySelector('.dot');
+        if (navigator.onLine) {
+            el.textContent = 'Back online — reloading…';
+            dot.style.background = '#22c55e';
+            setTimeout(function () { window.location.reload(); }, 800);
+        } else {
+            el.textContent = 'No internet';
+            dot.style.background = '#ef4444';
+        }
+    }
+    window.addEventListener('online', updateStatus);
+    window.addEventListener('offline', updateStatus);
+    updateStatus();
+</script>
+</body>
+</html>

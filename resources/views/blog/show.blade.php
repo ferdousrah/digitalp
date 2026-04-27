@@ -34,7 +34,7 @@
 
         @if($blogPost->getFirstMediaUrl('featured_image'))
         <div class="rounded-2xl overflow-hidden mb-8">
-            <img src="{{ $blogPost->getFirstMediaUrl('featured_image') }}" alt="{{ $blogPost->title }}" class="w-full">
+            <img src="{{ $blogPost->getFirstMediaUrl('featured_image') }}" alt="{{ $blogPost->title }}" decoding="async" fetchpriority="high" class="w-full">
         </div>
         @endif
 
@@ -48,7 +48,7 @@
             @foreach($relatedPosts as $related)
             <a href="{{ route('blog.show', $related) }}" class="group">
                 <div class="aspect-video bg-surface-100 rounded-lg overflow-hidden mb-3">
-                    @if($related->getFirstMediaUrl('featured_image'))<img src="{{ $related->getFirstMediaUrl('featured_image') }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform" loading="lazy">@endif
+                    @if($related->getFirstMediaUrl('featured_image'))<img src="{{ $related->getFirstMediaUrl('featured_image') }}" alt="{{ $related->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform" loading="lazy" decoding="async">@endif
                 </div>
                 <h3 class="font-semibold line-clamp-2 group-hover:text-primary-600 transition-colors">{{ $related->title }}</h3>
             </a>

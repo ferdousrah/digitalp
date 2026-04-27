@@ -1,18 +1,23 @@
 @extends('layouts.app')
 @section('title', 'Shopping Cart - Digital Support')
-@php app(\App\Services\SeoService::class)->noindex(); @endphp
+@php
+    app(\App\Services\SeoService::class)->noindex();
+    // Pre-build the analytics items array — Blade's @json() arg parser can't handle
+    // an arrow function with an array literal inside as a directive argument.
+    $viewCartItems = collect(\App\Services\CartService::get())->map(fn ($i) => [
+        'id'    => $i['id'] ?? null,
+        'name'  => $i['name'] ?? null,
+        'price' => (float) ($i['price'] ?? 0),
+        'qty'   => (int) ($i['qty'] ?? 1),
+    ])->values();
+@endphp
 
 @push('scripts')
 <script>
     // Analytics: fire view_cart on page load
     window.dsTrack && window.dsTrack('view_cart', {
         value: {{ (float) (\App\Services\CartService::total() ?? 0) }},
-        items: @json(collect(\App\Services\CartService::get())->map(fn ($i) => [
-            'id'    => $i['id'] ?? null,
-            'name'  => $i['name'] ?? null,
-            'price' => (float) ($i['price'] ?? 0),
-            'qty'   => (int) ($i['qty'] ?? 1),
-        ])->values()),
+        items: @json($viewCartItems),
     });
 </script>
 @endpush
@@ -23,18 +28,13 @@
 <div class="container-custom px-4 sm:px-6 lg:px-8 py-10">
 
     @if(empty($items))
-    {{-- Empty cart --}}
-    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:80px 20px; text-align:center;">
-        <svg style="width:100px; height:100px; color:#e5e7eb; margin-bottom:24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-        </svg>
-        <h2 style="font-size:1.5rem; font-weight:700; color:#111827; margin-bottom:10px;">Your cart is empty</h2>
-        <p style="color:#9ca3af; font-size:0.925rem; margin-bottom:28px;">Looks like you haven't added anything to your cart yet.</p>
-        <a href="{{ route('products.index') }}" style="display:inline-flex; align-items:center; gap:8px; padding:14px 32px; background:#f97316; color:#fff; border-radius:8px; font-weight:700; font-size:0.9rem; text-decoration:none; letter-spacing:0.04em; transition:background 0.2s;" onmouseover="this.style.background='#ea6c0a'" onmouseout="this.style.background='#f97316'">
-            <svg style="width:18px; height:18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-            Continue Shopping
-        </a>
-    </div>
+    <x-empty-state
+        icon="cart"
+        title="Your cart is empty"
+        body="Looks like you haven't added anything to your cart yet."
+        ctaLabel="Continue Shopping"
+        :ctaHref="route('products.index')"
+        variant="plain" />
 
     @else
     <div style="display:grid; grid-template-columns:1fr 340px; gap:28px; align-items:start;" id="cart-page-grid">
@@ -42,7 +42,7 @@
         {{-- ── Left: Items Table ── --}}
         <div>
             {{-- Header row --}}
-            <div style="display:grid; grid-template-columns:2fr 1fr 1fr 1fr 40px; gap:12px; padding:12px 20px; background:#f9fafb; border:1px solid #e5e7eb; border-radius:10px 10px 0 0; font-size:0.75rem; font-weight:700; color:#6b7280; text-transform:uppercase; letter-spacing:0.06em;">
+            <div id="cart-page-header-row" style="display:grid; grid-template-columns:2fr 1fr 1fr 1fr 40px; gap:12px; padding:12px 20px; background:#f9fafb; border:1px solid #e5e7eb; border-radius:10px 10px 0 0; font-size:0.75rem; font-weight:700; color:#6b7280; text-transform:uppercase; letter-spacing:0.06em;">
                 <span>Product</span>
                 <span style="text-align:center;">Price</span>
                 <span style="text-align:center;">Quantity</span>
@@ -57,7 +57,7 @@
                     {{-- Product --}}
                     <div style="display:flex; align-items:center; gap:14px;">
                         @if($item['image'])
-                            <img src="{{ $item['image'] }}" alt="{{ $item['name'] }}" style="width:72px; height:72px; object-fit:cover; border-radius:8px; border:1px solid #f0f0f0; flex-shrink:0;">
+                            <img src="{{ $item['image'] }}" alt="{{ $item['name'] }}" loading="lazy" decoding="async" width="72" height="72" style="width:72px; height:72px; object-fit:cover; border-radius:8px; border:1px solid #f0f0f0; flex-shrink:0;">
                         @else
                             <span style="width:72px; height:72px; background:#f3f4f6; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
                                 <svg style="width:28px; height:28px; color:#d1d5db;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
@@ -70,28 +70,28 @@
 
                     {{-- Price --}}
                     <div style="text-align:center;">
-                        <span style="font-size:0.9rem; font-weight:600; color:#374151;">{{ number_format($item['price'], 2) }}৳</span>
+                        <span style="font-size:0.9rem; font-weight:600; color:#374151;">@bdt($item['price'])</span>
                     </div>
 
                     {{-- Quantity --}}
                     <div style="display:flex; justify-content:center;">
                         <div style="display:inline-flex; align-items:center; border:1.5px solid #e5e7eb; border-radius:8px; overflow:hidden;">
-                            <button onclick="pageCartUpdate('{{ $key }}', {{ $item['qty'] - 1 }})" style="width:32px; height:36px; background:none; border:none; cursor:pointer; font-size:1.1rem; color:#374151; display:flex; align-items:center; justify-content:center; transition:background 0.15s;" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='none'">−</button>
-                            <input type="number" value="{{ $item['qty'] }}" min="1" data-key="{{ $key }}"
-                                style="width:44px; height:36px; border:none; border-left:1px solid #e5e7eb; border-right:1px solid #e5e7eb; text-align:center; font-size:0.875rem; font-weight:600; color:#111827; outline:none;"
+                            <button onclick="pageCartUpdate('{{ $key }}', {{ $item['qty'] - 1 }})" aria-label="Decrease quantity" style="width:44px; height:44px; background:none; border:none; cursor:pointer; font-size:1.1rem; color:#374151; display:flex; align-items:center; justify-content:center; transition:background 0.15s;" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='none'">−</button>
+                            <input type="number" value="{{ $item['qty'] }}" min="1" data-key="{{ $key }}" aria-label="Quantity"
+                                style="width:48px; height:44px; border:none; border-left:1px solid #e5e7eb; border-right:1px solid #e5e7eb; text-align:center; font-size:0.875rem; font-weight:600; color:#111827; outline:none;"
                                 onchange="pageCartUpdate('{{ $key }}', parseInt(this.value) || 1)">
-                            <button onclick="pageCartUpdate('{{ $key }}', {{ $item['qty'] + 1 }})" style="width:32px; height:36px; background:none; border:none; cursor:pointer; font-size:1.1rem; color:#374151; display:flex; align-items:center; justify-content:center; transition:background 0.15s;" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='none'">+</button>
+                            <button onclick="pageCartUpdate('{{ $key }}', {{ $item['qty'] + 1 }})" aria-label="Increase quantity" style="width:44px; height:44px; background:none; border:none; cursor:pointer; font-size:1.1rem; color:#374151; display:flex; align-items:center; justify-content:center; transition:background 0.15s;" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='none'">+</button>
                         </div>
                     </div>
 
                     {{-- Subtotal --}}
                     <div style="text-align:right;">
-                        <span class="row-subtotal" style="font-size:0.925rem; font-weight:700; color:#f97316;">{{ number_format($item['price'] * $item['qty'], 2) }}৳</span>
+                        <span class="row-subtotal" style="font-size:0.925rem; font-weight:700; color:#f97316;">@bdt($item['price'] * $item['qty'])</span>
                     </div>
 
                     {{-- Remove --}}
                     <div style="display:flex; justify-content:center;">
-                        <button onclick="pageCartRemove('{{ $key }}')" style="width:32px; height:32px; background:none; border:1px solid #e5e7eb; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; color:#9ca3af; transition:all 0.2s;" onmouseover="this.style.borderColor='#ef4444'; this.style.color='#ef4444'; this.style.background='#fef2f2'" onmouseout="this.style.borderColor='#e5e7eb'; this.style.color='#9ca3af'; this.style.background='none'">
+                        <button onclick="pageCartRemove('{{ $key }}')" aria-label="Remove {{ $item['name'] }}" style="width:32px; height:32px; background:none; border:1px solid #e5e7eb; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; color:#9ca3af; transition:all 0.2s;" onmouseover="this.style.borderColor='#ef4444'; this.style.color='#ef4444'; this.style.background='#fef2f2'" onmouseout="this.style.borderColor='#e5e7eb'; this.style.color='#9ca3af'; this.style.background='none'">
                             <svg style="width:14px; height:14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                         </button>
                     </div>
@@ -119,7 +119,7 @@
             <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px;">
                 <div style="display:flex; justify-content:space-between; font-size:0.875rem; color:#6b7280;">
                     <span>Subtotal (<span id="page-item-count">{{ array_sum(array_column($items, 'qty')) }}</span> items)</span>
-                    <span id="page-subtotal" style="font-weight:600; color:#111827;">{{ number_format($total, 2) }}৳</span>
+                    <span id="page-subtotal" style="font-weight:600; color:#111827;">@bdt($total)</span>
                 </div>
                 <div style="display:flex; justify-content:space-between; font-size:0.875rem; color:#6b7280;">
                     <span>Shipping</span>
@@ -129,7 +129,7 @@
 
             <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 0; border-top:1px solid #e5e7eb; border-bottom:1px solid #e5e7eb; margin-bottom:20px;">
                 <span style="font-size:1rem; font-weight:700; color:#111827;">Total</span>
-                <span id="page-total" style="font-size:1.25rem; font-weight:800; color:#f97316;">{{ number_format($total, 2) }}৳</span>
+                <span id="page-total" style="font-size:1.25rem; font-weight:800; color:#f97316;">@bdt($total)</span>
             </div>
 
             <a href="{{ route('contact.index') }}" style="display:block; text-align:center; padding:15px; background:#f97316; color:#fff; font-size:0.9rem; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; text-decoration:none; border-radius:8px; transition:background 0.2s; margin-bottom:12px;" onmouseover="this.style.background='#ea6c0a'" onmouseout="this.style.background='#f97316'">
@@ -227,15 +227,16 @@
     }
 
     function refreshPageSummary(data) {
-        var count  = data.itemCount || 0;
-        var total  = data.total || '0.00';
+        var count    = data.itemCount || 0;
+        var total    = data.total || 0;
+        var totalFmt = window.dsBdt(total);
         // Update summary panel
         var ic = document.getElementById('page-item-count');
         var st = document.getElementById('page-subtotal');
         var pt = document.getElementById('page-total');
         if (ic) ic.textContent = count;
-        if (st) st.textContent = total + '৳';
-        if (pt) pt.textContent = total + '৳';
+        if (st) st.textContent = totalFmt;
+        if (pt) pt.textContent = totalFmt;
         // Also update floating cart button & header badge via global renderCart
         if (typeof renderCart === 'function') renderCart(data);
         else {
@@ -245,7 +246,7 @@
             var fl = document.getElementById('cart-float-label');
             var ft = document.getElementById('cart-float-total');
             if (fl) fl.textContent = count + (count === 1 ? ' Item' : ' Items');
-            if (ft) ft.textContent = total + '৳';
+            if (ft) ft.textContent = totalFmt;
         }
         // Reload row subtotals
         if (data.items && data.items.length) {
@@ -253,7 +254,7 @@
                 var row = document.querySelector('.cart-page-row[data-key="' + item.id + '"]');
                 if (!row) return;
                 var sub = row.querySelector('.row-subtotal');
-                if (sub) sub.textContent = (parseFloat(item.price) * item.qty).toFixed(2) + '৳';
+                if (sub) sub.textContent = window.dsBdt(parseFloat(item.price) * item.qty);
                 var inp = row.querySelector('input[type=number]');
                 if (inp) inp.value = item.qty;
                 var btns = row.querySelectorAll('button');
@@ -266,4 +267,80 @@
     @endif
 
 </div>
+
+<style>
+/* ─── Cart page — mobile reflow ─── */
+@media (max-width: 900px) {
+    #cart-page-grid {
+        grid-template-columns: 1fr !important;
+    }
+    #cart-summary {
+        position: static !important;
+        top: auto !important;
+    }
+}
+
+@media (max-width: 767px) {
+    /* Hide table-style header — rows become self-describing cards */
+    #cart-page-header-row { display: none !important; }
+
+    #cart-page-items {
+        border-radius: 10px !important;
+        border-top: 1px solid #e5e7eb !important;
+    }
+
+    /* Each row → card layout */
+    .cart-page-row {
+        grid-template-columns: 1fr auto !important;
+        grid-template-areas:
+            "product  remove"
+            "price    subtotal"
+            "qty      qty" !important;
+        row-gap: 10px !important;
+        column-gap: 12px !important;
+        padding: 14px 16px !important;
+    }
+    .cart-page-row > div:nth-child(1) {
+        grid-area: product;
+        align-self: start;
+    }
+    .cart-page-row > div:nth-child(2) {
+        grid-area: price;
+        text-align: left !important;
+        font-size: 0.75rem !important;
+        color: #6b7280 !important;
+    }
+    .cart-page-row > div:nth-child(2)::before {
+        content: 'Unit price · ';
+        color: #9ca3af;
+        font-weight: 500;
+    }
+    .cart-page-row > div:nth-child(3) {
+        grid-area: qty;
+        justify-content: flex-start !important;
+        margin-top: 4px;
+    }
+    .cart-page-row > div:nth-child(4) {
+        grid-area: subtotal;
+        text-align: right !important;
+    }
+    .cart-page-row > div:nth-child(5) {
+        grid-area: remove;
+        align-self: start;
+    }
+
+    /* Tighten thumbnail in cards */
+    .cart-page-row img,
+    .cart-page-row > div:nth-child(1) > span {
+        width: 64px !important;
+        height: 64px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .cart-page-row {
+        padding: 12px !important;
+    }
+}
+</style>
 @endsection

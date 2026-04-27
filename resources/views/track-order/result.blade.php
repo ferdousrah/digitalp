@@ -61,7 +61,7 @@ $sc = $statusColors[$order->status] ?? $statusColors['pending'];
                 <span style="font-size:0.82rem; font-weight:700; color:#92400e;">Payment Pending</span>
             </div>
             @endif
-            <div style="margin-left:auto; font-size:1.1rem; font-weight:800; color:#111827;">{{ number_format($order->total, 2) }}৳</div>
+            <div style="margin-left:auto; font-size:1.1rem; font-weight:800; color:#111827;">@bdt($order->total)</div>
         </div>
     </div>
 
@@ -157,21 +157,21 @@ $sc = $statusColors[$order->status] ?? $statusColors['pending'];
                 </div>
                 <div style="display:flex; justify-content:space-between; color:#6b7280;">
                     <span>Subtotal</span>
-                    <span style="font-weight:600; color:#111827;">{{ number_format($order->subtotal, 2) }}৳</span>
+                    <span style="font-weight:600; color:#111827;">@bdt($order->subtotal)</span>
                 </div>
                 <div style="display:flex; justify-content:space-between; color:#6b7280;">
                     <span>Delivery</span>
-                    <span style="font-weight:600; color:#111827;">{{ number_format($order->delivery_cost, 2) }}৳</span>
+                    <span style="font-weight:600; color:#111827;">@bdt($order->delivery_cost)</span>
                 </div>
                 @if($order->coupon_discount > 0)
                 <div style="display:flex; justify-content:space-between; color:#16a34a;">
                     <span>Discount</span>
-                    <span style="font-weight:600;">-{{ number_format($order->coupon_discount, 2) }}৳</span>
+                    <span style="font-weight:600;">-@bdt($order->coupon_discount)</span>
                 </div>
                 @endif
                 <div style="border-top:1px dashed #e5e7eb; padding-top:8px; display:flex; justify-content:space-between;">
                     <span style="font-weight:700; color:#111827;">Total</span>
-                    <span style="font-size:1.05rem; font-weight:800; color:#f97316;">{{ number_format($order->total, 2) }}৳</span>
+                    <span style="font-size:1.05rem; font-weight:800; color:#f97316;">@bdt($order->total)</span>
                 </div>
             </div>
         </div>
@@ -190,7 +190,7 @@ $sc = $statusColors[$order->status] ?? $statusColors['pending'];
         @foreach($order->items as $item)
         <div style="display:flex; align-items:center; gap:16px; padding:16px 24px; border-bottom:1px solid #f9fafb;">
             @if($item->product_image)
-                <img src="{{ Storage::disk('public')->url($item->product_image) }}" alt="{{ $item->product_name }}"
+                <img src="{{ Storage::disk('public')->url($item->product_image) }}" alt="{{ $item->product_name }}" loading="lazy" decoding="async" width="60" height="60"
                     style="width:60px; height:60px; object-fit:cover; border-radius:8px; border:1px solid #e5e7eb; flex-shrink:0;">
             @else
                 <div style="width:60px; height:60px; background:#f3f4f6; border-radius:8px; border:1px solid #e5e7eb; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
@@ -199,9 +199,9 @@ $sc = $statusColors[$order->status] ?? $statusColors['pending'];
             @endif
             <div style="flex:1; min-width:0;">
                 <div style="font-weight:600; color:#111827; font-size:0.9rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ $item->product_name }}</div>
-                <div style="font-size:0.8rem; color:#6b7280; margin-top:2px;">{{ number_format($item->price, 2) }}৳ × {{ $item->quantity }}</div>
+                <div style="font-size:0.8rem; color:#6b7280; margin-top:2px;">@bdt($item->price) × {{ $item->quantity }}</div>
             </div>
-            <div style="font-weight:800; color:#111827; font-size:0.95rem; flex-shrink:0;">{{ number_format($item->subtotal, 2) }}৳</div>
+            <div style="font-weight:800; color:#111827; font-size:0.95rem; flex-shrink:0;">@bdt($item->subtotal)</div>
         </div>
         @endforeach
     </div>

@@ -35,13 +35,17 @@
 </div>
 
 <div id="cart-sidebar"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="cart-sidebar-title"
+    aria-hidden="true"
     style="position:fixed; top:0; right:0; bottom:0; width:400px; max-width:100vw; background:#fff; z-index:9999; display:flex; flex-direction:column; transform:translateX(100%); transition:transform 0.35s cubic-bezier(.4,0,.2,1); box-shadow:-12px 0 48px rgba(15,23,42,0.18);">
 
     {{-- Header --}}
     <div style="display:flex; align-items:center; justify-content:space-between; padding:18px 20px; border-bottom:1px solid #f1f5f9; flex-shrink:0;">
         <div style="display:flex; align-items:center; gap:10px;">
-            <h2 style="font-size:0.92rem; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:#0f172a; margin:0;">Your Cart</h2>
-            <span id="cart-header-badge" style="display:none; font-size:0.7rem; font-weight:700; color:#f97316; background:#fff7ed; padding:3px 9px; border-radius:999px; line-height:1;">0</span>
+            <h2 id="cart-sidebar-title" style="font-size:0.92rem; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:#0f172a; margin:0;">Your Cart</h2>
+            <span id="cart-drawer-badge" style="display:none; font-size:0.7rem; font-weight:700; color:#f97316; background:#fff7ed; padding:3px 9px; border-radius:999px; line-height:1;">0</span>
         </div>
         <button onclick="cartClose()" aria-label="Close cart" style="display:flex; align-items:center; justify-content:center; width:32px; height:32px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; cursor:pointer; color:#64748b; transition:all 0.2s;" onmouseover="this.style.background='#f1f5f9';this.style.color='#0f172a'" onmouseout="this.style.background='#f8fafc';this.style.color='#64748b'">
             <svg style="width:16px; height:16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -58,11 +62,11 @@
         <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 16px 8px;">
             <span style="font-size:0.78rem; font-weight:700; color:#0f172a; letter-spacing:0.02em;">You may also like</span>
             <div style="display:flex; gap:6px;">
-                <button id="sugg-prev" onclick="suggPrev()"
+                <button id="sugg-prev" onclick="suggPrev()" aria-label="Previous suggestions"
                     style="width:28px; height:28px; border-radius:50%; background:#fff; border:1px solid #e2e8f0; color:#475569; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0.5; transition:all 0.2s; flex-shrink:0;">
                     <svg style="width:13px;height:13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
                 </button>
-                <button id="sugg-next" onclick="suggNext()"
+                <button id="sugg-next" onclick="suggNext()" aria-label="Next suggestions"
                     style="width:28px; height:28px; border-radius:50%; background:#fff; border:1px solid #e2e8f0; color:#475569; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s; flex-shrink:0;">
                     <svg style="width:13px;height:13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
                 </button>

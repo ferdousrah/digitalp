@@ -31,6 +31,42 @@ class AccountController extends Controller
         return view('account.orders', compact('orders'));
     }
 
+    public function showOrder(string $orderNumber)
+    {
+        $user  = Auth::user();
+        $order = $this->ordersForUser($user)
+            ->where('order_number', $orderNumber)
+            ->with(['items', 'activities' => fn ($q) => $q->latest('created_at')])
+            ->firstOrFail();
+
+        return view('account.order', compact('order'));
+    }
+
+    public function cancelOrder(Request $request, string $orderNumber)
+    {
+        $user  = Auth::user();
+        $order = $this->ordersForUser($user)
+            ->where('order_number', $orderNumber)
+            ->firstOrFail();
+
+        // Only allow cancelling while still pending / processing — and only if not yet shipped.
+        if (!in_array($order->status, ['pending', 'processing']) || $order->shipped_at) {
+            return back()->withErrors(['order' => 'This order can no longer be cancelled.']);
+        }
+
+        $order->update([
+            'status'       => 'cancelled',
+            'cancelled_at' => now(),
+        ]);
+
+        // Best-effort: log activity (the OrderObserver may also handle this)
+        if (method_exists($order, 'logActivity')) {
+            $order->logActivity('cancelled', 'Cancelled by customer', 'Customer cancelled the order from their account.');
+        }
+
+        return back()->with('success', 'Order cancelled.');
+    }
+
     public function updateProfile(Request $request)
     {
         $data = $request->validate([

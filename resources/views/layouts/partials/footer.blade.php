@@ -258,7 +258,13 @@
     {{-- ─── BOTTOM BAR ─── --}}
     <div class="ds-div" style="padding:18px 16px;">
         <div class="container-custom" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; font-size:0.78rem; color:#525252;">
-            <p style="margin:0;">{{ sc('footer', 'copyright', '© ' . date('Y') . ' Digital Support. All Rights Reserved.') }}</p>
+            <p style="margin:0; display:inline-flex; align-items:center; gap:14px; flex-wrap:wrap;">
+                <span>{{ sc('footer', 'copyright', '© ' . date('Y') . ' Digital Support. All Rights Reserved.') }}</span>
+                <span style="opacity:0.4;">·</span>
+                <span>Developed by
+                    <a href="https://technocratsbd.com" target="_blank" rel="noopener" class="ds-credit" style="color:#a3a3a3; font-weight:600; text-decoration:none; border-bottom:1px solid #404040; padding-bottom:1px; transition:color 0.2s, border-color 0.2s;" onmouseover="this.style.color='#f97316';this.style.borderColor='#f97316'" onmouseout="this.style.color='#a3a3a3';this.style.borderColor='#404040'">Technocrats</a>
+                </span>
+            </p>
             <div style="display:flex; gap:24px; align-items:center;">
                 <a href="{{ url('/page/privacy-policy') }}" style="color:#525252; transition:color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#525252'">Privacy</a>
                 <a href="{{ url('/page/terms-of-service') }}" style="color:#525252; transition:color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#525252'">Terms</a>

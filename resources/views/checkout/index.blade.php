@@ -2,19 +2,24 @@
 
 @section('title', 'Checkout')
 @section('meta_description', 'Complete your order securely')
-@php app(\App\Services\SeoService::class)->noindex(); @endphp
+@php
+    app(\App\Services\SeoService::class)->noindex();
+    // Pre-build the analytics items array — Blade's @json() arg parser can't handle
+    // an arrow function with an array literal inside as a directive argument.
+    $beginCheckoutItems = collect(\App\Services\CartService::get())->map(fn ($i) => [
+        'id'    => $i['id'] ?? null,
+        'name'  => $i['name'] ?? null,
+        'price' => (float) ($i['price'] ?? 0),
+        'qty'   => (int) ($i['qty'] ?? 1),
+    ])->values();
+@endphp
 
 @push('scripts')
 <script>
     // Analytics: fire begin_checkout when this page loads
     window.dsTrack && window.dsTrack('begin_checkout', {
         value: {{ (float) (\App\Services\CartService::total() ?? 0) }},
-        items: @json(collect(\App\Services\CartService::get())->map(fn ($i) => [
-            'id'    => $i['id'] ?? null,
-            'name'  => $i['name'] ?? null,
-            'price' => (float) ($i['price'] ?? 0),
-            'qty'   => (int) ($i['qty'] ?? 1),
-        ])->values()),
+        items: @json($beginCheckoutItems),
     });
 </script>
 @endpush
@@ -78,6 +83,46 @@
     font-size: 0.76rem;
     color: #ef4444;
     margin-top: 4px;
+}
+/* Phone field with +880 prefix chip — matches the sign-in page styling */
+.co-phone-input {
+    display: flex;
+    align-items: stretch;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #fff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.co-phone-input:focus-within {
+    border-color: #f97316;
+    box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.12);
+}
+.co-phone-input.error { border-color: #ef4444; }
+.co-phone-prefix {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 12px;
+    background: #f8fafc;
+    color: #0f172a;
+    font-weight: 700;
+    font-size: 0.85rem;
+    border-right: 1px solid #e2e8f0;
+    white-space: nowrap;
+}
+.co-phone-prefix svg { width: 13px; height: 13px; color: #64748b; }
+.co-phone-input input {
+    flex: 1;
+    min-width: 0;
+    padding: 9px 12px;
+    border: none;
+    outline: none;
+    font-size: 0.85rem;
+    color: #111827;
+    background: transparent;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
 }
 .co-select {
     appearance: none;
@@ -189,7 +234,7 @@
         <h1 style="font-size:1.5rem; font-weight:800; color:#111827; margin:0 0 24px;">{{ sc('checkout', 'title', 'Checkout') }}</h1>
 
         @if($errors->any())
-        <div style="background:#fef2f2; border:1px solid #fecaca; border-left:4px solid #ef4444; border-radius:8px; padding:14px 18px; margin-bottom:20px; font-size:0.85rem; color:#dc2626;">
+        <div role="alert" aria-live="assertive" style="background:#fef2f2; border:1px solid #fecaca; border-left:4px solid #ef4444; border-radius:8px; padding:14px 18px; margin-bottom:20px; font-size:0.85rem; color:#dc2626;">
             <strong>Please fix the following errors:</strong>
             <ul style="margin:8px 0 0 16px; padding:0;">
                 @foreach($errors->all() as $error)
@@ -231,7 +276,7 @@
                                             <td style="padding:12px 20px;">
                                                 <div style="display:flex; align-items:center; gap:12px;">
                                                     <template x-if="item.image">
-                                                        <img :src="item.image" :alt="item.name" style="width:52px; height:52px; object-fit:cover; border-radius:6px; border:1px solid #e5e7eb; flex-shrink:0;">
+                                                        <img :src="item.image" :alt="item.name" loading="lazy" decoding="async" width="52" height="52" style="width:52px; height:52px; object-fit:cover; border-radius:6px; border:1px solid #e5e7eb; flex-shrink:0;">
                                                     </template>
                                                     <template x-if="!item.image">
                                                         <div style="width:52px; height:52px; background:#f3f4f6; border-radius:6px; border:1px solid #e5e7eb; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
@@ -258,7 +303,7 @@
                                             <td style="padding:12px 20px; text-align:right;">
                                                 <div style="display:flex; align-items:center; justify-content:flex-end; gap:10px;">
                                                     <span x-text="(parseFloat(item.price) * item.qty).toFixed(2) + '৳'" style="font-weight:700; color:#111827;"></span>
-                                                    <button type="button" @click="removeItem(item.key)" title="Remove item"
+                                                    <button type="button" @click="removeItem(item.key)" title="Remove item" aria-label="Remove item"
                                                         style="width:28px;height:28px;border:none;border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:center;background:#fef2f2;color:#ef4444;transition:background 0.15s;flex-shrink:0;"
                                                         onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#fef2f2'">
                                                         <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
@@ -294,7 +339,16 @@
                                         </div>
                                         <div>
                                             <label class="co-label" for="shipping_phone">Phone Number <span style="color:#ef4444;">*</span></label>
-                                            <input class="co-input @error('shipping_phone') error @enderror" type="text" id="shipping_phone" name="shipping_phone" value="{{ old('shipping_phone') }}" placeholder="{{ sc('checkout', 'phone_placeholder', '01XXXXXXXXX') }}" required>
+                                            @php $__shipPhone = preg_replace('/^(\+?880|0)/', '', old('shipping_phone', '')); @endphp
+                                            <div class="co-phone-input @error('shipping_phone') error @enderror">
+                                                <span class="co-phone-prefix">
+                                                    <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                                                    <span>+880</span>
+                                                </span>
+                                                <input type="tel" id="shipping_phone" name="shipping_phone" value="{{ $__shipPhone }}" placeholder="1712345678" inputmode="numeric" pattern="1[3-9][0-9]{8}" maxlength="10" autocomplete="tel" required data-no-type
+                                                    onkeypress="if(!/[0-9]/.test(event.key))event.preventDefault()"
+                                                    onpaste="var t=this; setTimeout(function(){ t.value = (t.value||'').replace(/\D/g,'').replace(/^(\+?880|0)/,'').slice(0,10); },0)">
+                                            </div>
                                             @error('shipping_phone')<p class="co-error">{{ $message }}</p>@enderror
                                         </div>
                                     </div>
@@ -360,7 +414,16 @@
                                         </div>
                                         <div>
                                             <label class="co-label" for="billing_phone">Phone Number</label>
-                                            <input class="co-input" type="text" id="billing_phone" name="billing_phone" value="{{ old('billing_phone') }}" placeholder="{{ sc('checkout', 'phone_placeholder', '01XXXXXXXXX') }}">
+                                            @php $__billPhone = preg_replace('/^(\+?880|0)/', '', old('billing_phone', '')); @endphp
+                                            <div class="co-phone-input">
+                                                <span class="co-phone-prefix">
+                                                    <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                                                    <span>+880</span>
+                                                </span>
+                                                <input type="tel" id="billing_phone" name="billing_phone" value="{{ $__billPhone }}" placeholder="1712345678" inputmode="numeric" pattern="1[3-9][0-9]{8}" maxlength="10" autocomplete="tel" data-no-type
+                                                    onkeypress="if(!/[0-9]/.test(event.key))event.preventDefault()"
+                                                    onpaste="var t=this; setTimeout(function(){ t.value = (t.value||'').replace(/\D/g,'').replace(/^(\+?880|0)/,'').slice(0,10); },0)">
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="co-grid-2">
@@ -606,7 +669,7 @@ function checkoutApp() {
                         'Accept': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                     },
-                    body: JSON.stringify({ code: this.couponCode, phone: this.shippingPhone }),
+                    body: JSON.stringify({ code: this.couponCode, phone: (document.getElementById('shipping_phone') || {}).value || '' }),
                 });
                 const data = await r.json();
                 if (r.ok && data.ok) {

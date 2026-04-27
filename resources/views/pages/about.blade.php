@@ -38,7 +38,7 @@
             @foreach($team as $member)
             <div class="gsap-fade-up text-center">
                 <div class="w-32 h-32 mx-auto mb-4 rounded-full bg-surface-200 overflow-hidden">
-                    @if($member->getFirstMediaUrl('member_photo'))<img src="{{ $member->getFirstMediaUrl('member_photo') }}" alt="{{ $member->name }}" class="w-full h-full object-cover">@endif
+                    @if($member->getFirstMediaUrl('member_photo'))<img src="{{ $member->getFirstMediaUrl('member_photo') }}" alt="{{ $member->name }}" loading="lazy" decoding="async" class="w-full h-full object-cover">@endif
                 </div>
                 <h3 class="font-semibold text-lg">{{ $member->name }}</h3>
                 <p class="text-primary-600 text-sm mb-2">{{ $member->position }}</p>

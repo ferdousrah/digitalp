@@ -10,7 +10,7 @@
 @endphp
 
 @if($section->title || $section->subtitle || $hasViewAll)
-<div class="{{ $uid }}-wrap" style="margin-bottom:28px; text-align:{{ $headingAlign }};">
+<div class="{{ $uid }}-wrap gsap-fade-up" style="margin-bottom:28px; text-align:{{ $headingAlign }};">
 
     {{-- Row 1: Title + View All --}}
     <div style="display:flex; align-items:flex-start; justify-content:{{ $headingAlign === 'center' ? 'center' : ($headingAlign === 'right' ? 'flex-end' : 'space-between') }}; gap:16px; margin-bottom:{{ $section->subtitle ? '4px' : '12px' }};">

@@ -64,7 +64,7 @@
                          style="width: 70px; height: 70px; min-height: 70px; border-radius: 8px; overflow: hidden; flex-shrink: 0;"
                          data-kind="image"
                          data-large="{{ $media->getUrl('large') }}" data-zoom="{{ $media->getUrl() }}">
-                        <img src="{{ $media->getUrl('thumb') }}" alt="{{ $product->name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        <img src="{{ $media->getUrl('thumb') }}" alt="{{ $product->name }}" loading="lazy" decoding="async" style="width: 100%; height: 100%; object-fit: cover;">
                     </div>
                     @endforeach
                     @foreach($videos as $video)
@@ -74,7 +74,7 @@
                          data-video-type="{{ $video['type'] }}"
                          data-video-src="{{ $video['src'] }}">
                         @if($video['thumb'])
-                            <img src="{{ $video['thumb'] }}" alt="Video" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.75;">
+                            <img src="{{ $video['thumb'] }}" alt="Video" loading="lazy" decoding="async" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.75;">
                         @endif
                         <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none;">
                             <div style="width:26px; height:26px; border-radius:50%; background:rgba(0,0,0,0.65); display:flex; align-items:center; justify-content:center;">
@@ -90,7 +90,7 @@
                 <div style="flex: 1; min-width: 0; position: relative;" id="image-wrapper">
                     <div id="zoom-container" class="bg-surface-50 border border-surface-200 rounded-xl overflow-hidden relative {{ $mainImage ? 'cursor-crosshair' : '' }}" style="aspect-ratio: 1/1;">
                         @if($mainImage)
-                            <img id="main-image" src="{{ $mainImage }}" data-zoom="{{ $fullImage ?: $mainImage }}" alt="{{ $product->name }}" class="w-full h-full object-contain p-6">
+                            <img id="main-image" src="{{ $mainImage }}" data-zoom="{{ $fullImage ?: $mainImage }}" alt="{{ $product->name }}" decoding="async" fetchpriority="high" class="w-full h-full object-contain p-6">
                         @else
                             <div class="w-full h-full flex items-center justify-center">
                                 <svg class="w-32 h-32 text-surface-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
@@ -100,7 +100,7 @@
                         <div id="main-video" class="hidden absolute inset-0 bg-black flex items-center justify-center"></div>
 
                         {{-- Fullscreen button (top-right) --}}
-                        <button type="button" id="fullscreen-btn" title="View fullscreen"
+                        <button type="button" id="fullscreen-btn" title="View fullscreen" aria-label="View image fullscreen"
                             style="position:absolute; top:12px; right:12px; z-index:5; width:38px; height:38px; border:none; border-radius:50%; background:rgba(17,24,39,0.72); color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(4px); transition:background 0.2s, transform 0.2s;"
                             onmouseover="this.style.background='rgba(17,24,39,0.95)'; this.style.transform='scale(1.08)'"
                             onmouseout="this.style.background='rgba(17,24,39,0.72)'; this.style.transform='scale(1)'">
@@ -133,9 +133,9 @@
             @endif
 
             <div class="flex items-center gap-4 mb-6">
-                <span class="text-xl font-bold text-primary-600">{{ number_format($product->price, 0) }}৳</span>
+                <span class="text-xl font-bold text-primary-600">@bdt($product->price)</span>
                 @if($product->compare_price)
-                    <span class="text-base text-surface-400 line-through">{{ number_format($product->compare_price, 0) }}৳</span>
+                    <span class="text-base text-surface-400 line-through">@bdt($product->compare_price)</span>
                     <span class="bg-accent-100 text-accent-700 text-sm font-semibold px-3 py-1 rounded-full">
                         Save {{ round(($product->compare_price - $product->price) / $product->compare_price * 100) }}%
                     </span>
@@ -164,12 +164,12 @@
                 <div style="display:flex; align-items:center; gap:16px; margin-bottom:16px;">
                     <span style="font-size:0.9rem; font-weight:600; color:#374151;">Quantity:</span>
                     <div style="display:inline-flex; align-items:center; border:1.5px solid #d1d5db; border-radius:8px; overflow:hidden;">
-                        <button type="button" @click="qty = Math.max(1, qty - 1)"
-                            style="width:38px; height:38px; background:#f9fafb; border:none; font-size:1.2rem; font-weight:600; color:#374151; cursor:pointer; display:flex; align-items:center; justify-content:center;"
+                        <button type="button" @click="qty = Math.max(1, qty - 1)" aria-label="Decrease quantity"
+                            style="width:44px; height:44px; background:#f9fafb; border:none; font-size:1.25rem; font-weight:600; color:#374151; cursor:pointer; display:flex; align-items:center; justify-content:center;"
                             onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='#f9fafb'">−</button>
-                        <span x-text="qty" style="min-width:40px; text-align:center; font-size:1rem; font-weight:700; color:#111827; border-left:1.5px solid #d1d5db; border-right:1.5px solid #d1d5db; height:38px; line-height:38px;"></span>
-                        <button type="button" @click="qty++"
-                            style="width:38px; height:38px; background:#f9fafb; border:none; font-size:1.2rem; font-weight:600; color:#374151; cursor:pointer; display:flex; align-items:center; justify-content:center;"
+                        <span x-text="qty" style="min-width:48px; text-align:center; font-size:1rem; font-weight:700; color:#111827; border-left:1.5px solid #d1d5db; border-right:1.5px solid #d1d5db; height:44px; line-height:44px;"></span>
+                        <button type="button" @click="qty++" aria-label="Increase quantity"
+                            style="width:44px; height:44px; background:#f9fafb; border:none; font-size:1.25rem; font-weight:600; color:#374151; cursor:pointer; display:flex; align-items:center; justify-content:center;"
                             onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='#f9fafb'">+</button>
                     </div>
                 </div>
@@ -325,7 +325,7 @@
     {{-- Header with counter + close --}}
     <div style="display:flex; align-items:center; justify-content:space-between; padding:16px 24px; color:#fff;">
         <div id="fs-counter" style="font-size:0.875rem; font-weight:500; color:rgba(255,255,255,0.8);"></div>
-        <button type="button" id="fs-close" title="Close (Esc)"
+        <button type="button" id="fs-close" title="Close (Esc)" aria-label="Close fullscreen"
             style="width:44px; height:44px; border:none; border-radius:50%; background:rgba(255,255,255,0.12); color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background 0.2s;"
             onmouseover="this.style.background='rgba(255,255,255,0.25)'"
             onmouseout="this.style.background='rgba(255,255,255,0.12)'">
@@ -335,14 +335,14 @@
 
     {{-- Main stage with prev/next arrows --}}
     <div style="flex:1 1 0; min-height:0; position:relative; display:flex; align-items:center; justify-content:center; padding:0 70px; overflow:hidden;">
-        <button type="button" id="fs-prev" title="Previous (←)"
+        <button type="button" id="fs-prev" title="Previous (←)" aria-label="Previous image"
             style="position:absolute; left:16px; top:50%; transform:translateY(-50%); width:48px; height:48px; border:none; border-radius:50%; background:rgba(255,255,255,0.12); color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background 0.2s;"
             onmouseover="this.style.background='rgba(255,255,255,0.28)'"
             onmouseout="this.style.background='rgba(255,255,255,0.12)'">
             <svg style="width:24px; height:24px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
         </button>
         <div id="fs-content" style="width:100%; height:100%; max-width:1400px; display:flex; align-items:center; justify-content:center;"></div>
-        <button type="button" id="fs-next" title="Next (→)"
+        <button type="button" id="fs-next" title="Next (→)" aria-label="Next image"
             style="position:absolute; right:16px; top:50%; transform:translateY(-50%); width:48px; height:48px; border:none; border-radius:50%; background:rgba(255,255,255,0.12); color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background 0.2s;"
             onmouseover="this.style.background='rgba(255,255,255,0.28)'"
             onmouseout="this.style.background='rgba(255,255,255,0.12)'">

@@ -98,11 +98,47 @@ Route::post('/auth/otp/send',  [PhoneAuthController::class, 'sendOtp'])->name('a
 Route::post('/auth/otp/verify',[PhoneAuthController::class, 'verifyOtp'])->name('auth.otp.verify');
 Route::post('/logout',         [PhoneAuthController::class, 'logout'])->name('logout');
 
+// PWA manifest — generated dynamically from SettingService so changes in /admin take effect without a redeploy.
+Route::get('/manifest.webmanifest', function () {
+    $name      = \App\Services\SettingService::get('site_name', config('app.name'));
+    $shortName = mb_substr(\App\Services\SettingService::get('site_short_name', $name), 0, 12);
+    $logoKey   = \App\Services\SettingService::get('site_logo');
+    $logoUrl   = $logoKey ? \Illuminate\Support\Facades\Storage::disk('public')->url($logoKey) : asset('favicon.ico');
+    $tc = \App\Filament\Pages\TemplateSettings::defaults();
+    $themeColor = \App\Services\SettingService::get('color_primary', $tc['color_primary'] ?? '#16a34a');
+
+    return response()->json([
+        'name'             => $name,
+        'short_name'       => $shortName,
+        'description'      => \App\Services\SettingService::get('site_description', 'Your trusted partner for digital products and computer accessories.'),
+        'start_url'        => url('/'),
+        'scope'            => url('/'),
+        'display'          => 'standalone',
+        'orientation'      => 'portrait-primary',
+        'theme_color'      => $themeColor,
+        'background_color' => '#ffffff',
+        'lang'             => 'en',
+        'icons' => [
+            [ 'src' => $logoUrl, 'sizes' => '192x192', 'type' => 'image/png', 'purpose' => 'any' ],
+            [ 'src' => $logoUrl, 'sizes' => '512x512', 'type' => 'image/png', 'purpose' => 'any' ],
+            [ 'src' => $logoUrl, 'sizes' => '512x512', 'type' => 'image/png', 'purpose' => 'maskable' ],
+        ],
+        'shortcuts' => [
+            [ 'name' => 'Products', 'url' => url('/products'), 'description' => 'Browse all products' ],
+            [ 'name' => 'My account', 'url' => url('/account'), 'description' => 'View your orders and profile' ],
+            [ 'name' => 'Track order', 'url' => url('/track-order'), 'description' => 'Track an existing order' ],
+        ],
+    ])->header('Content-Type', 'application/manifest+json')
+      ->header('Cache-Control', 'public, max-age=86400');
+})->name('pwa.manifest');
+
 // Customer account (auth required)
 Route::middleware('auth')->prefix('account')->name('account.')->group(function () {
-    Route::get('/',         [AccountController::class, 'index'])->name('index');
-    Route::get('/orders',   [AccountController::class, 'orders'])->name('orders');
-    Route::post('/profile', [AccountController::class, 'updateProfile'])->name('profile.update');
+    Route::get('/',                       [AccountController::class, 'index'])->name('index');
+    Route::get('/orders',                 [AccountController::class, 'orders'])->name('orders');
+    Route::get('/orders/{orderNumber}',   [AccountController::class, 'showOrder'])->name('orders.show');
+    Route::post('/orders/{orderNumber}/cancel', [AccountController::class, 'cancelOrder'])->name('orders.cancel');
+    Route::post('/profile',               [AccountController::class, 'updateProfile'])->name('profile.update');
 });
 
 // Checkout

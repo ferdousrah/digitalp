@@ -5,7 +5,8 @@
         @include('home.sections._section-header', ['section' => $section])
         <div class="hs-carousel-wrap" style="position:relative;">
             <div class="hs-carousel" id="brand-carousel-{{ $section->id }}"
-                style="display:flex; gap:20px; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; align-items:center;"
+                data-autoscroll="0.5"
+                style="display:flex; gap:20px; overflow-x:auto; scrollbar-width:none; align-items:center;"
                 onmousedown="hsCarouselDragStart(event,this)" onmousemove="hsCarouselDragMove(event,this)" onmouseup="hsCarouselDragEnd(event,this)" onmouseleave="hsCarouselDragEnd(event,this)">
                 @foreach($brands as $brand)
                 <div style="flex:0 0 calc((100% - {{ ($section->desktop_visible - 1) * 20 }}px) / {{ $section->desktop_visible }}); scroll-snap-align:start; display:flex; align-items:center; justify-content:center; padding:16px; background:#fff; border-radius:10px; border:1px solid #e5e7eb; transition:all 0.2s;" class="brand-item-{{ $section->id }}"

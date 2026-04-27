@@ -7,15 +7,15 @@
     <div class="container-custom" style="padding:48px 16px;">
 
         @if(session('success'))
-            <div style="margin-bottom:20px; padding:12px 16px; background:#ecfdf5; border:1px solid #bbf7d0; color:#166534; border-radius:10px; font-size:0.9rem;">
+            <div role="status" aria-live="polite" style="margin-bottom:20px; padding:12px 16px; background:#ecfdf5; border:1px solid #bbf7d0; color:#166534; border-radius:10px; font-size:0.9rem;">
                 {{ session('success') }}
             </div>
         @endif
 
-        <div style="display:grid; grid-template-columns:280px 1fr; gap:28px; align-items:start;">
+        <div id="account-grid" style="display:grid; grid-template-columns:280px 1fr; gap:28px; align-items:start;">
 
             {{-- Sidebar --}}
-            <aside style="background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:24px; position:sticky; top:24px;">
+            <aside id="account-sidebar" style="background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:24px; position:sticky; top:24px;">
                 <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px; padding-bottom:20px; border-bottom:1px solid #f1f5f9;">
                     <div style="width:48px; height:48px; border-radius:50%; background:linear-gradient(135deg,#f97316,#ea580c); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1.1rem; flex-shrink:0;">
                         {{ strtoupper(mb_substr($user->name ?? 'C', 0, 1)) }}
@@ -79,7 +79,7 @@
                     <h2 style="margin:0 0 4px; font-size:1.1rem; font-weight:800; color:#0f172a;">Your details</h2>
                     <p style="margin:0 0 20px; color:#64748b; font-size:0.88rem;">Add your name and email so we can keep you updated about orders.</p>
 
-                    <form method="POST" action="{{ route('account.profile.update') }}" style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                    <form method="POST" action="{{ route('account.profile.update') }}" id="account-profile-form" style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
                         @csrf
                         <div>
                             <label style="display:block; font-size:0.78rem; font-weight:700; color:#475569; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.05em;">Full name</label>
@@ -117,14 +117,14 @@
                     </div>
                     <div style="display:flex; flex-direction:column; gap:10px;">
                         @foreach($recent as $order)
-                            <div style="display:flex; align-items:center; gap:14px; padding:14px; background:#f8fafc; border:1px solid #f1f5f9; border-radius:10px;">
+                            <a href="{{ route('account.orders.show', $order->order_number) }}" style="display:flex; align-items:center; gap:14px; padding:14px; background:#f8fafc; border:1px solid #f1f5f9; border-radius:10px; text-decoration:none; transition:all 0.15s;" onmouseover="this.style.background='#fff'; this.style.borderColor='#e2e8f0'; this.style.transform='translateY(-1px)';" onmouseout="this.style.background='#f8fafc'; this.style.borderColor='#f1f5f9'; this.style.transform='none';">
                                 <div style="flex:1; min-width:0;">
                                     <p style="margin:0; font-weight:700; color:#0f172a; font-size:0.9rem;">#{{ $order->order_number ?? $order->id }}</p>
                                     <p style="margin:2px 0 0; font-size:0.78rem; color:#64748b;">{{ $order->created_at?->format('M d, Y h:i A') }}</p>
                                 </div>
                                 <span style="font-size:0.72rem; font-weight:700; padding:4px 10px; background:#fff; border:1px solid #e2e8f0; color:#475569; border-radius:999px; text-transform:uppercase; letter-spacing:0.05em;">{{ $order->status ?? 'Pending' }}</span>
-                                <span style="font-weight:800; color:#0f172a;">{{ number_format((float) ($order->total ?? 0), 0) }}৳</span>
-                            </div>
+                                <span style="font-weight:800; color:#0f172a;">@bdt($order->total ?? 0)</span>
+                            </a>
                         @endforeach
                     </div>
                 </div>
@@ -135,9 +135,23 @@
 </div>
 
 <style>
-@media (max-width:900px) {
-    aside { position:static !important; }
-    .container-custom > div { grid-template-columns:1fr !important; }
+/* Below 1024px: sidebar stacks above content (avoids cramped 280px sidebar on tablets) */
+@media (max-width: 1023px) {
+    #account-grid {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+    }
+    #account-sidebar {
+        position: static !important;
+        top: auto !important;
+    }
+}
+
+/* Below 640px: profile form stacks vertically */
+@media (max-width: 639px) {
+    #account-profile-form {
+        grid-template-columns: 1fr !important;
+    }
 }
 </style>
 @endsection

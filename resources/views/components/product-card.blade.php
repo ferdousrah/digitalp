@@ -90,6 +90,8 @@
         <div class="product-card-actions" style="position:absolute; top:12px; right:12px; display:flex; flex-direction:column; gap:8px; transform:translateX(60px); opacity:0; transition:all 0.3s cubic-bezier(.4,0,.2,1);">
             @if($pc['pc_show_wishlist_btn'] == '1')
             <button type="button" title="{{ $isWishlisted ? 'Remove from Wishlist' : 'Add to Wishlist' }}"
+                aria-label="{{ $isWishlisted ? 'Remove from Wishlist' : 'Add to Wishlist' }}"
+                aria-pressed="{{ $isWishlisted ? 'true' : 'false' }}"
                 class="wishlist-btn-{{ $product->id }} {{ $isWishlisted ? 'wishlisted' : '' }}"
                 onclick="event.preventDefault(); event.stopPropagation(); toggleWishlist({{ $product->id }}, this)"
                 style="width:36px; height:36px; background:{{ $isWishlisted ? '#ef4444' : '#fff' }}; border:none; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.12); transition:all 0.2s;">
@@ -99,6 +101,8 @@
 
             @if($pc['pc_show_compare_btn'] == '1')
             <button type="button" title="{{ $isCompared ? 'Remove from Compare' : 'Add to Compare' }}"
+                aria-label="{{ $isCompared ? 'Remove from Compare' : 'Add to Compare' }}"
+                aria-pressed="{{ $isCompared ? 'true' : 'false' }}"
                 class="compare-btn-{{ $product->id }} {{ $isCompared ? 'compared' : '' }}"
                 onclick="event.preventDefault(); event.stopPropagation(); toggleCompare({{ $product->id }}, this)"
                 style="width:36px; height:36px; background:{{ $isCompared ? '#16a34a' : '#fff' }}; border:none; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.12); transition:all 0.2s;">
@@ -107,7 +111,7 @@
             @endif
 
             @if($pc['pc_show_quickview_btn'] == '1')
-            <button type="button" title="Quick View"
+            <button type="button" title="Quick View" aria-label="Quick View"
                 onclick="event.preventDefault(); event.stopPropagation(); openQuickView('{{ route('products.quickView', $product) }}')"
                 style="width:36px; height:36px; background:#fff; border:none; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.12); transition:all 0.2s;"
                 onmouseover="this.style.background='#2563eb'; this.querySelector('svg').style.color='#fff'"
@@ -140,9 +144,9 @@
         </h3>
 
         <div style="display:flex; align-items:baseline; gap:8px; margin-bottom:12px;">
-            <span style="font-size:1.15rem; font-weight:700; color:{{ $pc['pc_price_color'] }};">{{ number_format($product->price, 0) }}৳</span>
+            <span style="font-size:1.15rem; font-weight:700; color:{{ $pc['pc_price_color'] }};">@bdt($product->price)</span>
             @if($pc['pc_show_compare_price'] == '1' && $product->compare_price)
-                <span style="font-size:0.825rem; color:{{ $pc['pc_compare_price_color'] }}; text-decoration:line-through;">{{ number_format($product->compare_price, 0) }}৳</span>
+                <span style="font-size:0.825rem; color:{{ $pc['pc_compare_price_color'] }}; text-decoration:line-through;">@bdt($product->compare_price)</span>
             @endif
         </div>
 
@@ -211,6 +215,34 @@
     .wishlisted svg { color: #fff !important; }
     .compared { background: #16a34a !important; }
     .compared svg { color: #fff !important; }
+
+    /* Keyboard users — when any element inside the card receives focus, reveal the
+       hover-only buttons so they can be reached by Tab. Without this, keyboard nav
+       skips over actions that are only visible on mouse hover. */
+    .product-card:focus-within .product-card-actions {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    .product-card:focus-within .product-card-btns {
+        max-height: 60px;
+        opacity: 1;
+        transform: translateY(0);
+        margin-top: 10px;
+    }
+
+    /* Touch devices have no hover — show actions + buy buttons by default */
+    @media (hover: none), (pointer: coarse) {
+        .product-card-actions {
+            transform: translateX(0) !important;
+            opacity: 1 !important;
+        }
+        .product-card-btns {
+            max-height: 60px !important;
+            opacity: 1 !important;
+            transform: translateY(0) !important;
+            margin-top: 10px !important;
+        }
+    }
 </style>
 
 @once

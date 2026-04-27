@@ -11,7 +11,7 @@
     <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         @foreach($album->items as $item)
         <div class="aspect-square bg-surface-100 rounded-lg overflow-hidden">
-            @if($item->getFirstMediaUrl('item_image'))<img src="{{ $item->getFirstMediaUrl('item_image') }}" alt="{{ $item->title }}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500" loading="lazy">@endif
+            @if($item->getFirstMediaUrl('item_image'))<img src="{{ $item->getFirstMediaUrl('item_image') }}" alt="{{ $item->title }}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500" loading="lazy" decoding="async">@endif
         </div>
         @endforeach
     </div>

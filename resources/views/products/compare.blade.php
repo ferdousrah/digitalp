@@ -49,9 +49,9 @@
                     <td style="padding:16px 20px; background:#f9fafb; border-bottom:1px solid #f3f4f6; font-weight:600; color:#374151; font-size:0.875rem;">Price</td>
                     @foreach($products as $p)
                     <td style="padding:16px 20px; text-align:center; border-bottom:1px solid #f3f4f6;">
-                        <span style="font-size:1.25rem; font-weight:700; color:#16a34a;">{{ number_format($p->price, 0) }}৳</span>
+                        <span style="font-size:1.25rem; font-weight:700; color:#16a34a;">@bdt($p->price)</span>
                         @if($p->compare_price)
-                            <br><span style="font-size:0.825rem; color:#9ca3af; text-decoration:line-through;">{{ number_format($p->compare_price, 0) }}৳</span>
+                            <br><span style="font-size:0.825rem; color:#9ca3af; text-decoration:line-through;">@bdt($p->compare_price)</span>
                             <span style="font-size:0.75rem; color:#ef4444; font-weight:600; margin-left:4px;">-{{ round(($p->compare_price - $p->price) / $p->compare_price * 100) }}%</span>
                         @endif
                     </td>

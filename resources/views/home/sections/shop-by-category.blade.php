@@ -7,7 +7,8 @@
         {{-- Carousel --}}
         <div class="hs-carousel-wrap" style="position:relative;">
             <div class="hs-carousel" id="cat-carousel-{{ $section->id }}"
-                style="display:flex; gap:16px; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; -ms-overflow-style:none; padding-bottom:4px; cursor:grab;"
+                data-autoscroll="0.4"
+                style="display:flex; gap:16px; overflow-x:auto; scrollbar-width:none; -ms-overflow-style:none; padding-bottom:4px; cursor:grab;"
                 onmousedown="hsCarouselDragStart(event,this)" onmousemove="hsCarouselDragMove(event,this)" onmouseup="hsCarouselDragEnd(event,this)" onmouseleave="hsCarouselDragEnd(event,this)">
                 @foreach($categories as $category)
                 <a href="{{ route('categories.show', $category) }}"

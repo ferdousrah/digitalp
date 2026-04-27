@@ -17,14 +17,23 @@
     @include('partials.seo-head')
     @stack('seo')
 
-    {{-- E-commerce tracking helper (window.dsTrack) — fires GA4 + FB Pixel events --}}
-    <script src="{{ asset('js/tracking.js') }}?v={{ filemtime(public_path('js/tracking.js')) }}"></script>
+    {{-- Preload the site logo — appears on every page in the header, so this earns its bytes everywhere --}}
+    @php $__siteLogo = \App\Services\SettingService::get('site_logo'); @endphp
+    @if($__siteLogo)
+        <link rel="preload" as="image" href="{{ Storage::disk('public')->url($__siteLogo) }}" fetchpriority="high">
+    @endif
+
+    {{-- E-commerce tracking helper (window.dsTrack). `defer` ensures it doesn't block parsing
+         and runs after HTML is fully parsed but before DOMContentLoaded. --}}
+    <script defer src="{{ asset('js/tracking.js') }}?v={{ filemtime(public_path('js/tracking.js')) }}"></script>
 
     {{-- DNS prefetch + preconnect to cut RTT on first request to fonts CDN --}}
     <link rel="dns-prefetch" href="https://fonts.googleapis.com">
     <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    <link rel="dns-prefetch" href="https://cdn-uicons.flaticon.com">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn-uicons.flaticon.com" crossorigin>
     @php
         use App\Services\SettingService;
         $fontEnglish  = SettingService::get('font_english', 'Inter');
@@ -115,12 +124,94 @@
         .border-primary-500,.border-primary-600 { border-color: {{ $tc['color_primary'] }} !important; }
         .hover\:text-primary-400:hover { color: {{ $tc['color_primary'] }} !important; }
         .hover\:bg-primary-600:hover   { background: {{ $tc['color_primary'] }} !important; }
+
+        /* ── Accessibility ── */
+        /* Visible orange focus ring for keyboard users only (no mouse-click outline) */
+        :focus { outline: none; }
+        a:focus-visible,
+        button:focus-visible,
+        input:focus-visible,
+        textarea:focus-visible,
+        select:focus-visible,
+        [role="button"]:focus-visible,
+        [tabindex]:focus-visible {
+            outline: 2px solid #f97316;
+            outline-offset: 2px;
+            border-radius: 4px;
+        }
+        /* Avoid the ring crashing into the orange Add-to-Cart's own background — invert when over orange */
+        .bg-primary-500:focus-visible,
+        .bg-primary-600:focus-visible,
+        [style*="background:#f97316"]:focus-visible,
+        [style*="background: #f97316"]:focus-visible {
+            outline-color: #fff;
+            box-shadow: 0 0 0 4px rgba(249,115,22,0.45);
+        }
+
+        /* Respect users who set "reduced motion" in OS settings — disable transitions and animations site-wide */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+
+        /* ── View Transitions API — soft cross-fade between pages on supported browsers ── */
+        @keyframes vt-fade-in  { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes vt-fade-out { from { opacity: 1; } to { opacity: 0; } }
+        ::view-transition-old(root) {
+            animation: vt-fade-out 0.18s cubic-bezier(.4, 0, .2, 1) both;
+        }
+        ::view-transition-new(root) {
+            animation: vt-fade-in 0.28s cubic-bezier(.4, 0, .2, 1) both;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
+        }
+
+        /* ── Micro-interactions: tactile feedback on buttons and links ── */
+        button:not(:disabled):active,
+        a[href]:active {
+            transform: translateY(1px);
+        }
+        @media (prefers-reduced-motion: reduce) {
+            button:not(:disabled):active,
+            a[href]:active { transform: none; }
+        }
     </style>
     <link rel="icon" href="{{ $siteFavicon ? Storage::disk('public')->url($siteFavicon) : asset('favicon.ico') }}">
 
+    {{-- Smooth cross-document navigation in supporting browsers (Chrome 111+, Edge, Opera).
+         The hover-prefetch from Phase 2 already makes the next page load almost instant —
+         this adds a soft cross-fade on top, so nav feels SPA-like without Barba intercepting. --}}
+    <meta name="view-transition" content="same-origin">
+
+    {{-- PWA — manifest + theme + iOS install meta --}}
+    <link rel="manifest" href="{{ route('pwa.manifest') }}">
+    <meta name="theme-color" content="{{ $tc['color_primary'] ?? '#16a34a' }}">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="{{ \App\Services\SettingService::get('site_short_name', \App\Services\SettingService::get('site_name', config('app.name'))) }}">
+    @php $__pwaIcon = \App\Services\SettingService::get('site_logo'); @endphp
+    @if($__pwaIcon)
+        <link rel="apple-touch-icon" href="{{ Storage::disk('public')->url($__pwaIcon) }}">
+    @endif
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
-    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.6.0/uicons-solid-rounded/css/uicons-solid-rounded.css'>
+
+    {{-- Flaticon UICons — async-loaded so they don't block first paint.
+         Pattern: load as `print` media (browsers download non-blockingly) then
+         flip to `all` once the file arrives. <noscript> fallback for the rare
+         no-JS visitor. --}}
+    <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-rounded/css/uicons-regular-rounded.css" media="print" onload="this.media='all'; this.onload=null;">
+    <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/2.6.0/uicons-solid-rounded/css/uicons-solid-rounded.css" media="print" onload="this.media='all'; this.onload=null;">
+    <noscript>
+        <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-rounded/css/uicons-regular-rounded.css">
+        <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/2.6.0/uicons-solid-rounded/css/uicons-solid-rounded.css">
+    </noscript>
     @stack('styles')
 </head>
 <body class="min-h-screen flex flex-col">
@@ -184,18 +275,86 @@
         }, { passive: true });
 
         btn.addEventListener('click', function () {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            window.scrollTo({ top: 0, behavior: window.dsReducedMotion() ? 'auto' : 'smooth' });
         });
 
         btn.addEventListener('mouseover', function () { btn.style.transform = 'scale(1.1)'; });
         btn.addEventListener('mouseout', function () { btn.style.transform = 'scale(1)'; });
     })();
+
+    // Single source of truth for the user's "reduced motion" preference.
+    // Used by JS-driven effects (confetti, smooth scroll, cart shake, hero auto-advance)
+    // since CSS-only rules can't catch JS-set inline styles or interval timers.
+    if (typeof window.dsReducedMotion !== 'function') {
+        window.dsReducedMotion = function () {
+            return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        };
+    }
+
+    /* ── Hover prefetch ─────────────────────────────────────────────
+       When a user hovers an internal link for ~65ms (a strong signal of
+       intent to click), inject <link rel="prefetch"> so the next page is
+       in cache by the time they actually click. Adds ~0 cost on desktop
+       and is gated on slow/saving connections to respect data plans.
+    */
+    (function () {
+        // Skip on slow connections or when user has data-saver on
+        var conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+        if (conn && (conn.saveData || /2g/.test(conn.effectiveType || ''))) return;
+
+        var prefetched = new Set();
+        var hoverTimer = null;
+
+        function isPrefetchable(a) {
+            if (!a || !a.href) return false;
+            if (a.hasAttribute('download') || a.target === '_blank') return false;
+            try {
+                var u = new URL(a.href);
+                if (u.origin !== window.location.origin) return false;
+                // Skip noisy/dynamic endpoints — they're either authenticated, mutating, or auto-loaded
+                if (/\/(admin|livewire|api|logout|cart\/(add|update|remove|clear|data)|auth\/|sslcommerz|bkash)/.test(u.pathname)) return false;
+                // Skip same-page hash links
+                if (u.pathname === window.location.pathname && u.hash) return false;
+                if (prefetched.has(u.href)) return false;
+                return true;
+            } catch (e) { return false; }
+        }
+
+        function prefetch(url) {
+            prefetched.add(url);
+            var link = document.createElement('link');
+            link.rel = 'prefetch';
+            link.href = url;
+            link.as = 'document';
+            document.head.appendChild(link);
+        }
+
+        function start() {
+            document.addEventListener('mouseover', function (e) {
+                var a = e.target.closest && e.target.closest('a[href]');
+                if (!isPrefetchable(a)) return;
+                clearTimeout(hoverTimer);
+                hoverTimer = setTimeout(function () { prefetch(a.href); }, 65);
+            }, { passive: true });
+
+            document.addEventListener('mouseout', function () { clearTimeout(hoverTimer); }, { passive: true });
+
+            // Touch devices have no hover — start prefetch on touchstart instead (the user is committed)
+            document.addEventListener('touchstart', function (e) {
+                var a = e.target.closest && e.target.closest('a[href]');
+                if (isPrefetchable(a)) prefetch(a.href);
+            }, { passive: true });
+        }
+
+        // Defer until the browser is idle so prefetch never competes with first paint
+        (window.requestIdleCallback || function (cb) { return setTimeout(cb, 1500); })(start);
+    })();
     </script>
 
     <!-- Quick View Modal -->
     <div id="quick-view-overlay" onclick="if(event.target===this)closeQuickView()" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:100; align-items:center; justify-content:center; padding:20px; opacity:0; transition:opacity 0.25s ease;">
-        <div id="quick-view-modal" style="background:#fff; border-radius:16px; max-width:720px; width:100%; max-height:90vh; overflow-y:auto; padding:28px; position:relative; transform:scale(0.95) translateY(10px); transition:transform 0.25s ease; box-shadow:0 20px 60px rgba(0,0,0,0.2);">
-            <button onclick="closeQuickView()" style="position:absolute; top:12px; right:12px; width:32px; height:32px; border:none; background:#f3f4f6; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:10; transition:background 0.2s;" onmouseover="this.style.background='#e5e7eb'" onmouseout="this.style.background='#f3f4f6'">
+        <div id="quick-view-modal" role="dialog" aria-modal="true" aria-label="Product quick view" aria-hidden="true" style="background:#fff; border-radius:16px; max-width:720px; width:100%; max-height:90vh; overflow-y:auto; padding:28px; position:relative; transform:scale(0.95) translateY(10px); transition:transform 0.25s ease; box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+            <button onclick="closeQuickView()" aria-label="Close quick view" style="position:absolute; top:12px; right:12px; width:32px; height:32px; border:none; background:#f3f4f6; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:10; transition:background 0.2s;" onmouseover="this.style.background='#e5e7eb'" onmouseout="this.style.background='#f3f4f6'">
                 <svg style="width:18px; height:18px; color:#6b7280;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
             <div id="quick-view-content">
@@ -206,16 +365,47 @@
         </div>
     </div>
     <script>
+    var qvOpener = null;
+    var qvKeyHandler = null;
+
+    function _qvFocusable(root) {
+        return Array.from(root.querySelectorAll(
+            'a[href], button:not([disabled]), input:not([disabled]):not([type=hidden]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )).filter(function (el) { return el.offsetParent !== null; });
+    }
+
     function openQuickView(url) {
         var overlay = document.getElementById('quick-view-overlay');
         var modal = document.getElementById('quick-view-modal');
         var content = document.getElementById('quick-view-content');
+        qvOpener = document.activeElement;
+
         content.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;padding:60px 0;"><svg style="width:32px;height:32px;animation:spin 1s linear infinite;" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-opacity="0.2"/><path d="M12 2a10 10 0 019.8 8" stroke-linecap="round"/></svg></div>';
         overlay.style.display = 'flex';
+        modal.setAttribute('aria-hidden', 'false');
         setTimeout(function() { overlay.style.opacity = '1'; modal.style.transform = 'scale(1) translateY(0)'; }, 10);
         var sbw = window.innerWidth - document.documentElement.clientWidth;
         if (sbw > 0) document.body.style.paddingRight = sbw + 'px';
         document.body.style.overflow = 'hidden';
+
+        // Focus the close button so keyboard users can dismiss immediately or Tab into the content
+        setTimeout(function () {
+            var closeBtn = modal.querySelector('button[aria-label="Close quick view"]');
+            if (closeBtn) closeBtn.focus();
+        }, 50);
+
+        // Tab focus trap + Esc to close
+        qvKeyHandler = function (e) {
+            if (e.key === 'Escape') { e.preventDefault(); closeQuickView(); return; }
+            if (e.key !== 'Tab') return;
+            var focusables = _qvFocusable(modal);
+            if (focusables.length === 0) return;
+            var first = focusables[0], last = focusables[focusables.length - 1];
+            if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+            else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+        };
+        document.addEventListener('keydown', qvKeyHandler);
+
         fetch(url)
             .then(function(res) { return res.text(); })
             .then(function(html) { content.innerHTML = html; })
@@ -224,19 +414,28 @@
     function closeQuickView() {
         var overlay = document.getElementById('quick-view-overlay');
         var modal = document.getElementById('quick-view-modal');
+        if (!overlay || overlay.style.display === 'none') return;
+
         overlay.style.opacity = '0';
         modal.style.transform = 'scale(0.95) translateY(10px)';
+        modal.setAttribute('aria-hidden', 'true');
+
+        if (qvKeyHandler) { document.removeEventListener('keydown', qvKeyHandler); qvKeyHandler = null; }
+
         setTimeout(function() {
             overlay.style.display = 'none';
             document.body.style.overflow = '';
             document.body.style.paddingRight = '';
+            if (qvOpener && typeof qvOpener.focus === 'function') {
+                try { qvOpener.focus(); } catch (e) { /* element gone */ }
+            }
+            qvOpener = null;
         }, 250);
     }
-    document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeQuickView(); });
     </script>
 
     <!-- Toast Notification Container -->
-    <div id="toast-container" style="position:fixed; top:24px; right:24px; z-index:200; display:flex; flex-direction:column; gap:10px; pointer-events:none;"></div>
+    <div id="toast-container" role="status" aria-live="polite" aria-atomic="true" style="position:fixed; top:24px; right:24px; z-index:200; display:flex; flex-direction:column; gap:10px; pointer-events:none;"></div>
     <script>
     function showToast(message, type) {
         type = type || 'success';
@@ -330,51 +529,117 @@
         function getScrollbarWidth() {
             return window.innerWidth - document.documentElement.clientWidth;
         }
+
+        // Track which element opened the drawer so we can return focus there on close.
+        // Without focus restoration, keyboard users get "lost" in the page after closing.
+        var cartOpener = null;
+        var cartKeyHandler = null;
+
+        function focusableIn(root) {
+            return Array.from(root.querySelectorAll(
+                'a[href], button:not([disabled]), input:not([disabled]):not([type=hidden]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+            )).filter(function (el) { return el.offsetParent !== null; });
+        }
+
         window.cartOpen = function () {
             var overlay = document.getElementById('cart-overlay');
             var sidebar = document.getElementById('cart-sidebar');
+            cartOpener = document.activeElement;
+
             overlay.style.display = 'block';
+            sidebar.setAttribute('aria-hidden', 'false');
             // Compensate for the disappearing scrollbar so layout stays steady
             var sbw = getScrollbarWidth();
             if (sbw > 0) document.body.style.paddingRight = sbw + 'px';
             document.body.style.overflow = 'hidden';
+
             setTimeout(function () { overlay.style.opacity = '1'; sidebar.style.transform = 'translateX(0)'; }, 10);
+
+            // Move focus into the drawer so screen readers and keyboard users land inside the dialog
+            setTimeout(function () {
+                var first = focusableIn(sidebar)[0];
+                if (first) first.focus();
+            }, 50);
+
+            // Esc to close + Tab focus trap
+            cartKeyHandler = function (e) {
+                if (e.key === 'Escape') { e.preventDefault(); window.cartClose(); return; }
+                if (e.key !== 'Tab') return;
+                var focusables = focusableIn(sidebar);
+                if (focusables.length === 0) return;
+                var first = focusables[0];
+                var last  = focusables[focusables.length - 1];
+                if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+                else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+            };
+            document.addEventListener('keydown', cartKeyHandler);
         };
         window.cartClose = function () {
             var overlay = document.getElementById('cart-overlay');
             var sidebar = document.getElementById('cart-sidebar');
             overlay.style.opacity = '0';
             sidebar.style.transform = 'translateX(100%)';
+            sidebar.setAttribute('aria-hidden', 'true');
+
+            if (cartKeyHandler) { document.removeEventListener('keydown', cartKeyHandler); cartKeyHandler = null; }
+
             setTimeout(function () {
                 overlay.style.display = 'none';
                 document.body.style.overflow = '';
                 document.body.style.paddingRight = '';
+                // Return focus to whatever opened the drawer (the cart icon, the float button, etc.)
+                if (cartOpener && typeof cartOpener.focus === 'function') {
+                    try { cartOpener.focus(); } catch (e) { /* element may have been removed */ }
+                }
+                cartOpener = null;
             }, 350);
         };
 
         /* ── render cart items ── */
+        // Global money formatter — keep in sync with App\Support\Money::format()
+        // Default: no decimals (matches the @@bdt Blade directive). Pass 2 for full precision invoices.
+        if (typeof window.dsBdt !== 'function') {
+            window.dsBdt = function (amount, decimals) {
+                var num = parseFloat(amount);
+                if (isNaN(num)) return '0৳';
+                var d = (decimals == null) ? 0 : Number(decimals);
+                return num.toLocaleString('en-US', {
+                    minimumFractionDigits: d,
+                    maximumFractionDigits: d,
+                }) + '৳';
+            };
+        }
         function fmtBdt(n) {
+            // Existing helper — keep returning the unit-less number (callsites add '৳' themselves)
             var num = parseFloat(n);
-            if (isNaN(num)) return '0.00';
-            return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            if (isNaN(num)) return '0';
+            return num.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
         }
 
         function renderCart(data) {
             var items   = data.items || [];
-            var total   = data.total || '0.00';
+            var total   = data.total || 0;
             var count   = data.itemCount || 0;
+            var totalFmt = window.dsBdt(total);
 
             // floating button
             var floatLabel = document.getElementById('cart-float-label');
             var floatTotal = document.getElementById('cart-float-total');
             if (floatLabel) floatLabel.textContent = count + (count === 1 ? ' Item' : ' Items');
-            if (floatTotal) floatTotal.textContent = total + '৳';
+            if (floatTotal) floatTotal.textContent = totalFmt;
 
-            // header badge — show item count with label
+            // Two distinct badges:
+            //   - cart-header-badge   : small circular badge on the header cart icon (just a number)
+            //   - cart-drawer-badge   : pill next to "Your Cart" inside the drawer ("X items")
             var hdrBadge = document.getElementById('cart-header-badge');
             if (hdrBadge) {
-                hdrBadge.textContent = count + (count === 1 ? ' item' : ' items');
-                hdrBadge.style.display = count > 0 ? 'inline-block' : 'none';
+                hdrBadge.textContent = count;
+                hdrBadge.style.display = count > 0 ? 'flex' : 'none';
+            }
+            var drawerBadge = document.getElementById('cart-drawer-badge');
+            if (drawerBadge) {
+                drawerBadge.textContent = count + (count === 1 ? ' item' : ' items');
+                drawerBadge.style.display = count > 0 ? 'inline-block' : 'none';
             }
 
             var container = document.getElementById('cart-items');
@@ -406,15 +671,15 @@
 
             footer.style.display = 'block';
             var sidebarTotal = document.getElementById('cart-sidebar-total');
-            if (sidebarTotal) sidebarTotal.textContent = total + '৳';
+            if (sidebarTotal) sidebarTotal.textContent = totalFmt;
 
             container.innerHTML = items.map(function (item) {
                 var img = item.image
-                    ? '<img src="' + item.image + '" alt="' + esc(item.name) + '" style="width:72px; height:72px; object-fit:cover; border-radius:10px; background:#f8fafc; flex-shrink:0;">'
+                    ? '<img src="' + item.image + '" alt="' + esc(item.name) + '" loading="lazy" decoding="async" width="72" height="72" style="width:72px; height:72px; object-fit:cover; border-radius:10px; background:#f8fafc; flex-shrink:0;">'
                     : '<span style="width:72px; height:72px; border-radius:10px; background:#f1f5f9; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><svg style="width:28px; height:28px; color:#cbd5e1;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></span>';
 
-                var lineTotal = fmtBdt(parseFloat(item.price) * item.qty);
-                var unitPrice = fmtBdt(item.price);
+                var lineTotal = window.dsBdt(parseFloat(item.price) * item.qty);
+                var unitPrice = window.dsBdt(item.price);
 
                 return '<div class="cart-item-row" style="display:flex; gap:12px; padding:14px 20px; border-bottom:1px solid #f1f5f9; align-items:flex-start;">'
                     + img
@@ -425,14 +690,14 @@
                     +       '<svg style="width:14px; height:14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>'
                     +     '</button>'
                     +   '</div>'
-                    +   '<div style="font-size:0.72rem; color:#64748b;">' + unitPrice + '৳ each</div>'
+                    +   '<div style="font-size:0.72rem; color:#64748b;">' + unitPrice + ' each</div>'
                     +   '<div style="display:flex; align-items:center; justify-content:space-between; margin-top:2px;">'
                     +     '<div style="display:inline-flex; align-items:center; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; overflow:hidden;">'
-                    +       '<button onclick="cartUpdateQty(\'' + item.id + '\',' + (item.qty - 1) + ')" aria-label="Decrease" style="width:28px; height:28px; background:none; border:none; cursor:pointer; font-size:0.95rem; color:#475569; display:flex; align-items:center; justify-content:center; transition:background 0.15s;" onmouseover="this.style.background=\'#e2e8f0\'" onmouseout="this.style.background=\'transparent\'">−</button>'
-                    +       '<span style="width:32px; text-align:center; font-size:0.78rem; font-weight:700; color:#0f172a;">' + item.qty + '</span>'
-                    +       '<button onclick="cartUpdateQty(\'' + item.id + '\',' + (item.qty + 1) + ')" aria-label="Increase" style="width:28px; height:28px; background:none; border:none; cursor:pointer; font-size:0.95rem; color:#475569; display:flex; align-items:center; justify-content:center; transition:background 0.15s;" onmouseover="this.style.background=\'#e2e8f0\'" onmouseout="this.style.background=\'transparent\'">+</button>'
+                    +       '<button onclick="cartUpdateQty(\'' + item.id + '\',' + (item.qty - 1) + ')" aria-label="Decrease" style="width:36px; height:36px; background:none; border:none; cursor:pointer; font-size:1rem; color:#475569; display:flex; align-items:center; justify-content:center; transition:background 0.15s;" onmouseover="this.style.background=\'#e2e8f0\'" onmouseout="this.style.background=\'transparent\'">−</button>'
+                    +       '<span style="width:36px; text-align:center; font-size:0.82rem; font-weight:700; color:#0f172a;">' + item.qty + '</span>'
+                    +       '<button onclick="cartUpdateQty(\'' + item.id + '\',' + (item.qty + 1) + ')" aria-label="Increase" style="width:36px; height:36px; background:none; border:none; cursor:pointer; font-size:1rem; color:#475569; display:flex; align-items:center; justify-content:center; transition:background 0.15s;" onmouseover="this.style.background=\'#e2e8f0\'" onmouseout="this.style.background=\'transparent\'">+</button>'
                     +     '</div>'
-                    +     '<span style="font-size:0.92rem; font-weight:700; color:#0f172a; letter-spacing:-0.01em;">' + lineTotal + '৳</span>'
+                    +     '<span style="font-size:0.92rem; font-weight:700; color:#0f172a; letter-spacing:-0.01em;">' + lineTotal + '</span>'
                     +   '</div>'
                     + '</div>'
                     + '</div>';
@@ -497,6 +762,8 @@
         function shakeCartFloat() {
             var el = document.getElementById('cart-float');
             if (!el) return;
+            // Skip the playful shake for users who prefer reduced motion
+            if (window.dsReducedMotion && window.dsReducedMotion()) return;
             el.style.animation = 'none';
             // force reflow
             void el.offsetWidth;
@@ -543,14 +810,14 @@
             // Render ALL cards; carousel slides via CSS transform
             track.innerHTML = sugg_products.map(function (p) {
                 var img = p.image
-                    ? '<img src="' + p.image + '" alt="' + esc(p.name) + '" style="width:62px; height:62px; object-fit:cover; border-radius:8px; flex-shrink:0; background:#f8fafc;">'
+                    ? '<img src="' + p.image + '" alt="' + esc(p.name) + '" loading="lazy" decoding="async" width="62" height="62" style="width:62px; height:62px; object-fit:cover; border-radius:8px; flex-shrink:0; background:#f8fafc;">'
                     : '<span style="width:62px; height:62px; border-radius:8px; background:#f1f5f9; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><svg style="width:22px; height:22px; color:#cbd5e1;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></span>';
 
                 var priceHtml = '';
                 if (p.compare_price) {
-                    priceHtml += '<span style="font-size:0.66rem; color:#94a3b8; text-decoration:line-through; margin-right:5px;">' + p.compare_price + '৳</span>';
+                    priceHtml += '<span style="font-size:0.66rem; color:#94a3b8; text-decoration:line-through; margin-right:5px;">' + window.dsBdt(p.compare_price) + '</span>';
                 }
-                priceHtml += '<span style="font-size:0.78rem; color:#f97316; font-weight:800;">' + p.price + '৳</span>';
+                priceHtml += '<span style="font-size:0.78rem; color:#f97316; font-weight:800;">' + window.dsBdt(p.price) + '</span>';
 
                 return '<div style="min-width:' + SUGG_CARD_W + 'px; max-width:' + SUGG_CARD_W + 'px; background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:10px; display:flex; gap:10px; align-items:flex-start; box-shadow:0 1px 2px rgba(0,0,0,0.04); transition:all 0.2s;" onmouseover="this.style.borderColor=\'#fed7aa\';this.style.boxShadow=\'0 2px 8px rgba(249,115,22,0.08)\'" onmouseout="this.style.borderColor=\'#e2e8f0\';this.style.boxShadow=\'0 1px 2px rgba(0,0,0,0.04)\'">'
                     + img
@@ -610,6 +877,108 @@
 
     @stack('scripts')
 
+    {{-- ─── PWA: install prompt banner ─── --}}
+    <div id="pwa-install" role="dialog" aria-labelledby="pwa-install-title" aria-hidden="true" style="display:none; position:fixed; left:16px; right:16px; bottom:16px; z-index:9000; max-width:420px; margin:0 auto; background:#0f172a; color:#fff; border-radius:14px; padding:14px 16px; box-shadow:0 12px 32px rgba(15,23,42,0.3); border:1px solid rgba(255,255,255,0.06);">
+        <div style="display:flex; align-items:center; gap:12px;">
+            <div style="flex-shrink:0; width:40px; height:40px; border-radius:10px; background:rgba(249,115,22,0.15); border:1px solid rgba(249,115,22,0.4); display:flex; align-items:center; justify-content:center; color:#f97316;">
+                <svg style="width:18px; height:18px;" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+            </div>
+            <div style="flex:1; min-width:0;">
+                <p id="pwa-install-title" style="margin:0; font-size:0.88rem; font-weight:700;">Install app</p>
+                <p style="margin:2px 0 0; font-size:0.78rem; color:#94a3b8;">Faster access, works offline, no app store.</p>
+            </div>
+            <button id="pwa-install-btn" type="button" style="flex-shrink:0; padding:9px 16px; background:#f97316; color:#fff; font-size:0.78rem; font-weight:800; letter-spacing:0.06em; text-transform:uppercase; border:none; border-radius:8px; cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='#ea6c0a'" onmouseout="this.style.background='#f97316'">Install</button>
+            <button id="pwa-install-dismiss" type="button" aria-label="Dismiss install prompt" style="flex-shrink:0; width:30px; height:30px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); border-radius:8px; cursor:pointer; color:#cbd5e1; display:flex; align-items:center; justify-content:center; transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.12)'; this.style.color='#fff'" onmouseout="this.style.background='rgba(255,255,255,0.06)'; this.style.color='#cbd5e1'">
+                <svg style="width:14px; height:14px;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+    /* ── PWA registration + install prompt ────────────────────────────
+       Service worker caches HTML and static assets so subsequent visits
+       are near-instant and a basic offline experience works. The install
+       banner appears once `beforeinstallprompt` fires (Chrome/Edge/Android),
+       and is hidden after install or 7-day dismissal cookie.
+    */
+    (function () {
+        // Register the SW after page load so it never competes with first paint
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('{{ asset('sw.js') }}?v={{ filemtime(public_path('sw.js')) }}', {
+                    scope: '{{ url('/') }}/'
+                }).catch(function () { /* SW failed — silent: user gets normal site */ });
+            });
+        }
+
+        // ── Install prompt orchestration ──
+        var deferredPrompt = null;
+        var banner   = document.getElementById('pwa-install');
+        var btnInstall = document.getElementById('pwa-install-btn');
+        var btnDismiss = document.getElementById('pwa-install-dismiss');
+        var DISMISS_KEY = 'ds_pwa_dismissed_until';
+        var INSTALLED_KEY = 'ds_pwa_installed';
+
+        function dismissedRecently() {
+            try {
+                var until = parseInt(localStorage.getItem(DISMISS_KEY) || '0', 10);
+                return until > Date.now();
+            } catch (e) { return false; }
+        }
+
+        function alreadyInstalled() {
+            // Already running as PWA?
+            if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) return true;
+            if (window.navigator.standalone) return true;
+            try { return localStorage.getItem(INSTALLED_KEY) === '1'; } catch (e) { return false; }
+        }
+
+        function showBanner() {
+            if (!banner) return;
+            banner.style.display = 'block';
+            banner.setAttribute('aria-hidden', 'false');
+        }
+        function hideBanner() {
+            if (!banner) return;
+            banner.style.display = 'none';
+            banner.setAttribute('aria-hidden', 'true');
+        }
+
+        if (alreadyInstalled() || dismissedRecently()) hideBanner();
+
+        window.addEventListener('beforeinstallprompt', function (e) {
+            e.preventDefault();
+            deferredPrompt = e;
+            if (alreadyInstalled() || dismissedRecently()) return;
+            // Slight delay so it doesn't crash into the page on first paint
+            setTimeout(showBanner, 2500);
+        });
+
+        if (btnInstall) btnInstall.addEventListener('click', function () {
+            if (!deferredPrompt) { hideBanner(); return; }
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then(function (choice) {
+                if (choice.outcome === 'accepted') {
+                    try { localStorage.setItem(INSTALLED_KEY, '1'); } catch (e) {}
+                }
+                deferredPrompt = null;
+                hideBanner();
+            });
+        });
+
+        if (btnDismiss) btnDismiss.addEventListener('click', function () {
+            try { localStorage.setItem(DISMISS_KEY, String(Date.now() + 7 * 24 * 60 * 60 * 1000)); } catch (e) {}
+            hideBanner();
+        });
+
+        window.addEventListener('appinstalled', function () {
+            try { localStorage.setItem(INSTALLED_KEY, '1'); } catch (e) {}
+            deferredPrompt = null;
+            hideBanner();
+        });
+    })();
+    </script>
+
     <script>
     // Homepage section carousel helpers
     function hsCarouselNav(id, dir) {
@@ -653,6 +1022,97 @@
         });
     }
     document.addEventListener('DOMContentLoaded', hsCarouselInit);
+
+    /* ── Auto-scroll for any element with data-autoscroll ──────────────────
+       Continuously scrolls horizontally at the given speed (px per frame,
+       defaults to 0.5). Pauses on hover, touch, drag, or keyboard focus
+       inside the strip. Loops back to the start when reaching the end.
+
+       When the strip's content already fits within its viewport (no overflow),
+       we clone its children one or two times so there's something to scroll —
+       otherwise auto-scroll silently does nothing on small lists. Cloned items
+       are marked aria-hidden + tabindex=-1 so they don't pollute keyboard nav
+       or screen reader output.
+
+       Skipped entirely when prefers-reduced-motion is on.
+    */
+    document.addEventListener('DOMContentLoaded', function () {
+        if (window.dsReducedMotion && window.dsReducedMotion()) return;
+
+        function fillForScroll(el) {
+            // Only clone when there's content but it doesn't overflow the strip
+            if (!el.children.length) return;
+            // Bail early if the strip is already scrollable
+            if (el.scrollWidth - el.clientWidth > 1) return;
+
+            var originals = Array.from(el.children);
+            var safety = 0;
+            while (el.scrollWidth - el.clientWidth < el.clientWidth && safety < 6) {
+                originals.forEach(function (child) {
+                    var clone = child.cloneNode(true);
+                    clone.setAttribute('aria-hidden', 'true');
+                    clone.dataset.autoscrollClone = '1';
+                    clone.querySelectorAll('a, button, input, select, textarea').forEach(function (n) { n.tabIndex = -1; });
+                    el.appendChild(clone);
+                });
+                safety++;
+            }
+        }
+
+        document.querySelectorAll('[data-autoscroll]').forEach(function (el) {
+            var speed = parseFloat(el.dataset.autoscroll) || 0.5;
+            var paused = false;
+            var visible = true;
+            var raf;
+
+            // scroll-snap fights smooth incremental scrolling — disable it on auto-scroll strips
+            el.style.scrollSnapType = 'none';
+
+            // Make sure there's enough content to scroll. Re-run on resize since
+            // clientWidth changes with breakpoints.
+            fillForScroll(el);
+            window.addEventListener('resize', function () {
+                // Strip clones first, then re-fill so cloning math stays correct
+                Array.from(el.querySelectorAll('[data-autoscroll-clone]')).forEach(function (c) { c.remove(); });
+                el.scrollLeft = 0;
+                fillForScroll(el);
+            }, { passive: true });
+
+            function pause()  { paused = true;  }
+            function resume() { paused = false; }
+
+            // Pause when the user is interacting
+            el.addEventListener('mouseenter', pause);
+            el.addEventListener('mouseleave', resume);
+            el.addEventListener('focusin',    pause);
+            el.addEventListener('focusout',   resume);
+            el.addEventListener('touchstart', pause, { passive: true });
+            el.addEventListener('touchend',   resume, { passive: true });
+            el.addEventListener('mousedown',  pause);
+            document.addEventListener('mouseup', resume);
+
+            // Pause when the strip is off-screen (saves CPU)
+            if ('IntersectionObserver' in window) {
+                var io = new IntersectionObserver(function (entries) {
+                    visible = entries[0].isIntersecting;
+                }, { threshold: 0 });
+                io.observe(el);
+            }
+
+            function tick() {
+                if (visible && !paused) {
+                    var max = el.scrollWidth - el.clientWidth;
+                    if (max > 1) {
+                        el.scrollLeft += speed;
+                        // Loop back to the start when reaching the end
+                        if (el.scrollLeft >= max - 1) el.scrollLeft = 0;
+                    }
+                }
+                raf = requestAnimationFrame(tick);
+            }
+            raf = requestAnimationFrame(tick);
+        });
+    });
 
     // Typewriter placeholder effect
     (function() {

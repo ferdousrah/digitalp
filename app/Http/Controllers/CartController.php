@@ -20,7 +20,7 @@ class CartController extends Controller
         return response()->json([
             'items'      => array_values(CartService::get()),
             'itemCount'  => CartService::itemCount(),
-            'total'      => number_format(CartService::total(), 2),
+            'total'      => (float) CartService::total(),
         ]);
     }
 
@@ -32,7 +32,7 @@ class CartController extends Controller
         return response()->json([
             'message'   => $product->name . ' added to cart.',
             'itemCount' => CartService::itemCount(),
-            'total'     => number_format(CartService::total(), 2),
+            'total'     => (float) CartService::total(),
             'items'     => array_values(CartService::get()),
         ]);
     }
@@ -44,7 +44,7 @@ class CartController extends Controller
 
         return response()->json([
             'itemCount' => CartService::itemCount(),
-            'total'     => number_format(CartService::total(), 2),
+            'total'     => (float) CartService::total(),
             'items'     => array_values(CartService::get()),
         ]);
     }
@@ -55,7 +55,7 @@ class CartController extends Controller
 
         return response()->json([
             'itemCount' => CartService::itemCount(),
-            'total'     => number_format(CartService::total(), 2),
+            'total'     => (float) CartService::total(),
             'items'     => array_values(CartService::get()),
         ]);
     }
@@ -82,8 +82,8 @@ class CartController extends Controller
                 return [
                     'id'            => $p->id,
                     'name'          => $p->name,
-                    'price'         => number_format((float) $p->price, 2),
-                    'compare_price' => $p->compare_price ? number_format((float) $p->compare_price, 2) : null,
+                    'price'         => (float) $p->price,
+                    'compare_price' => $p->compare_price ? (float) $p->compare_price : null,
                     'image'         => $p->getFirstMediaUrl('product_images', 'thumb') ?: $p->getFirstMediaUrl('product_images') ?: null,
                     'url'           => route('products.show', $p->slug),
                 ];

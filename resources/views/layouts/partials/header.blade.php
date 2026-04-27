@@ -1,4 +1,5 @@
-<div x-data="{ mobileMenuOpen: false, megaOpen: false, megaTimer: null, mobileProductsOpen: false }">
+<div x-data="{ mobileMenuOpen: false, megaOpen: false, megaTimer: null, mobileProductsOpen: false }"
+     @keydown.escape.window="if (mobileMenuOpen) { mobileMenuOpen = false; } if (megaOpen) { megaOpen = false; }">
 <header id="site-header" class="bg-white sticky top-0 z-40" style="transition: top 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
 
     <!-- Announcement bar -->
@@ -42,7 +43,7 @@
             <a href="{{ route('home') }}" style="flex-shrink:0; display:flex; align-items:center; text-decoration:none;">
                 @php $siteLogo = \App\Services\SettingService::get('site_logo'); @endphp
                 @if($siteLogo)
-                    <img id="header-logo" src="{{ Storage::disk('public')->url($siteLogo) }}" alt="{{ config('app.name') }}" style="height:52px; width:auto; transition:height 0.3s ease;">
+                    <img id="header-logo" src="{{ Storage::disk('public')->url($siteLogo) }}" alt="{{ config('app.name') }}" decoding="async" fetchpriority="high" style="height:52px; width:auto; transition:height 0.3s ease;">
                 @else
                     <div id="header-logo" style="display:flex; flex-direction:column; line-height:1.1; transition:all 0.3s ease;">
                         <span style="font-size:1.2rem; font-weight:800; color:#16a34a; letter-spacing:-0.01em;">Digital</span>
@@ -61,7 +62,7 @@
                         onfocus="this.style.borderColor='#16a34a'; this.style.boxShadow='0 0 0 3px rgba(22,163,74,0.12)';"
                         onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none';"
                         autocomplete="off">
-                    <button type="submit" style="position:absolute; right:0; top:0; bottom:0; width:52px; display:flex; align-items:center; justify-content:center; background:transparent; border:none; cursor:pointer; color:#9ca3af; transition:color 0.2s;" onmouseover="this.style.color='#16a34a'" onmouseout="this.style.color='#9ca3af'">
+                    <button type="submit" aria-label="Search" style="position:absolute; right:0; top:0; bottom:0; width:52px; display:flex; align-items:center; justify-content:center; background:transparent; border:none; cursor:pointer; color:#9ca3af; transition:color 0.2s;" onmouseover="this.style.color='#16a34a'" onmouseout="this.style.color='#9ca3af'">
                         <i class="fi fi-rr-search" style="font-size:18px; line-height:1;"></i>
                     </button>
                     <div data-search-results class="hidden" style="position:absolute; top:calc(100% + 6px); left:0; right:0; background:#fff; border:1px solid #e5e7eb; border-radius:16px; box-shadow:0 8px 32px rgba(0,0,0,0.12); z-index:100; max-height:280px; overflow-y:auto;"></div>
@@ -160,6 +161,8 @@
 
     <!-- Sidebar panel -->
     <div x-show="mobileMenuOpen"
+        role="dialog" aria-modal="true" aria-label="Mobile navigation menu"
+        :aria-hidden="!mobileMenuOpen"
         x-transition:enter="transition ease-out duration-300" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0"
         x-transition:leave="transition ease-in duration-200" x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full"
         style="position:absolute; top:0; left:0; bottom:0; width:320px; max-width:85vw; background:#fff; box-shadow:4px 0 24px rgba(0,0,0,0.15); display:flex; flex-direction:column;">
@@ -168,13 +171,13 @@
         <div style="display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid #e5e7eb;">
             <a href="{{ route('home') }}" style="display:flex; align-items:center; gap:6px; text-decoration:none;">
                 @if($siteLogo ?? false)
-                    <img src="{{ Storage::disk('public')->url($siteLogo) }}" alt="{{ config('app.name') }}" style="height:36px; width:auto;">
+                    <img src="{{ Storage::disk('public')->url($siteLogo) }}" alt="{{ config('app.name') }}" decoding="async" style="height:36px; width:auto;">
                 @else
                     <span style="font-weight:800; font-size:1.1rem; color:#16a34a;">Digital</span>
                     <span style="font-weight:800; font-size:1.1rem; color:#ef4444;">Support</span>
                 @endif
             </a>
-            <button @click="mobileMenuOpen = false" style="width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%; background:#f3f4f6; border:none; cursor:pointer; color:#374151; transition:background 0.2s;" onmouseover="this.style.background='#e5e7eb'" onmouseout="this.style.background='#f3f4f6'">
+            <button @click="mobileMenuOpen = false" aria-label="Close menu" style="width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%; background:#f3f4f6; border:none; cursor:pointer; color:#374151; transition:background 0.2s;" onmouseover="this.style.background='#e5e7eb'" onmouseout="this.style.background='#f3f4f6'">
                 <svg style="width:20px; height:20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>
@@ -194,7 +197,7 @@
                             <svg style="width:20px; height:20px; color:{{ request()->routeIs('products.*') || request()->routeIs('categories.*') ? '#16a34a' : '#9ca3af' }};" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
                             Products
                         </a>
-                        <button @click="open = !open" style="width:36px; height:36px; display:flex; align-items:center; justify-content:center; border:none; background:transparent; cursor:pointer; color:#6b7280;">
+                        <button @click="open = !open" aria-label="Toggle category" :aria-expanded="open" style="width:36px; height:36px; display:flex; align-items:center; justify-content:center; border:none; background:transparent; cursor:pointer; color:#6b7280;">
                             <svg style="width:18px; height:18px; transition:transform 0.3s;" :style="open && 'transform:rotate(180deg)'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                         </button>
                     </div>
@@ -206,7 +209,7 @@
                                     <div style="display:flex; align-items:center;">
                                         <a href="{{ route('categories.show', $megaCat) }}" style="flex:1; display:flex; align-items:center; gap:10px; padding:8px 0; text-decoration:none; color:#374151; font-size:0.9625rem; font-weight:500;">
                                             @if($megaCat->getFirstMediaUrl('category_image'))
-                                                <img src="{{ $megaCat->getFirstMediaUrl('category_image') }}" alt="" style="width:28px; height:28px; border-radius:6px; object-fit:cover; border:1px solid #e5e7eb;">
+                                                <img src="{{ $megaCat->getFirstMediaUrl('category_image') }}" alt="" loading="lazy" decoding="async" width="28" height="28" style="width:28px; height:28px; border-radius:6px; object-fit:cover; border:1px solid #e5e7eb;">
                                             @else
                                                 <span style="width:28px; height:28px; border-radius:6px; background:#f0fdf4; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
                                                     <svg style="width:14px; height:14px; color:#16a34a;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
@@ -228,7 +231,7 @@
                                 @else
                                     <a href="{{ route('categories.show', $megaCat) }}" style="display:flex; align-items:center; gap:10px; padding:8px 0; text-decoration:none; color:#374151; font-size:0.9625rem; font-weight:500;">
                                         @if($megaCat->getFirstMediaUrl('category_image'))
-                                            <img src="{{ $megaCat->getFirstMediaUrl('category_image') }}" alt="" style="width:28px; height:28px; border-radius:6px; object-fit:cover; border:1px solid #e5e7eb;">
+                                            <img src="{{ $megaCat->getFirstMediaUrl('category_image') }}" alt="" loading="lazy" decoding="async" width="28" height="28" style="width:28px; height:28px; border-radius:6px; object-fit:cover; border:1px solid #e5e7eb;">
                                         @else
                                             <span style="width:28px; height:28px; border-radius:6px; background:#f0fdf4; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
                                                 <svg style="width:14px; height:14px; color:#16a34a;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
@@ -310,7 +313,7 @@
 <!-- Dark category nav bar — outside x-data wrapper so position:sticky works relative to body -->
 <div id="cat-bar" class="hidden lg:block" style="background:#0d1f2d; position:sticky; top:0; z-index:39; box-shadow:0 2px 8px rgba(0,0,0,0.2); transform:translateY(0); transition:box-shadow 0.3s ease, transform 0.3s ease;">
     <div class="container-custom px-4 sm:px-6 lg:px-8 flex items-center justify-between" style="height:54px;">
-        <nav style="display:flex; align-items:center; overflow:visible;">
+        <nav aria-label="Primary navigation" style="display:flex; align-items:center; overflow:visible;">
             @foreach($menuItems ?? [] as $item)
                 @if($item->type === 'category' && $item->category)
                     @php $cat = $item->category; $children = $cat->children ?? collect(); @endphp
