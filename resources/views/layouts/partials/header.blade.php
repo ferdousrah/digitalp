@@ -6,7 +6,7 @@
     @if(\App\Services\SettingService::get('top_bar_enabled', '1') == '1')
     <div id="top-bar" style="background:#16a34a; color:#fff; font-size:0.8125rem;">
         <div class="container-custom flex justify-between items-center px-4 sm:px-6 lg:px-8" style="height:34px;">
-            <span class="hidden sm:inline" style="opacity:0.9;">{{ sc('navbar', 'welcome', 'Welcome to Digital Support') }}</span>
+            <span class="hidden sm:inline" style="opacity:0.9;">{{ sc('navbar', 'welcome', 'Welcome to ' . \App\Services\SettingService::get('site_name', config('app.name'))) }}</span>
             <div class="flex items-center gap-5 ml-auto">
                 <a href="{{ route('contact.index') }}" style="color:rgba(255,255,255,0.85); text-decoration:none; transition:color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.85)'">{{ sc('navbar', 'contact', 'Contact') }}</a>
                 <a href="{{ route('faq.index') }}" style="color:rgba(255,255,255,0.85); text-decoration:none; transition:color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.85)'">{{ sc('navbar', 'faq', 'FAQ') }}</a>
@@ -40,14 +40,22 @@
         <div class="container-custom flex items-center gap-4 px-4 sm:px-6 lg:px-8" style="height:92px; padding-top:10px; padding-bottom:10px; transition:height 0.3s ease;">
 
             <!-- Logo -->
-            <a href="{{ route('home') }}" style="flex-shrink:0; display:flex; align-items:center; text-decoration:none;">
-                @php $siteLogo = \App\Services\SettingService::get('site_logo'); @endphp
+            @php
+                $siteLogo = \App\Services\SettingService::get('site_logo');
+                $siteName = \App\Services\SettingService::get('site_name', config('app.name'));
+                // Split site_name on first space — first word in primary, rest in accent.
+                // For one-word names ("Qloraa"), only the primary span renders.
+                $nameParts = preg_split('/\s+/', trim($siteName), 2);
+            @endphp
+            <a href="{{ route('home') }}" aria-label="{{ $siteName }}" style="flex-shrink:0; display:flex; align-items:center; text-decoration:none;">
                 @if($siteLogo)
-                    <img id="header-logo" src="{{ Storage::disk('public')->url($siteLogo) }}" alt="{{ config('app.name') }}" decoding="async" fetchpriority="high" style="height:52px; width:auto; transition:height 0.3s ease;">
+                    <img id="header-logo" src="{{ Storage::disk('public')->url($siteLogo) }}" alt="{{ $siteName }}" decoding="async" fetchpriority="high" style="height:52px; width:auto; transition:height 0.3s ease;">
                 @else
                     <div id="header-logo" style="display:flex; flex-direction:column; line-height:1.1; transition:all 0.3s ease;">
-                        <span style="font-size:1.2rem; font-weight:800; color:#16a34a; letter-spacing:-0.01em;">Digital</span>
-                        <span style="font-size:1.2rem; font-weight:800; color:#ef4444; letter-spacing:-0.01em;">Support</span>
+                        <span style="font-size:1.2rem; font-weight:800; color:#16a34a; letter-spacing:-0.01em;">{{ $nameParts[0] }}</span>
+                        @if(!empty($nameParts[1]))
+                            <span style="font-size:1.2rem; font-weight:800; color:#ef4444; letter-spacing:-0.01em;">{{ $nameParts[1] }}</span>
+                        @endif
                     </div>
                 @endif
             </a>
@@ -169,12 +177,14 @@
 
         <!-- Sidebar Header -->
         <div style="display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid #e5e7eb;">
-            <a href="{{ route('home') }}" style="display:flex; align-items:center; gap:6px; text-decoration:none;">
+            <a href="{{ route('home') }}" aria-label="{{ $siteName }}" style="display:flex; align-items:center; gap:6px; text-decoration:none;">
                 @if($siteLogo ?? false)
-                    <img src="{{ Storage::disk('public')->url($siteLogo) }}" alt="{{ config('app.name') }}" decoding="async" style="height:36px; width:auto;">
+                    <img src="{{ Storage::disk('public')->url($siteLogo) }}" alt="{{ $siteName }}" decoding="async" style="height:36px; width:auto;">
                 @else
-                    <span style="font-weight:800; font-size:1.1rem; color:#16a34a;">Digital</span>
-                    <span style="font-weight:800; font-size:1.1rem; color:#ef4444;">Support</span>
+                    <span style="font-weight:800; font-size:1.1rem; color:#16a34a;">{{ $nameParts[0] }}</span>
+                    @if(!empty($nameParts[1]))
+                        <span style="font-weight:800; font-size:1.1rem; color:#ef4444;">{{ $nameParts[1] }}</span>
+                    @endif
                 @endif
             </a>
             <button @click="mobileMenuOpen = false" aria-label="Close menu" style="width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%; background:#f3f4f6; border:none; cursor:pointer; color:#374151; transition:background 0.2s;" onmouseover="this.style.background='#e5e7eb'" onmouseout="this.style.background='#f3f4f6'">

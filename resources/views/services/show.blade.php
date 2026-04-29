@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', $service->title . ' - Digital Support')
+@section('title', $service->title . '')
 
 @section('content')
 @include('components.breadcrumb', ['items' => [['label' => 'Services', 'url' => route('services.index')], ['label' => $service->title]]])

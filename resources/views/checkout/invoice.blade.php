@@ -73,11 +73,15 @@
 <body>
 <div class="page">
 
+    @php
+        $__invSiteName = \App\Services\SettingService::get('site_name', config('app.name'));
+        $__invTagline  = \App\Services\SettingService::get('site_tagline', \App\Services\SettingService::get('site_description', ''));
+    @endphp
     {{-- Header --}}
     <div class="header">
         <div>
-            <div class="brand-name">Digital Support</div>
-            <div class="brand-tagline">Your trusted digital partner</div>
+            <div class="brand-name">{{ $__invSiteName }}</div>
+            @if($__invTagline)<div class="brand-tagline">{{ $__invTagline }}</div>@endif
         </div>
         <div class="invoice-title">
             <h2>INVOICE</h2>
@@ -186,7 +190,7 @@
 
     {{-- Footer --}}
     <div class="footer">
-        <p>Thank you for shopping with <strong>Digital Support</strong>!</p>
+        <p>Thank you for shopping with <strong>{{ $__invSiteName }}</strong>!</p>
         <p>This is a computer-generated invoice. No signature is required.</p>
         <p>For support, please contact us with your order number: <strong>{{ $order->order_number }}</strong></p>
     </div>

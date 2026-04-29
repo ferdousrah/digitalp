@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Blog - Digital Support')
+@section('title', 'Blog')
 
 @section('content')
 @include('components.breadcrumb', ['items' => array_filter([['label' => 'Blog', 'url' => isset($blogCategory) ? route('blog.index') : null], isset($blogCategory) ? ['label' => $blogCategory->name] : null])])

@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', $blogPost->meta_title ?? $blogPost->title . ' - Digital Support Blog')
+@section('title', $blogPost->meta_title ?? $blogPost->title . ' Blog')
 @section('meta_description', $blogPost->meta_description ?? \Illuminate\Support\Str::limit(strip_tags((string) ($blogPost->excerpt ?? $blogPost->content)), 160))
 
 @php

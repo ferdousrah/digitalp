@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Page Not Found - Digital Support')
+@section('title', 'Page Not Found')
 
 @section('content')
 <div class="container-custom px-4 sm:px-6 lg:px-8 py-32 text-center">

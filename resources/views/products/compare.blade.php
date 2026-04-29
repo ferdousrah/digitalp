@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Compare Products - Digital Support')
+@section('title', 'Compare Products')
 
 @section('content')
 @include('components.breadcrumb', ['items' => [['label' => 'Products', 'url' => route('products.index')], ['label' => 'Compare']]])

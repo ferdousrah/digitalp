@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'FAQ - Digital Support')
+@section('title', 'FAQ')
 @section('meta_description', 'Frequently asked questions — products, orders, delivery, payment, and more.')
 
 @push('seo')

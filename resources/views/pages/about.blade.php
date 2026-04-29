@@ -1,12 +1,12 @@
 @extends('layouts.app')
-@section('title', $page?->meta_title ?? 'About Us - Digital Support')
+@section('title', $page?->meta_title ?? 'About Us')
 
 @section('content')
 @include('components.breadcrumb', ['items' => [['label' => 'About Us']]])
 
 <div class="container-custom px-4 sm:px-6 lg:px-8 pb-16">
     <div class="max-w-3xl mx-auto mb-16">
-        <h1 class="text-3xl md:text-4xl font-display mb-6 text-center">About Digital Support</h1>
+        <h1 class="text-3xl md:text-4xl font-display mb-6 text-center">About {{ \App\Services\SettingService::get('site_name', config('app.name')) }}</h1>
         @if($page?->content)<div class="prose prose-lg max-w-none">{!! $page->content !!}</div>@endif
     </div>
 

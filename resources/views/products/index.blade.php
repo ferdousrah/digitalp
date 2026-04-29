@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Products - Digital Support')
+@section('title', 'Products')
 
 @section('content')
 @include('components.breadcrumb', ['items' => [['label' => 'Products']]])

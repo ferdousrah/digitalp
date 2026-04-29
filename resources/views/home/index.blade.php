@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Digital Support - Your Digital Products Partner')
+@section('title', \App\Services\SettingService::get('meta_title', \App\Services\SettingService::get('site_name', config('app.name'))))
 
 {{-- Preload the first hero slide image — usually the page's LCP element, worth prioritising --}}
 @php $__heroImg = optional($sliders->first())->getFirstMediaUrl('slide_image'); @endphp
@@ -98,7 +98,7 @@
                 {{-- Fallback when no sliders configured --}}
                 <div style="width:100%; height:100%; background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460); display:flex; align-items:center; padding:40px;">
                     <div style="max-width:480px;">
-                        <h2 style="font-size:2rem; font-weight:700; color:#fff; margin:0 0 12px;">Welcome to Digital Support</h2>
+                        <h2 style="font-size:2rem; font-weight:700; color:#fff; margin:0 0 12px;">Welcome to {{ \App\Services\SettingService::get('site_name', config('app.name')) }}</h2>
                         <p style="color:rgba(255,255,255,0.8); margin:0 0 20px;">Your one-stop shop for laptops, printers &amp; accessories.</p>
                         <a href="{{ route('products.index') }}" style="display:inline-block; background:#16a34a; color:#fff; font-weight:600; padding:10px 24px; border-radius:6px; text-decoration:none;">Shop Now</a>
                     </div>

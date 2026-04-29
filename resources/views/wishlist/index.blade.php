@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'My Wishlist - Digital Support')
+@section('title', 'My Wishlist')
 
 @section('content')
 @include('components.breadcrumb', ['items' => [['label' => 'Wishlist']]])

@@ -131,8 +131,8 @@
     <div class="container-custom" style="padding:96px 16px 48px;">
         <div class="ds-news-grid">
             <div>
-                <h3 style="font-size:1.5rem; font-weight:800; color:#fff; margin:0 0 6px; letter-spacing:-0.01em;">Subscribe to our newsletter</h3>
-                <p style="font-size:0.88rem; color:#737373; margin:0;">Tech deals, new arrivals, and exclusive offers. Straight to your inbox. No spam.</p>
+                <h3 style="font-size:1.5rem; font-weight:800; color:#fff; margin:0 0 6px; letter-spacing:-0.01em;">{{ sc('footer', 'newsletter_title', 'Subscribe to our newsletter') }}</h3>
+                <p style="font-size:0.88rem; color:#737373; margin:0;">{{ sc('footer', 'newsletter_subtitle', 'Stay in the loop. New arrivals and exclusive offers, straight to your inbox. No spam.') }}</p>
             </div>
             <div class="ds-news-wrap">
                 <form action="{{ route('newsletter.subscribe') }}" method="post" class="ds-news-form" onsubmit="return dsSubscribe(event, this);">
@@ -158,12 +158,21 @@
         <div class="ds-cols">
 
             {{-- Brand block --}}
+            @php
+                $__siteName = \App\Services\SettingService::get('site_name', config('app.name'));
+                $__nameParts = preg_split('/\s+/', trim($__siteName), 2);
+                $__defaultTagline = \App\Services\SettingService::get('site_description', 'Your trusted partner.');
+            @endphp
             <div>
-                <a href="{{ url('/') }}" style="display:inline-flex; align-items:baseline; gap:6px; margin-bottom:20px;">
-                    <span style="font-size:1.5rem; font-weight:900; color:#fff; letter-spacing:-0.02em;">Digital</span>
-                    <span style="font-size:1.5rem; font-weight:900; color:#f97316; letter-spacing:-0.02em;">Support<span style="color:#f97316;">.</span></span>
+                <a href="{{ url('/') }}" aria-label="{{ $__siteName }}" style="display:inline-flex; align-items:baseline; gap:6px; margin-bottom:20px;">
+                    <span style="font-size:1.5rem; font-weight:900; color:#fff; letter-spacing:-0.02em;">{{ $__nameParts[0] }}</span>
+                    @if(!empty($__nameParts[1]))
+                        <span style="font-size:1.5rem; font-weight:900; color:#f97316; letter-spacing:-0.02em;">{{ $__nameParts[1] }}<span style="color:#f97316;">.</span></span>
+                    @else
+                        <span style="font-size:1.5rem; font-weight:900; color:#f97316;">.</span>
+                    @endif
                 </a>
-                <p style="color:#737373; font-size:0.95rem; line-height:1.65; margin:0 0 28px; max-width:380px;">{{ sc('footer', 'tagline', 'Your trusted partner for digital products and computer accessories. Quality products, great prices.') }}</p>
+                <p style="color:#737373; font-size:0.95rem; line-height:1.65; margin:0 0 28px; max-width:380px;">{{ sc('footer', 'tagline', $__defaultTagline) }}</p>
 
                 {{-- Live status / location --}}
                 <div style="display:inline-flex; align-items:center; gap:10px; padding:8px 14px; background:#111; border:1px solid #1f1f1f; border-radius:999px; font-size:0.78rem; color:#a3a3a3;">
@@ -259,7 +268,7 @@
     <div class="ds-div" style="padding:18px 16px;">
         <div class="container-custom" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; font-size:0.78rem; color:#525252;">
             <p style="margin:0; display:inline-flex; align-items:center; gap:14px; flex-wrap:wrap;">
-                <span>{{ sc('footer', 'copyright', '© ' . date('Y') . ' Digital Support. All Rights Reserved.') }}</span>
+                <span>{{ sc('footer', 'copyright', '© ' . date('Y') . ' ' . \App\Services\SettingService::get('site_name', config('app.name')) . '. All Rights Reserved.') }}</span>
                 <span style="opacity:0.4;">·</span>
                 <span>Developed by
                     <a href="https://technocratsbd.com" target="_blank" rel="noopener" class="ds-credit" style="color:#a3a3a3; font-weight:600; text-decoration:none; border-bottom:1px solid #404040; padding-bottom:1px; transition:color 0.2s, border-color 0.2s;" onmouseover="this.style.color='#f97316';this.style.borderColor='#f97316'" onmouseout="this.style.color='#a3a3a3';this.style.borderColor='#404040'">Technocrats</a>

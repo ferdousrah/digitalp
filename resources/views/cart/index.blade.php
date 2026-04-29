@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Shopping Cart - Digital Support')
+@section('title', 'Shopping Cart')
 @php
     app(\App\Services\SeoService::class)->noindex();
     // Pre-build the analytics items array — Blade's @json() arg parser can't handle

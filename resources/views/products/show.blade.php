@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', $product->meta_title ?? $product->name . ' - Digital Support')
+@section('title', $product->meta_title ?? $product->name . '')
 @section('meta_description', $product->meta_description ?? \Illuminate\Support\Str::limit(strip_tags((string) ($product->short_description ?? $product->description)), 160))
 
 @php

@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', $page->meta_title ?? $page->title . ' - Digital Support')
+@section('title', $page->meta_title ?? $page->title . '')
 
 @section('content')
 @include('components.breadcrumb', ['items' => [['label' => $page->title]]])

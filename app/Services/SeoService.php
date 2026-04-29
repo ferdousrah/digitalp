@@ -44,7 +44,12 @@ class SeoService
         $defaultLogo = SettingService::get('site_logo');
         $defaultLogoUrl = $defaultLogo ? Storage::disk('public')->url($defaultLogo) : null;
 
-        $title       = $this->data['title'] ?? SettingService::get('meta_title', $siteName);
+        $rawTitle    = $this->data['title'] ?? SettingService::get('meta_title', $siteName);
+        // Auto-append site name to page titles so admins changing site_name flows everywhere.
+        // Skip the append when title already contains site_name (or IS site_name).
+        $title = ($rawTitle === $siteName || str_contains($rawTitle, $siteName))
+            ? $rawTitle
+            : trim($rawTitle) . ' — ' . $siteName;
         $description = $this->data['description'] ?? $siteDesc;
         $image       = $this->data['image'] ?? $defaultLogoUrl;
         $canonical   = $this->data['canonical'] ?? $request->url();

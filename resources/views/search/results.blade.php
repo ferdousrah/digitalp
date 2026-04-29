@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Search Results - Digital Support')
+@section('title', 'Search Results')
 @php app(\App\Services\SeoService::class)->noindex(); @endphp
 
 @push('scripts')

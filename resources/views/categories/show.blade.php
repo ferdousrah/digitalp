@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', $category->meta_title ?? $category->name . ' - Digital Support')
+@section('title', $category->meta_title ?? $category->name . '')
 @section('meta_description', $category->meta_description ?? \Illuminate\Support\Str::limit(strip_tags((string) $category->description), 160))
 
 @push('seo')

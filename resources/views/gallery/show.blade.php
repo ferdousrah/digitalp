@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', $album->title . ' - Gallery - Digital Support')
+@section('title', $album->title . ' - Gallery')
 
 @section('content')
 @include('components.breadcrumb', ['items' => [['label' => 'Gallery', 'url' => route('gallery.index')], ['label' => $album->title]]])
