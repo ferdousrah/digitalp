@@ -232,6 +232,7 @@
     @else
         @include('layouts.partials.footer')
         @include('layouts.partials.cart-sidebar')
+        @include('layouts.partials.mobile-bottom-nav')
     @endif
 
     @hasSection('hide_chrome')
@@ -464,9 +465,12 @@
         .then(function(r) { return r.json(); })
         .then(function(data) {
             showToast(data.message, data.added ? 'success' : 'info');
-            // Update header badge
+            // Update header badge + any mirrors (e.g. mobile bottom nav)
             var badge = document.getElementById('wishlist-badge');
             if (badge) { badge.textContent = data.count; badge.style.display = data.count > 0 ? 'flex' : 'none'; }
+            document.querySelectorAll('.wishlist-count-badge').forEach(function (b) {
+                b.textContent = data.count; b.style.display = data.count > 0 ? 'flex' : 'none';
+            });
             // Toggle heart fill state
             document.querySelectorAll('.wishlist-btn-' + productId).forEach(function(b) {
                 var svg = b.querySelector('svg');
@@ -635,6 +639,12 @@
             if (hdrBadge) {
                 hdrBadge.textContent = count;
                 hdrBadge.style.display = count > 0 ? 'flex' : 'none';
+            }
+            // Mobile bottom-nav cart badge mirrors the header badge
+            var btmBadge = document.getElementById('cart-bottom-badge');
+            if (btmBadge) {
+                btmBadge.textContent = count;
+                btmBadge.style.display = count > 0 ? 'flex' : 'none';
             }
             var drawerBadge = document.getElementById('cart-drawer-badge');
             if (drawerBadge) {
