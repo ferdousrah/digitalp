@@ -347,6 +347,8 @@
 
 <style>
 .mobile-hamburger { display: none; }
+/* Announcement/top bar is desktop-only (Contact/FAQ/language live in the mobile drawer) */
+@media (max-width: 1023px) { #top-bar { display: none !important; } }
 /* Mobile drawer list rows — divider between items, none on the last */
 .mm-row { border-bottom: 1px solid #e8e8e8; }
 .mm-row:last-child { border-bottom: none; }
