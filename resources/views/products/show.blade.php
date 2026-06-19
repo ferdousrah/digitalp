@@ -174,12 +174,12 @@
                     </div>
                 </div>
 
-                {{-- Add to Cart + Buy Now --}}
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+                {{-- Action buttons — single 2×2 grid so all four are equal height --}}
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; grid-auto-rows:1fr;">
                     <button type="button"
                         @click="addToCart({{ $product->id }}, qty)"
                         @if(!$product->in_stock) disabled @endif
-                        class="btn-cart"
+                        class="btn-cart pd-action-btn"
                         style="display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:13px 10px; background:{{ $product->in_stock ? $tc['color_btn_cart_bg'] : '#9ca3af' }}; color:{{ $tc['color_btn_cart_text'] }}; font-size:0.88rem; font-weight:700; border:none; border-radius:8px; cursor:{{ $product->in_stock ? 'pointer' : 'not-allowed' }}; transition:background 0.2s, color 0.2s;"
                         onmouseover="if(!this.disabled){this.style.background='{{ $tc['color_btn_cart_hover_bg'] }}';this.style.color='{{ $tc['color_btn_cart_hover_text'] }}'}"
                         onmouseout="if(!this.disabled){this.style.background='{{ $tc['color_btn_cart_bg'] }}';this.style.color='{{ $tc['color_btn_cart_text'] }}'}">
@@ -189,20 +189,16 @@
                     <button type="button"
                         @click="buyNow({{ $product->id }}, qty)"
                         @if(!$product->in_stock) disabled @endif
-                        class="btn-buy"
+                        class="btn-buy pd-action-btn"
                         style="display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:13px 10px; background:{{ $product->in_stock ? $tc['color_btn_buy_bg'] : '#9ca3af' }}; color:{{ $tc['color_btn_buy_text'] }}; font-size:0.88rem; font-weight:700; border:none; border-radius:8px; cursor:{{ $product->in_stock ? 'pointer' : 'not-allowed' }}; transition:background 0.2s, color 0.2s;"
                         onmouseover="if(!this.disabled){this.style.background='{{ $tc['color_btn_buy_hover_bg'] }}';this.style.color='{{ $tc['color_btn_buy_hover_text'] }}'}"
                         onmouseout="if(!this.disabled){this.style.background='{{ $tc['color_btn_buy_bg'] }}';this.style.color='{{ $tc['color_btn_buy_text'] }}'}">
                         <svg style="width:16px;height:16px;flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                         BUY NOW
                     </button>
-                </div>
-
-                {{-- WhatsApp + Call --}}
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
                     <a href="{{ $waNumber ? 'https://wa.me/'.$waNumber.'?text='.$waMessage : '#' }}"
                         @if(!$waNumber) onclick="return false;" @else target="_blank" rel="noopener" @endif
-                        class="btn-wa"
+                        class="btn-wa pd-action-btn"
                         style="display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:13px 10px; background:{{ $tc['color_btn_wa_bg'] }}; color:{{ $tc['color_btn_wa_text'] }}; font-size:0.88rem; font-weight:700; text-decoration:none; border-radius:8px; transition:background 0.2s, color 0.2s; {{ !$waNumber ? 'opacity:0.5; cursor:not-allowed;' : '' }}"
                         onmouseover="this.style.background='{{ $tc['color_btn_wa_hover_bg'] }}';this.style.color='{{ $tc['color_btn_wa_hover_text'] }}'"
                         onmouseout="this.style.background='{{ $tc['color_btn_wa_bg'] }}';this.style.color='{{ $tc['color_btn_wa_text'] }}'">
@@ -211,7 +207,7 @@
                     </a>
                     <a href="{{ $phoneNumber ? 'tel:'.preg_replace('/\s+/', '', $phoneNumber) : '#' }}"
                         @if(!$phoneNumber) onclick="return false;" @endif
-                        class="btn-call"
+                        class="btn-call pd-action-btn"
                         style="display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:13px 10px; background:{{ $tc['color_btn_call_bg'] }}; color:{{ $tc['color_btn_call_text'] }}; font-size:0.88rem; font-weight:700; text-decoration:none; border-radius:8px; transition:background 0.2s, color 0.2s; {{ !$phoneNumber ? 'opacity:0.5; cursor:not-allowed;' : '' }}"
                         onmouseover="this.style.background='{{ $tc['color_btn_call_hover_bg'] }}';this.style.color='{{ $tc['color_btn_call_hover_text'] }}'"
                         onmouseout="this.style.background='{{ $tc['color_btn_call_bg'] }}';this.style.color='{{ $tc['color_btn_call_text'] }}'">
@@ -232,6 +228,8 @@
     <!-- Tabbed Section: Specifications | Details | Q&A | Review -->
     <div id="product-tabs" x-data="{ activeTab: 'specifications' }" style="margin-top:48px;">
         <style>
+            /* Product action buttons (Add to Cart / Buy Now / WhatsApp / Call) — equal height, wrap cleanly */
+            .pd-action-btn { min-height: 52px; line-height: 1.2; text-align: center; }
             .prod-tabs { scrollbar-width: none; -ms-overflow-style: none; }
             .prod-tabs::-webkit-scrollbar { display: none; }
             .prod-tabs > button { flex-shrink: 0; white-space: nowrap; }
