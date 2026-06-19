@@ -55,7 +55,7 @@
                 })->filter(fn ($v) => !empty($v['src']))->values();
                 $totalThumbs = $allMedia->count() + $videos->count();
             @endphp
-            <div style="display: flex; gap: 12px;">
+            <div class="pd-gallery" style="display: flex; gap: 12px;">
                 {{-- Vertical Thumbnails --}}
                 @if($totalThumbs > 1)
                 <div id="thumb-strip" style="display: flex; flex-direction: column; gap: 8px; width: 70px; min-width: 70px; max-width: 70px; overflow-y: auto; max-height: 500px;">
@@ -235,6 +235,21 @@
             .prod-tabs { scrollbar-width: none; -ms-overflow-style: none; }
             .prod-tabs::-webkit-scrollbar { display: none; }
             .prod-tabs > button { flex-shrink: 0; white-space: nowrap; }
+
+            /* ── Product page: mobile tuning ── */
+            @media (max-width: 640px) {
+                /* Gallery: main image on top, thumbnails in a horizontal scroll strip below */
+                .pd-gallery   { flex-direction: column-reverse !important; }
+                #thumb-strip  { flex-direction: row !important; width: 100% !important; min-width: 0 !important;
+                                max-width: 100% !important; max-height: none !important;
+                                overflow-x: auto !important; overflow-y: hidden !important; scrollbar-width: none; }
+                #thumb-strip::-webkit-scrollbar { display: none; }
+                /* Tabs: tighter padding so more fit before scrolling */
+                .prod-tabs > button { padding: 10px 16px !important; font-size: 0.82rem !important; }
+                /* Specs table: tighter cells + readable column split */
+                .pd-spec td               { padding: 11px 14px !important; font-size: 0.82rem !important; }
+                .pd-spec td:first-child   { width: 40% !important; }
+            }
         </style>
         <!-- Tab Headers (scroll horizontally on narrow screens) -->
         <div class="prod-tabs" style="display:flex; border-bottom:1px solid #d1d5db; overflow-x:auto;">
@@ -262,7 +277,7 @@
             <!-- Specifications Tab -->
             <div x-show="activeTab === 'specifications'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
                 @if($product->specifications && count($product->specifications))
-                <table style="width:100%; border-collapse:collapse;">
+                <table class="pd-spec" style="width:100%; border-collapse:collapse;">
                     <tbody>
                         @php $specIndex = 0; @endphp
                         @foreach($product->specifications as $key => $value)
@@ -282,7 +297,7 @@
             <!-- Details Tab -->
             <div x-show="activeTab === 'details'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" style="display:none;">
                 @if($product->description)
-                <div style="padding:24px;" class="prose prose-lg max-w-none">{!! $product->description !!}</div>
+                <div style="padding:24px;" class="prose prose-sm sm:prose-base lg:prose-lg max-w-none">{!! $product->description !!}</div>
                 @else
                 <div style="padding:40px; text-align:center; color:#9ca3af;">No detailed description available for this product.</div>
                 @endif
