@@ -70,7 +70,9 @@ class ProductResource extends Resource
                         SpatieMediaLibraryFileUpload::make('product_thumbnail')
                             ->collection('product_thumbnail')
                             ->image()
-                            ->helperText('Shown on product cards and as the poster for the thumbnail video below.'),
+                            ->multiple()
+                            ->reorderable()
+                            ->helperText('Shown on product cards. Upload more than one to get a hover slider (next/prev) on the card; the first is the default & the video poster.'),
                         Forms\Components\Section::make('Thumbnail Video (optional)')
                             ->description('If set, the product card will show a video instead of a static image. The thumbnail image above is used as the poster.')
                             ->collapsed(fn ($record) => empty($record?->thumbnail_video))

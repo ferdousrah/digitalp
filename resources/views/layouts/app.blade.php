@@ -49,6 +49,7 @@
         foreach ($tc as $k => $default) {
             $tc[$k] = SettingService::get($k, $default);
         }
+
     @endphp
     <link rel="stylesheet" href="{{ $googleFontsUrl }}">
     <style>
@@ -68,6 +69,15 @@
            `clip` (not `hidden`) clips overflow WITHOUT creating a scroll container, so the
            sticky header (#site-header) and category bar (#cat-bar) keep working. */
         html { overflow-x: clip; }
+
+        /* Back-to-top is desktop-only — hide on mobile (the JS sets inline display, so !important).
+           WhatsApp float stays, but smaller and tucked closer to the right edge (in line with the cart). */
+        @media (max-width: 1023px) {
+            #back-to-top { display: none !important; }
+            body > div[style*="bottom: 24px"] { right: 12px !important; }
+            a[aria-label="Chat on WhatsApp"]      { width: 44px !important; height: 44px !important; }
+            a[aria-label="Chat on WhatsApp"] svg  { width: 22px !important; height: 22px !important; }
+        }
 
         /* ── Fonts ── */
         body, button, input, select, textarea { font-family: var(--font-english); }
@@ -392,7 +402,7 @@
         setTimeout(function() { overlay.style.opacity = '1'; modal.style.transform = 'scale(1) translateY(0)'; }, 10);
         var sbw = window.innerWidth - document.documentElement.clientWidth;
         if (sbw > 0) document.body.style.paddingRight = sbw + 'px';
-        document.body.style.overflow = 'hidden';
+        document.documentElement.style.overflow = 'hidden'; document.body.style.overflow = 'hidden';
 
         // Focus the close button so keyboard users can dismiss immediately or Tab into the content
         setTimeout(function () {
@@ -430,7 +440,7 @@
 
         setTimeout(function() {
             overlay.style.display = 'none';
-            document.body.style.overflow = '';
+            document.documentElement.style.overflow = ''; document.body.style.overflow = '';
             document.body.style.paddingRight = '';
             if (qvOpener && typeof qvOpener.focus === 'function') {
                 try { qvOpener.focus(); } catch (e) { /* element gone */ }
@@ -560,7 +570,7 @@
             // Compensate for the disappearing scrollbar so layout stays steady
             var sbw = getScrollbarWidth();
             if (sbw > 0) document.body.style.paddingRight = sbw + 'px';
-            document.body.style.overflow = 'hidden';
+            document.documentElement.style.overflow = 'hidden'; document.body.style.overflow = 'hidden';
 
             setTimeout(function () { overlay.style.opacity = '1'; sidebar.style.transform = 'translateX(0)'; }, 10);
 
@@ -594,7 +604,7 @@
 
             setTimeout(function () {
                 overlay.style.display = 'none';
-                document.body.style.overflow = '';
+                document.documentElement.style.overflow = ''; document.body.style.overflow = '';
                 document.body.style.paddingRight = '';
                 // Return focus to whatever opened the drawer (the cart icon, the float button, etc.)
                 if (cartOpener && typeof cartOpener.focus === 'function') {

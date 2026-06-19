@@ -16,12 +16,35 @@ class CategoryController extends Controller
         $categories = Category::active()
             ->whereIsRoot()
             ->withCount('products')
-            ->with(['children' => fn ($q) => $q->active()->withCount('products'), 'media'])
+            ->with([
+                'children' => fn ($q) => $q->active()->withCount('products')->with('media')->orderBy('sort_order'),
+                'media',
+            ])
             ->orderBy('sort_order')
             ->orderBy('name')
             ->get();
 
         return view('categories.index', compact('categories'));
+    }
+
+    /**
+     * Dedicated mobile category browser — root categories with their sub-categories
+     * laid out in the app-style sectioned grid. Linked from the mobile bottom nav.
+     */
+    public function mobile()
+    {
+        $categories = Category::active()
+            ->whereIsRoot()
+            ->withCount('products')
+            ->with([
+                'children' => fn ($q) => $q->active()->withCount('products')->with('media')->orderBy('sort_order'),
+                'media',
+            ])
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get();
+
+        return view('categories.mobile', compact('categories'));
     }
 
     public function show(Category $category, Request $request)

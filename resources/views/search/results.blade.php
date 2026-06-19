@@ -17,7 +17,7 @@
     <h1 class="text-3xl font-display mb-2">Search Results</h1>
     <p class="text-surface-600 mb-8">{{ $products instanceof \Illuminate\Pagination\LengthAwarePaginator ? $products->total() : $products->count() }} results for "{{ $query }}"</p>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
+    <div class="product-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
         @forelse($products as $product)
             @include('components.product-card', ['product' => $product])
         @empty

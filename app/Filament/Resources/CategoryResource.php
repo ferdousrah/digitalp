@@ -59,6 +59,12 @@ class CategoryResource extends Resource
                                 SpatieMediaLibraryFileUpload::make('category_image')
                                     ->collection('category_image')
                                     ->image(),
+                                SpatieMediaLibraryFileUpload::make('category_banner')
+                                    ->collection('category_banner')
+                                    ->label('Section Banner (mobile)')
+                                    ->helperText('Wide banner shown in the mobile Categories page section header (parent categories). Recommended ~600×300.')
+                                    ->image()
+                                    ->imageEditor(),
                             ]),
                         Forms\Components\Tabs\Tab::make('Filter Attributes')
                             ->schema([

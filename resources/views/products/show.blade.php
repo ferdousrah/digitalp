@@ -311,7 +311,7 @@
     @if($relatedProducts->count())
     <div style="margin-top:48px; border-top:1px solid #e5e7eb; padding-top:32px;">
         <h2 class="text-2xl font-display mb-6">Related Products</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
+        <div class="product-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
             @foreach($relatedProducts as $related)
                 @include('components.product-card', ['product' => $related])
             @endforeach

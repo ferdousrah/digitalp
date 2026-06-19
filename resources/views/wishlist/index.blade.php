@@ -15,7 +15,7 @@
     </div>
 
     @if($wishlistItems->count())
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
+    <div class="product-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
         @foreach($wishlistItems as $item)
             @if($item->product)
                 @include('components.product-card', ['product' => $item->product])

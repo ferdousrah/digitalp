@@ -120,17 +120,30 @@ class AppServiceProvider extends ServiceProvider
             );
         });
 
-        // Share wishlist & compare data globally (needed by header badges + product cards)
+        // Share wishlist & compare data globally (needed by header badges + product cards).
+        // Storefront-only: the admin panel and Livewire requests don't render these views,
+        // and querying the storefront tables there is wasteful (and 500s if they're absent).
         view()->composer('*', function ($view) {
             static $loaded = false;
-            static $data = [];
+            static $data = [
+                'wishlistCount'      => 0,
+                'compareCount'       => 0,
+                'wishlistProductIds' => [],
+                'compareProductIds'  => [],
+            ];
             if (!$loaded) {
-                $sessionId = session()->getId();
-                $data['wishlistCount'] = \App\Models\Wishlist::where('session_id', $sessionId)->count();
-                $data['compareCount'] = count(session()->get('compare', []));
-                $data['wishlistProductIds'] = \App\Models\Wishlist::where('session_id', $sessionId)->pluck('product_id')->toArray();
-                $data['compareProductIds'] = session()->get('compare', []);
                 $loaded = true;
+                if (! request()->is('admin', 'admin/*', 'livewire/*')) {
+                    try {
+                        $sessionId = session()->getId();
+                        $data['wishlistCount']      = \App\Models\Wishlist::where('session_id', $sessionId)->count();
+                        $data['compareCount']       = count(session()->get('compare', []));
+                        $data['wishlistProductIds'] = \App\Models\Wishlist::where('session_id', $sessionId)->pluck('product_id')->toArray();
+                        $data['compareProductIds']  = session()->get('compare', []);
+                    } catch (\Throwable $e) {
+                        // Storefront tables missing / DB hiccup — degrade to zero counts rather than 500.
+                    }
+                }
             }
             $view->with($data);
         });

@@ -1,4 +1,5 @@
 <div x-data="{ mobileMenuOpen: false, megaOpen: false, megaTimer: null, mobileProductsOpen: false }"
+     x-effect="document.documentElement.style.overflow = mobileMenuOpen ? 'hidden' : ''; document.body.style.overflow = mobileMenuOpen ? 'hidden' : ''"
      @keydown.escape.window="if (mobileMenuOpen) { mobileMenuOpen = false; } if (megaOpen) { megaOpen = false; }">
 <header id="site-header" class="bg-white sticky top-0 z-40" style="transition: top 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
 
@@ -37,7 +38,14 @@
 
     <!-- Main bar: Logo + Search + Icons -->
     <div id="main-bar" style="background:#fff; border-bottom:1px solid #f0f0f0;">
-        <div class="container-custom flex items-center gap-4 px-4 sm:px-6 lg:px-8" style="height:92px; padding-top:10px; padding-bottom:10px; transition:height 0.3s ease;">
+        <div class="container-custom main-bar-inner flex items-center gap-4 px-4 sm:px-6 lg:px-8" style="height:92px; padding-top:10px; padding-bottom:10px; transition:height 0.3s ease;">
+
+            <!-- Mobile hamburger (left — mobile only) -->
+            <button @click="mobileMenuOpen = !mobileMenuOpen" class="mobile-hamburger" aria-label="Menu"
+                    style="align-items:center; justify-content:center; width:42px; height:42px; padding:0; color:#374151; background:none; border:none; cursor:pointer;">
+                <i x-show="!mobileMenuOpen" class="fi fi-rr-menu-burger" style="font-size:24px; line-height:1;"></i>
+                <i x-show="mobileMenuOpen" class="fi fi-rr-cross" style="font-size:24px; line-height:1;"></i>
+            </button>
 
             <!-- Logo -->
             @php
@@ -47,7 +55,7 @@
                 // For one-word names ("Qloraa"), only the primary span renders.
                 $nameParts = preg_split('/\s+/', trim($siteName), 2);
             @endphp
-            <a href="{{ route('home') }}" aria-label="{{ $siteName }}" style="flex-shrink:0; display:flex; align-items:center; text-decoration:none;">
+            <a href="{{ route('home') }}" class="header-logo-link" aria-label="{{ $siteName }}" style="flex-shrink:0; display:flex; align-items:center; text-decoration:none;">
                 @if($siteLogo)
                     <img id="header-logo" src="{{ Storage::disk('public')->url($siteLogo) }}" alt="{{ $siteName }}" decoding="async" fetchpriority="high" style="height:52px; width:auto; transition:height 0.3s ease;">
                 @else
@@ -61,7 +69,7 @@
             </a>
 
             <!-- Search bar -->
-            <div style="flex:1; max-width:640px; margin:0 auto;">
+            <div class="header-search" style="flex:1; max-width:640px; margin:0 auto;">
                 <form action="{{ route('search') }}" method="GET" style="position:relative;">
                     <input type="text" name="q" data-search-input
                         data-autocomplete-url="{{ route('search.autocomplete') }}"
@@ -78,7 +86,7 @@
             </div>
 
             <!-- Right action icons -->
-            <div style="display:flex; align-items:center; flex-shrink:0;">
+            <div class="header-actions" style="display:flex; align-items:center; flex-shrink:0;">
 
                 <!-- Track Order (desktop only) -->
                 <a href="{{ route('track-order.index') }}" style="display:none; flex-direction:column; align-items:center; gap:2px; padding:8px 12px; color:#374151; text-decoration:none; transition:color 0.2s;" class="lg-flex-col" onmouseover="this.style.color='#16a34a'" onmouseout="this.style.color='#374151'">
@@ -125,14 +133,14 @@
                 @endauth
 
                 <!-- Wishlist -->
-                <a href="{{ route('wishlist.index') }}" style="display:flex; flex-direction:column; align-items:center; gap:2px; padding:8px 10px; color:#374151; text-decoration:none; transition:color 0.2s; position:relative;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#374151'" aria-label="Wishlist">
+                <a href="{{ route('wishlist.index') }}" class="header-action-wishlist" style="display:flex; flex-direction:column; align-items:center; gap:2px; padding:8px 10px; color:#374151; text-decoration:none; transition:color 0.2s; position:relative;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#374151'" aria-label="Wishlist">
                     <i class="fi fi-rr-heart" style="font-size:22px; line-height:1;"></i>
                     <span class="header-icon-label" style="font-size:0.7125rem; font-weight:500;">{{ sc('navbar', 'wishlist', 'Wishlist') }}</span>
                     <span id="wishlist-badge" style="position:absolute; top:2px; right:4px; background:#ef4444; color:#fff; font-size:0.6625rem; font-weight:700; min-width:16px; height:16px; border-radius:50%; display:{{ ($wishlistCount ?? 0) > 0 ? 'flex' : 'none' }}; align-items:center; justify-content:center; line-height:1;">{{ $wishlistCount ?? 0 }}</span>
                 </a>
 
                 <!-- Compare -->
-                <a href="{{ route('compare.index') }}" style="display:flex; flex-direction:column; align-items:center; gap:2px; padding:8px 10px; color:#374151; text-decoration:none; transition:color 0.2s; position:relative;" onmouseover="this.style.color='#16a34a'" onmouseout="this.style.color='#374151'" aria-label="Compare">
+                <a href="{{ route('compare.index') }}" class="header-action-compare" style="display:flex; flex-direction:column; align-items:center; gap:2px; padding:8px 10px; color:#374151; text-decoration:none; transition:color 0.2s; position:relative;" onmouseover="this.style.color='#16a34a'" onmouseout="this.style.color='#374151'" aria-label="Compare">
                     <i class="fi fi-rr-chart-histogram" style="font-size:22px; line-height:1;"></i>
                     <span class="header-icon-label" style="font-size:0.7125rem; font-weight:500;">{{ sc('navbar', 'compare', 'Compare') }}</span>
                     <span id="compare-badge" style="position:absolute; top:2px; right:4px; background:#f97316; color:#fff; font-size:0.6625rem; font-weight:700; min-width:16px; height:16px; border-radius:50%; display:{{ ($compareCount ?? 0) > 0 ? 'flex' : 'none' }}; align-items:center; justify-content:center; line-height:1;">{{ $compareCount ?? 0 }}</span>
@@ -145,12 +153,6 @@
                     <span id="cart-header-badge" style="position:absolute; top:2px; right:4px; background:#f97316; color:#fff; font-size:0.6625rem; font-weight:700; min-width:16px; height:16px; border-radius:50%; display:none; align-items:center; justify-content:center; line-height:1;">0</span>
                 </button>
 
-                <!-- Mobile hamburger -->
-                <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden" style="display:flex; flex-direction:column; align-items:center; gap:2px; padding:8px 10px; color:#374151; background:none; border:none; cursor:pointer; transition:color 0.2s;" onmouseover="this.style.color='#16a34a'" onmouseout="this.style.color='#374151'" aria-label="Menu">
-                    <i x-show="!mobileMenuOpen" class="fi fi-rr-menu-burger" style="font-size:22px; line-height:1;"></i>
-                    <i x-show="mobileMenuOpen" class="fi fi-rr-cross" style="font-size:22px; line-height:1;"></i>
-                    <span style="font-size:0.7125rem; font-weight:500;">More</span>
-                </button>
             </div>
         </div>
     </div>
@@ -173,144 +175,110 @@
         :aria-hidden="!mobileMenuOpen"
         x-transition:enter="transition ease-out duration-300" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0"
         x-transition:leave="transition ease-in duration-200" x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full"
-        style="position:absolute; top:0; left:0; bottom:0; width:320px; max-width:85vw; background:#fff; box-shadow:4px 0 24px rgba(0,0,0,0.15); display:flex; flex-direction:column;">
+        style="position:absolute; top:0; left:0; bottom:0; width:300px; max-width:80vw; background:#fff; box-shadow:4px 0 24px rgba(0,0,0,0.15); display:flex; flex-direction:column;">
 
-        <!-- Sidebar Header -->
-        <div style="display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid #e5e7eb;">
-            <a href="{{ route('home') }}" aria-label="{{ $siteName }}" style="display:flex; align-items:center; gap:6px; text-decoration:none;">
-                @if($siteLogo ?? false)
-                    <img src="{{ Storage::disk('public')->url($siteLogo) }}" alt="{{ $siteName }}" decoding="async" style="height:36px; width:auto;">
-                @else
-                    <span style="font-weight:800; font-size:1.1rem; color:#16a34a;">{{ $nameParts[0] }}</span>
-                    @if(!empty($nameParts[1]))
-                        <span style="font-weight:800; font-size:1.1rem; color:#ef4444;">{{ $nameParts[1] }}</span>
-                    @endif
-                @endif
+        <!-- Close button — sits just outside the panel's right edge, on the overlay (like the sample) -->
+        <button @click="mobileMenuOpen = false" aria-label="Close menu"
+            style="position:absolute; top:14px; right:-50px; width:44px; height:44px; display:flex; align-items:center; justify-content:center; border:none; background:transparent; cursor:pointer; color:#fff;">
+            <svg style="width:34px; height:34px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+
+        <!-- Sidebar Body (Shajgoj-style: user card · categories · quick links) -->
+        <div class="mm-scroll" style="position:absolute; inset:0; overflow-y:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; padding:0 0 24px;">
+            @php $mmUser = auth()->user(); @endphp
+
+            <!-- Orange user card -->
+            <a href="{{ $mmUser ? route('account.index') : route('login') }}"
+               style="display:flex; align-items:center; gap:13px; margin:14px; padding:15px 16px; border-radius:14px; background:#f97316; text-decoration:none; box-shadow:0 6px 16px rgba(249,115,22,0.28);">
+                <span style="width:46px; height:46px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 1px 3px rgba(0,0,0,0.12);">
+                    <i class="fi fi-sr-user" style="font-size:24px; color:#94a3b8; line-height:1;"></i>
+                </span>
+                <span style="display:flex; flex-direction:column; line-height:1.25; min-width:0;">
+                    <strong style="color:#fff; font-size:1.02rem; font-weight:800;">{{ $mmUser ? 'Hi, ' . explode(' ', $mmUser->name)[0] : 'Hello there!' }}</strong>
+                    <span style="color:rgba(255,255,255,0.92); font-size:0.85rem;">{{ $mmUser ? 'My Account' : 'Sign in' }}</span>
+                </span>
             </a>
-            <button @click="mobileMenuOpen = false" aria-label="Close menu" style="width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%; background:#f3f4f6; border:none; cursor:pointer; color:#374151; transition:background 0.2s;" onmouseover="this.style.background='#e5e7eb'" onmouseout="this.style.background='#f3f4f6'">
-                <svg style="width:20px; height:20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-            </button>
-        </div>
 
-        <!-- Sidebar Body -->
-        <div style="flex:1; overflow-y:auto; padding:12px 0;">
-            <div style="padding:0 20px;">
-                <a href="{{ route('home') }}" style="display:flex; align-items:center; gap:12px; padding:12px 0; text-decoration:none; color:{{ request()->routeIs('home') ? '#16a34a' : '#111827' }}; font-weight:600; font-size:1rem; border-bottom:1px solid #f3f4f6;">
-                    <svg style="width:20px; height:20px; color:{{ request()->routeIs('home') ? '#16a34a' : '#9ca3af' }};" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                    Home
-                </a>
-
-                <!-- Products accordion -->
-                <div style="border-bottom:1px solid #f3f4f6;" x-data="{ open: false }">
-                    <div style="display:flex; align-items:center;">
-                        <a href="{{ route('products.index') }}" style="flex:1; display:flex; align-items:center; gap:12px; padding:12px 0; text-decoration:none; color:{{ request()->routeIs('products.*') || request()->routeIs('categories.*') ? '#16a34a' : '#111827' }}; font-weight:600; font-size:1rem;">
-                            <svg style="width:20px; height:20px; color:{{ request()->routeIs('products.*') || request()->routeIs('categories.*') ? '#16a34a' : '#9ca3af' }};" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-                            Products
-                        </a>
-                        <button @click="open = !open" aria-label="Toggle category" :aria-expanded="open" style="width:36px; height:36px; display:flex; align-items:center; justify-content:center; border:none; background:transparent; cursor:pointer; color:#6b7280;">
-                            <svg style="width:18px; height:18px; transition:transform 0.3s;" :style="open && 'transform:rotate(180deg)'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                        </button>
-                    </div>
-                    <div x-show="open" x-collapse>
-                        <div style="padding:0 0 12px 32px;" x-data="{ openCat: null }">
-                            @foreach($megaCategories as $megaCat)
-                            <div style="border-bottom:1px solid #f9fafb;">
-                                @if($megaCat->children->count())
-                                    <div style="display:flex; align-items:center;">
-                                        <a href="{{ route('categories.show', $megaCat) }}" style="flex:1; display:flex; align-items:center; gap:10px; padding:8px 0; text-decoration:none; color:#374151; font-size:0.9625rem; font-weight:500;">
-                                            @if($megaCat->getFirstMediaUrl('category_image'))
-                                                <img src="{{ $megaCat->getFirstMediaUrl('category_image') }}" alt="" loading="lazy" decoding="async" width="28" height="28" style="width:28px; height:28px; border-radius:6px; object-fit:cover; border:1px solid #e5e7eb;">
-                                            @else
-                                                <span style="width:28px; height:28px; border-radius:6px; background:#f0fdf4; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                                                    <svg style="width:14px; height:14px; color:#16a34a;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-                                                </span>
-                                            @endif
-                                            {{ $megaCat->name }}
-                                        </a>
-                                        <button @click="openCat = openCat === {{ $megaCat->id }} ? null : {{ $megaCat->id }}" style="width:30px; height:30px; display:flex; align-items:center; justify-content:center; border:none; background:transparent; cursor:pointer; color:#9ca3af; flex-shrink:0;">
-                                            <svg style="width:14px; height:14px; transition:transform 0.3s;" :style="openCat === {{ $megaCat->id }} && 'transform:rotate(180deg)'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                                        </button>
-                                    </div>
-                                    <div x-show="openCat === {{ $megaCat->id }}" x-collapse>
-                                        <div style="padding:2px 0 8px 38px;">
-                                            @foreach($megaCat->children as $subCat)
-                                                <a href="{{ route('categories.show', $subCat) }}" style="display:block; padding:5px 0; font-size:0.8875rem; color:#6b7280; text-decoration:none;">{{ $subCat->name }}</a>
-                                            @endforeach
-                                        </div>
-                                    </div>
-                                @else
-                                    <a href="{{ route('categories.show', $megaCat) }}" style="display:flex; align-items:center; gap:10px; padding:8px 0; text-decoration:none; color:#374151; font-size:0.9625rem; font-weight:500;">
-                                        @if($megaCat->getFirstMediaUrl('category_image'))
-                                            <img src="{{ $megaCat->getFirstMediaUrl('category_image') }}" alt="" loading="lazy" decoding="async" width="28" height="28" style="width:28px; height:28px; border-radius:6px; object-fit:cover; border:1px solid #e5e7eb;">
-                                        @else
-                                            <span style="width:28px; height:28px; border-radius:6px; background:#f0fdf4; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                                                <svg style="width:14px; height:14px; color:#16a34a;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-                                            </span>
-                                        @endif
-                                        {{ $megaCat->name }}
-                                    </a>
-                                @endif
+            <!-- Category list -->
+            <div style="margin:0 14px; background:#f5f5f5; border-radius:12px; overflow:hidden;">
+                @foreach($megaCategories as $mmCat)
+                    @if($mmCat->children->count())
+                        <div x-data="{ open: false }" class="mm-row">
+                            <button @click="open = !open" :aria-expanded="open" style="width:100%; display:flex; align-items:center; justify-content:space-between; gap:8px; padding:13px 16px; background:none; border:none; cursor:pointer; text-align:left;">
+                                <span :style="{ color: open ? '#f97316' : '#333' }" style="font-size:0.74rem; font-weight:500;">{{ $mmCat->name }}</span>
+                                <svg :style="{ transform: open ? 'rotate(-90deg)' : 'rotate(0deg)', color: open ? '#f97316' : '#c4c4c4' }" style="width:15px; height:15px; transition:transform 0.25s; flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                            </button>
+                            <div x-show="open" x-collapse style="background:#fff;">
+                                @foreach($mmCat->children as $mmSub)
+                                    <a href="{{ route('categories.show', $mmSub) }}" class="mm-sub" style="display:block; padding:9px 16px 9px 32px; font-size:0.69rem; color:#555; text-decoration:none;">{{ $mmSub->name }}</a>
+                                @endforeach
                             </div>
-                            @endforeach
-                            <a href="{{ route('products.index') }}" style="display:flex; align-items:center; gap:6px; padding:10px 0 4px; font-size:0.85rem; color:#16a34a; font-weight:600; text-decoration:none;">
-                                View All Products
-                                <svg style="width:14px; height:14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-                            </a>
                         </div>
-                    </div>
+                    @else
+                        <a href="{{ route('categories.show', $mmCat) }}" class="mm-row" style="display:flex; align-items:center; padding:13px 16px; text-decoration:none;">
+                            <span style="font-size:0.74rem; color:#333; font-weight:500;">{{ $mmCat->name }}</span>
+                        </a>
+                    @endif
+                @endforeach
+            </div>
+
+            <!-- Quick Links -->
+            <div style="padding:22px 18px 10px;">
+                <span style="font-size:0.98rem; font-weight:800; color:#444;">Quick Links</span>
+                <div style="width:34px; height:3px; background:#f97316; border-radius:2px; margin-top:6px;"></div>
+            </div>
+            @php $mmLocale = current_locale(); @endphp
+            <div style="margin:0 14px; background:#f5f5f5; border-radius:12px; overflow:hidden;">
+                <a href="{{ route('wishlist.index') }}" class="mm-row" style="display:flex; align-items:center; gap:13px; padding:13px 16px; text-decoration:none; color:#333;">
+                    <svg style="width:20px; height:20px; color:#334155;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                    <span style="font-size:0.74rem; font-weight:500;">Wishlist</span>
+                </a>
+                <a href="{{ route('compare.index') }}" class="mm-row" style="display:flex; align-items:center; gap:13px; padding:13px 16px; text-decoration:none; color:#333;">
+                    <svg style="width:20px; height:20px; color:#334155;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                    <span style="font-size:0.74rem; font-weight:500;">Compare</span>
+                </a>
+                <a href="{{ route('track-order.index') }}" class="mm-row" style="display:flex; align-items:center; gap:13px; padding:13px 16px; text-decoration:none; color:#333;">
+                    <svg style="width:20px; height:20px; color:#334155;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                    <span style="font-size:0.74rem; font-weight:500;">{{ sc('navbar', 'track_order', 'Track Order') }}</span>
+                </a>
+                <div class="mm-row" style="display:flex; align-items:center; justify-content:space-between; gap:10px; padding:11px 16px;">
+                    <span style="display:flex; align-items:center; gap:13px; color:#333;">
+                        <svg style="width:20px; height:20px; color:#334155;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0zM3.6 9h16.8M3.6 15h16.8M11.5 3a16 16 0 000 18M12.5 3a16 16 0 010 18"/></svg>
+                        <span style="font-size:0.74rem; font-weight:500;">Language</span>
+                    </span>
+                    <span style="display:flex; align-items:center; gap:6px;">
+                        <a href="{{ route('language.switch', 'en') }}" style="font-size:0.62rem; font-weight:700; padding:3px 10px; border-radius:999px; text-decoration:none; {{ $mmLocale === 'en' ? 'background:#f97316; color:#fff;' : 'background:#e5e7eb; color:#555;' }}">EN</a>
+                        <a href="{{ route('language.switch', 'bn') }}" style="font-size:0.62rem; font-weight:700; padding:3px 10px; border-radius:999px; text-decoration:none; {{ $mmLocale === 'bn' ? 'background:#f97316; color:#fff;' : 'background:#e5e7eb; color:#555;' }}">বাং</a>
+                    </span>
                 </div>
-
-                <a href="{{ route('services.index') }}" style="display:flex; align-items:center; gap:12px; padding:12px 0; text-decoration:none; color:{{ request()->routeIs('services.*') ? '#16a34a' : '#111827' }}; font-weight:600; font-size:1rem; border-bottom:1px solid #f3f4f6;">
-                    <svg style="width:20px; height:20px; color:{{ request()->routeIs('services.*') ? '#16a34a' : '#9ca3af' }};" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                    Services
-                </a>
-                <a href="{{ route('blog.index') }}" style="display:flex; align-items:center; gap:12px; padding:12px 0; text-decoration:none; color:{{ request()->routeIs('blog.*') ? '#16a34a' : '#111827' }}; font-weight:600; font-size:1rem; border-bottom:1px solid #f3f4f6;">
-                    <svg style="width:20px; height:20px; color:{{ request()->routeIs('blog.*') ? '#16a34a' : '#9ca3af' }};" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
-                    Blog
-                </a>
-                <a href="{{ route('pages.about') }}" style="display:flex; align-items:center; gap:12px; padding:12px 0; text-decoration:none; color:{{ request()->routeIs('pages.about') ? '#16a34a' : '#111827' }}; font-weight:600; font-size:1rem; border-bottom:1px solid #f3f4f6;">
-                    <svg style="width:20px; height:20px; color:{{ request()->routeIs('pages.about') ? '#16a34a' : '#9ca3af' }};" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    About
-                </a>
-                <a href="{{ route('contact.index') }}" style="display:flex; align-items:center; gap:12px; padding:12px 0; text-decoration:none; color:{{ request()->routeIs('contact.*') ? '#16a34a' : '#111827' }}; font-weight:600; font-size:1rem; border-bottom:1px solid #f3f4f6;">
-                    <svg style="width:20px; height:20px; color:{{ request()->routeIs('contact.*') ? '#16a34a' : '#9ca3af' }};" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                    Contact
-                </a>
             </div>
 
-            <div style="height:8px; background:#f3f4f6; margin:12px 0;"></div>
-
-            <div style="padding:0 20px;">
-                <a href="{{ route('wishlist.index') }}" style="display:flex; align-items:center; justify-content:space-between; padding:12px 0; text-decoration:none; color:#111827; font-weight:500; font-size:0.9875rem; border-bottom:1px solid #f3f4f6;">
-                    <span style="display:flex; align-items:center; gap:12px;">
-                        <svg style="width:20px; height:20px; color:#ef4444;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-                        My Wishlist
-                    </span>
-                    @if(($wishlistCount ?? 0) > 0)
-                        <span style="background:#fef2f2; color:#ef4444; font-size:0.8125rem; font-weight:700; padding:2px 10px; border-radius:12px;">{{ $wishlistCount }}</span>
-                    @endif
-                </a>
-                <a href="{{ route('compare.index') }}" style="display:flex; align-items:center; justify-content:space-between; padding:12px 0; text-decoration:none; color:#111827; font-weight:500; font-size:0.9875rem; border-bottom:1px solid #f3f4f6;">
-                    <span style="display:flex; align-items:center; gap:12px;">
-                        <svg style="width:20px; height:20px; color:#16a34a;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                        Compare Products
-                    </span>
-                    @if(($compareCount ?? 0) > 0)
-                        <span style="background:#f0fdf4; color:#16a34a; font-size:0.8125rem; font-weight:700; padding:2px 10px; border-radius:12px;">{{ $compareCount }}</span>
-                    @endif
-                </a>
-                <a href="{{ route('track-order.index') }}" style="display:flex; align-items:center; gap:12px; padding:12px 0; text-decoration:none; color:{{ request()->routeIs('track-order.*') ? '#f97316' : '#111827' }}; font-weight:500; font-size:0.9875rem;">
-                    <i class="fi fi-rr-box-open" style="font-size:20px; color:{{ request()->routeIs('track-order.*') ? '#f97316' : '#9ca3af' }};"></i>
-                    {{ sc('navbar', 'track_order', 'Track Order') }}
-                </a>
+            <!-- Information -->
+            <div style="padding:22px 18px 10px;">
+                <span style="font-size:0.98rem; font-weight:800; color:#444;">Information</span>
+                <div style="width:34px; height:3px; background:#f97316; border-radius:2px; margin-top:6px;"></div>
             </div>
-        </div>
-
-        <!-- Sidebar Footer -->
-        <div style="border-top:1px solid #e5e7eb; padding:16px 20px; background:#f9fafb;">
-            <div style="display:flex; align-items:center; gap:8px; color:#6b7280; font-size:0.8875rem;">
-                <svg style="width:16px; height:16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
-                <span>Need help? <a href="{{ route('contact.index') }}" style="color:#16a34a; font-weight:600; text-decoration:none;">Contact Us</a></span>
+            <div style="margin:0 14px; background:#f5f5f5; border-radius:12px; overflow:hidden;">
+                <a href="{{ route('pages.about') }}" class="mm-row" style="display:flex; align-items:center; gap:13px; padding:13px 16px; text-decoration:none; color:#333;">
+                    <svg style="width:20px; height:20px; color:#334155;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span style="font-size:0.74rem; font-weight:500;">About</span>
+                </a>
+                <a href="{{ route('services.index') }}" class="mm-row" style="display:flex; align-items:center; gap:13px; padding:13px 16px; text-decoration:none; color:#333;">
+                    <svg style="width:20px; height:20px; color:#334155;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    <span style="font-size:0.74rem; font-weight:500;">Services</span>
+                </a>
+                <a href="{{ route('blog.index') }}" class="mm-row" style="display:flex; align-items:center; gap:13px; padding:13px 16px; text-decoration:none; color:#333;">
+                    <svg style="width:20px; height:20px; color:#334155;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
+                    <span style="font-size:0.74rem; font-weight:500;">Blog</span>
+                </a>
+                <a href="{{ route('faq.index') }}" class="mm-row" style="display:flex; align-items:center; gap:13px; padding:13px 16px; text-decoration:none; color:#333;">
+                    <svg style="width:20px; height:20px; color:#334155;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span style="font-size:0.74rem; font-weight:500;">Faqs</span>
+                </a>
+                <a href="{{ route('contact.index') }}" class="mm-row" style="display:flex; align-items:center; gap:13px; padding:13px 16px; text-decoration:none; color:#333;">
+                    <svg style="width:20px; height:20px; color:#334155;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                    <span style="font-size:0.74rem; font-weight:500;">Contact</span>
+                </a>
             </div>
         </div>
     </div>
@@ -378,12 +346,34 @@
 </div>
 
 <style>
+.mobile-hamburger { display: none; }
+/* Mobile drawer list rows — divider between items, none on the last */
+.mm-row { border-bottom: 1px solid #e8e8e8; }
+.mm-row:last-child { border-bottom: none; }
+.mm-sub { border-bottom: 1px solid #ededed; }
+.mm-sub:last-child { border-bottom: none; }
+/* Hide the sidebar scrollbar (still scrollable) */
+.mm-scroll { scrollbar-width: none; -ms-overflow-style: none; }
+.mm-scroll::-webkit-scrollbar { width: 0; height: 0; display: none; }
 @media (min-width: 1024px) {
     .lg-flex-col { display: flex !important; }
     .header-icon-label { display: block; }
 }
 @media (max-width: 1023px) {
     .header-icon-label { display: none; }
+
+    /* ── Mobile header: hamburger left · logo center · cart right · search full-width below ── */
+    .main-bar-inner   { flex-wrap: wrap; height: auto !important; gap: 6px 6px !important; padding-top: 6px !important; padding-bottom: 8px !important; }
+    .mobile-hamburger { display: flex; order: 1; flex-shrink: 0; width: 36px; height: 36px; }
+    .header-logo-link { order: 2; flex: 1 1 auto; justify-content: center; }
+    #header-logo      { height: 32px !important; }
+    .header-actions   { order: 3; flex-shrink: 0; }
+    .header-actions > a, .header-actions > button { padding: 6px 8px !important; }
+    .header-search    { order: 4; flex: 0 0 100% !important; max-width: 100% !important; margin: 0 !important; }
+    /* Slimmer search field on mobile */
+    .header-search [data-search-input] { padding-top: 5px !important; padding-bottom: 5px !important; font-size: 0.8125rem !important; }
+    /* Wishlist & Compare live in the bottom nav on mobile — keep the top bar to just the cart */
+    .header-action-wishlist, .header-action-compare { display: none !important; }
 }
 @keyframes catBarSlideIn {
     from { transform: translateY(-100%); opacity: 0; }

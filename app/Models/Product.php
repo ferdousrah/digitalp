@@ -169,8 +169,8 @@ class Product extends Model implements HasMedia
         $this->addMediaCollection('product_images')
             ->useFallbackUrl('/images/placeholder-product.jpg');
 
-        $this->addMediaCollection('product_thumbnail')
-            ->singleFile();
+        // Multiple thumbnails — the product card shows them as a hover slider when >1.
+        $this->addMediaCollection('product_thumbnail');
     }
 
     /**

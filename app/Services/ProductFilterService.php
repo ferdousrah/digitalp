@@ -30,6 +30,10 @@ class ProductFilterService
             )
             ->when($request->filled('in_stock'), fn ($q) =>
                 $q->where('in_stock', true)
+            )
+            // Offers: products with a strike-through compare price higher than the selling price
+            ->when($request->filled('sale'), fn ($q) =>
+                $q->whereNotNull('compare_price')->whereColumn('compare_price', '>', 'price')
             );
 
         // Attribute filtering: ?attr[slug]=value1,value2&attr[slug2]=value3

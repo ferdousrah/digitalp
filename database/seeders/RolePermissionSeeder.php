@@ -61,6 +61,7 @@ class RolePermissionSeeder extends Seeder
         'payment'          => 'Payment Settings',
         'font'             => 'Font Settings',
         'hero_layout'      => 'Hero Layout',
+        'bottom_nav'       => 'Mobile Bottom Nav',
         'users'            => 'Users',
         'roles'            => 'Roles & Permissions',
     ];

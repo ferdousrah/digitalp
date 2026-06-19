@@ -48,6 +48,7 @@ Route::get('/products/{product:slug}/quick-view', [ProductController::class, 'qu
 
 // Categories
 Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+Route::get('/categories/all', [CategoryController::class, 'mobile'])->name('categories.mobile');
 Route::get('/categories/{category:slug}', [CategoryController::class, 'show'])->name('categories.show');
 
 // Compare

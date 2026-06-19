@@ -42,17 +42,14 @@
         </style>
 
         @else
+        {{-- Columns follow the global Product Card per-device setting (.product-grid).
+             The section's columns × rows still caps how many items show. --}}
         @php $maxItems = $section->desktop_columns * $section->rows; @endphp
-        <div class="prod-grid-{{ $section->id }}" style="display:grid; grid-template-columns:repeat({{ $section->desktop_columns }}, 1fr); gap:20px; align-items:start; justify-items:{{ $section->extra['content_align'] ?? 'stretch' }};">
+        <div class="product-grid" style="display:grid; align-items:start; justify-items:{{ $section->extra['content_align'] ?? 'stretch' }};">
             @foreach($products->take($maxItems) as $product)
                 <x-product-card :product="$product" />
             @endforeach
         </div>
-        <style>
-        @media(max-width:767px) {
-            .prod-grid-{{ $section->id }} { grid-template-columns: repeat({{ $section->mobile_columns }}, 1fr) !important; }
-        }
-        </style>
         @endif
 
     </div>

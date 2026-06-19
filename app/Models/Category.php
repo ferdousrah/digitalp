@@ -87,5 +87,9 @@ class Category extends Model implements HasMedia
     {
         $this->addMediaCollection('category_image')
             ->singleFile();
+
+        // Wide banner shown in the mobile category-browser section header (parent categories).
+        $this->addMediaCollection('category_banner')
+            ->singleFile();
     }
 }
