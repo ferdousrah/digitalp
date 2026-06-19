@@ -127,10 +127,10 @@
 .cart-float-total  { font-size: 0.64rem; }
 /* Smaller still on mobile/tablet so it never overlaps product cards */
 @media (max-width: 1023px) {
-    .cart-float-top    { padding: 5px 8px; gap: 1px; }
-    .cart-float-bottom { padding: 2px 8px; }
-    .cart-float-icon   { width: 16px; height: 16px; }
-    .cart-float-label  { font-size: 0.5rem; }
-    .cart-float-total  { font-size: 0.54rem; }
+    .cart-float-top    { padding: 8px 12px; gap: 2px; }
+    .cart-float-bottom { padding: 4px 12px; }
+    .cart-float-icon   { width: 22px; height: 22px; }
+    .cart-float-label  { font-size: 0.64rem; }
+    .cart-float-total  { font-size: 0.68rem; }
 }
 </style>
