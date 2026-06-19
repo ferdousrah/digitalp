@@ -71,6 +71,10 @@
            BOTH html and body — clip on the root alone doesn't always propagate to the viewport. */
         html, body { overflow-x: clip; max-width: 100%; }
 
+        /* Hide Alpine-controlled elements until Alpine initializes — prevents the mobile
+           drawer (and other x-show elements) from flashing open on every page load. */
+        [x-cloak] { display: none !important; }
+
         /* Back-to-top is desktop-only — hide on mobile (the JS sets inline display, so !important).
            WhatsApp float stays, but smaller and tucked closer to the right edge (in line with the cart). */
         @media (max-width: 1023px) {

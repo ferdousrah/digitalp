@@ -161,7 +161,7 @@
 </header>
 
 <!-- Mobile Sidebar Drawer -->
-<div x-show="mobileMenuOpen" class="lg:hidden" style="position:fixed; inset:0; z-index:9999;">
+<div x-show="mobileMenuOpen" x-cloak class="lg:hidden" style="position:fixed; inset:0; z-index:9999;">
     <!-- Backdrop -->
     <div x-show="mobileMenuOpen"
         x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
