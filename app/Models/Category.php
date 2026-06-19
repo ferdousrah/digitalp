@@ -25,6 +25,8 @@ class Category extends Model implements HasMedia
         'name',
         'slug',
         'description',
+        'seo_content',
+        'faqs',
         'meta_title',
         'meta_description',
         'is_active',
@@ -41,6 +43,7 @@ class Category extends Model implements HasMedia
     {
         return [
             'is_active' => 'boolean',
+            'faqs'      => 'array',
         ];
     }
 

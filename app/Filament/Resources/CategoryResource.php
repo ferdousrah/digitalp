@@ -79,6 +79,25 @@ class CategoryResource extends Resource
                             ->schema([
                                 \App\Filament\Forms\SeoSection::make(),
                             ]),
+                        Forms\Components\Tabs\Tab::make('SEO Content & FAQ')
+                            ->schema([
+                                Forms\Components\RichEditor::make('seo_content')
+                                    ->label('Long-form SEO content')
+                                    ->helperText('Rich content (buying guide / overview) shown below the products on the category page. Great for ranking and AI Overview — aim for a few hundred to a few thousand words.')
+                                    ->columnSpanFull(),
+                                Forms\Components\Repeater::make('faqs')
+                                    ->label('Category FAQs')
+                                    ->helperText('Shown on the category page and emitted as FAQ structured data — helps the page answer user questions in Google AI Overview and ChatGPT/Gemini.')
+                                    ->schema([
+                                        Forms\Components\TextInput::make('question')->required()->maxLength(255),
+                                        Forms\Components\Textarea::make('answer')->required()->rows(3),
+                                    ])
+                                    ->itemLabel(fn (array $state): ?string => $state['question'] ?? 'Question')
+                                    ->collapsible()
+                                    ->reorderable()
+                                    ->defaultItems(0)
+                                    ->addActionLabel('Add FAQ'),
+                            ]),
                     ])
                     ->columnSpanFull(),
             ]);

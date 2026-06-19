@@ -2,12 +2,22 @@
 @section('title', $category->meta_title ?? $category->name . '')
 @section('meta_description', $category->meta_description ?? \Illuminate\Support\Str::limit(strip_tags((string) $category->description), 160))
 
+@php
+    // Filtered / sorted / paginated category views are duplicates — noindex + canonical to the clean category URL.
+    if (collect(['brand','attr','min_price','max_price','in_stock','sort','page'])->contains(fn ($k) => request()->filled($k))) {
+        app(\App\Services\SeoService::class)->noindex()->canonical(route('categories.show', $category));
+    }
+@endphp
+
 @push('seo')
     @include('partials.schema.breadcrumbs', ['items' => [
         ['label' => 'Home',     'url' => url('/')],
         ['label' => 'Products', 'url' => route('products.index')],
         ['label' => $category->name],
     ]])
+    @if(!empty($category->faqs))
+        @include('partials.schema.faq', ['faqs' => collect($category->faqs)->map(fn ($f) => (object) $f)])
+    @endif
 @endpush
 
 @section('content')
@@ -76,6 +86,34 @@
         </div>
     </div>
 </div>
+
+{{-- Long-form SEO content (ranking + AI Overview) --}}
+@if($category->seo_content)
+<section class="container-custom px-4 sm:px-6 lg:px-8" style="padding:8px 0 36px;">
+    <div class="prose prose-sm sm:prose max-w-none" style="color:#4b5563;">{!! $category->seo_content !!}</div>
+</section>
+@endif
+
+{{-- Category FAQs (answers user questions; FAQPage schema emitted in <head>) --}}
+@if(!empty($category->faqs) && count($category->faqs))
+<section class="container-custom px-4 sm:px-6 lg:px-8" style="padding:8px 0 48px;">
+    <h2 style="font-size:1.4rem; font-weight:800; color:#111827; margin:0 0 18px;">Frequently Asked Questions</h2>
+    <div style="max-width:820px;">
+        @foreach($category->faqs as $faq)
+            @continue(empty($faq['question']))
+            <div x-data="{ open: {{ $loop->first ? 'true' : 'false' }} }" style="border:1px solid #e5e7eb; border-radius:12px; margin-bottom:10px; overflow:hidden; background:#fff;">
+                <button @click="open = !open" :aria-expanded="open" style="width:100%; display:flex; align-items:center; justify-content:space-between; gap:14px; padding:16px 20px; background:none; border:none; cursor:pointer; text-align:left;">
+                    <span style="font-size:0.95rem; font-weight:700; color:#111827; line-height:1.5;">{{ $faq['question'] }}</span>
+                    <svg style="width:18px; height:18px; color:#9ca3af; flex-shrink:0; transition:transform 0.25s;" :style="{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div x-show="open" x-collapse>
+                    <div style="padding:0 20px 18px; font-size:0.9rem; color:#4b5563; line-height:1.75;">{!! nl2br(e($faq['answer'] ?? '')) !!}</div>
+                </div>
+            </div>
+        @endforeach
+    </div>
+</section>
+@endif
 
 <!-- Loading overlay -->
 <div id="filter-loading" style="display:none; position:fixed; inset:0; background:rgba(255,255,255,0.5); z-index:30; align-items:center; justify-content:center;">

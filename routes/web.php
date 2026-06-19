@@ -34,6 +34,29 @@ Route::middleware(['web', 'auth'])->prefix('admin')->name('admin.')->group(funct
 // SEO
 Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
 
+// robots.txt — served dynamically so the Sitemap URL always matches the current domain.
+Route::get('/robots.txt', function () {
+    $lines = [
+        'User-agent: *',
+        'Allow: /',
+        '',
+        'Disallow: /admin',
+        'Disallow: /admin/',
+        'Disallow: /livewire/',
+        'Disallow: /cart',
+        'Disallow: /cart/',
+        'Disallow: /checkout',
+        'Disallow: /checkout/',
+        'Disallow: /account',
+        'Disallow: /account/',
+        'Disallow: /search?',
+        'Disallow: /*?utm_',
+        '',
+        'Sitemap: ' . url('/sitemap.xml'),
+    ];
+    return response(implode("\n", $lines) . "\n", 200, ['Content-Type' => 'text/plain; charset=UTF-8']);
+})->name('robots');
+
 // Home
 Route::get('/', [HomeController::class, 'index'])->name('home');
 

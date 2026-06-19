@@ -1,6 +1,14 @@
 @extends('layouts.app')
 @section('title', 'Products')
 
+@php
+    // Filtered / sorted / paginated listings duplicate the base page — keep them out of the
+    // search index and point their canonical at the clean URL. (?sale=1 stays indexable.)
+    if (collect(['brand','attr','min_price','max_price','in_stock','sort','page'])->contains(fn ($k) => request()->filled($k))) {
+        app(\App\Services\SeoService::class)->noindex()->canonical(route('products.index'));
+    }
+@endphp
+
 @section('content')
 @include('components.breadcrumb', ['items' => [['label' => 'Products']]])
 

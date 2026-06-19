@@ -46,6 +46,7 @@ class Product extends Model implements HasMedia
         'meta_title',
         'meta_description',
         'specifications',
+        'faqs',
         'videos',
         'thumbnail_video',
         'weight',
@@ -71,6 +72,7 @@ class Product extends Model implements HasMedia
             'is_best_seller' => 'boolean',
             'in_stock'       => 'boolean',
             'specifications'  => 'array',
+            'faqs'            => 'array',
             'videos'          => 'array',
             'thumbnail_video' => 'array',
         ];

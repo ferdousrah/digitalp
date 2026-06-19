@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\BlogPost;
-use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Faq;
 use App\Models\Page;
@@ -40,8 +39,8 @@ class SitemapController extends Controller
         $entries->push(['loc' => $base . '/products',        'priority' => '0.9', 'changefreq' => 'daily',   'lastmod' => now()]);
         $entries->push(['loc' => $base . '/blog',            'priority' => '0.7', 'changefreq' => 'weekly',  'lastmod' => now()]);
         $entries->push(['loc' => $base . '/contact',         'priority' => '0.5', 'changefreq' => 'monthly', 'lastmod' => now()]);
-        $entries->push(['loc' => $base . '/about-us',        'priority' => '0.5', 'changefreq' => 'monthly', 'lastmod' => now()]);
-        $entries->push(['loc' => $base . '/faqs',            'priority' => '0.6', 'changefreq' => 'monthly', 'lastmod' => now()]);
+        $entries->push(['loc' => $base . '/about',           'priority' => '0.5', 'changefreq' => 'monthly', 'lastmod' => now()]);
+        $entries->push(['loc' => $base . '/faq',             'priority' => '0.6', 'changefreq' => 'monthly', 'lastmod' => now()]);
 
         // Products — include images so they're picked up by Google Images
         Product::where('is_active', true)
@@ -80,16 +79,6 @@ class SitemapController extends Controller
             ]);
         });
 
-        // Brands
-        Brand::where('is_active', true)->select(['slug', 'updated_at'])->each(function ($b) use ($entries, $base) {
-            $entries->push([
-                'loc'        => $base . '/brands/' . $b->slug,
-                'priority'   => '0.6',
-                'changefreq' => 'weekly',
-                'lastmod'    => $b->updated_at,
-            ]);
-        });
-
         // Blog posts
         BlogPost::where('status', 'published')->select(['slug', 'updated_at'])->each(function ($p) use ($entries, $base) {
             $entries->push([
@@ -113,7 +102,7 @@ class SitemapController extends Controller
         // Custom pages
         Page::where('is_active', true)->select(['slug', 'updated_at'])->each(function ($p) use ($entries, $base) {
             $entries->push([
-                'loc'        => $base . '/pages/' . $p->slug,
+                'loc'        => $base . '/page/' . $p->slug,
                 'priority'   => '0.5',
                 'changefreq' => 'monthly',
                 'lastmod'    => $p->updated_at,

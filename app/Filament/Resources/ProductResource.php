@@ -179,6 +179,20 @@ class ProductResource extends Resource
                         Forms\Components\TextInput::make('dimensions')->maxLength(255),
                         Forms\Components\TextInput::make('warranty_info')->maxLength(255),
                     ]),
+                    Forms\Components\Tabs\Tab::make('FAQ')->schema([
+                        Forms\Components\Repeater::make('faqs')
+                            ->label('Frequently Asked Questions')
+                            ->helperText('Shown on the product page and emitted as FAQ structured data — helps Google AI Overview and ChatGPT/Gemini/Perplexity answer questions about this product.')
+                            ->schema([
+                                Forms\Components\TextInput::make('question')->required()->maxLength(255),
+                                Forms\Components\Textarea::make('answer')->required()->rows(3),
+                            ])
+                            ->itemLabel(fn (array $state): ?string => $state['question'] ?? 'Question')
+                            ->collapsible()
+                            ->reorderable()
+                            ->defaultItems(0)
+                            ->addActionLabel('Add FAQ'),
+                    ]),
                 ])->columnSpanFull(),
             Forms\Components\Toggle::make('is_active')->default(true),
             Forms\Components\Toggle::make('is_featured')->default(false),

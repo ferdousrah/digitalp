@@ -16,6 +16,9 @@
         ['label' => 'Products', 'url' => route('products.index')],
         ['label' => $product->name],
     ]])
+    @if(!empty($product->faqs))
+        @include('partials.schema.faq', ['faqs' => collect($product->faqs)->map(fn ($f) => (object) $f)])
+    @endif
 @endpush
 
 @section('content')
@@ -263,7 +266,7 @@
             </button>
             <button @click="activeTab = 'qa'"
                 :style="'padding:12px 28px; font-size:0.925rem; font-weight:600; border:1px solid; border-bottom:none; cursor:pointer; margin-bottom:-1px; margin-right:-1px;' + (activeTab === 'qa' ? 'background:#111827; color:#fff; border-color:#111827;' : 'background:transparent; color:#374151; border-color:#d1d5db;')">
-                Q&amp;A
+                FAQ
             </button>
             <button @click="activeTab = 'review'"
                 :style="'padding:12px 28px; font-size:0.925rem; font-weight:600; border:1px solid; border-bottom:none; cursor:pointer; margin-bottom:-1px;' + (activeTab === 'review' ? 'background:#111827; color:#fff; border-color:#111827;' : 'background:transparent; color:#374151; border-color:#d1d5db;')">
@@ -303,15 +306,32 @@
                 @endif
             </div>
 
-            <!-- Q&A Tab -->
+            <!-- FAQ Tab -->
             <div x-show="activeTab === 'qa'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" style="display:none;">
+                @if(!empty($product->faqs) && count($product->faqs))
+                <div style="padding:6px 0;">
+                    @foreach($product->faqs as $faq)
+                        @continue(empty($faq['question']))
+                        <div x-data="{ open: {{ $loop->first ? 'true' : 'false' }} }" style="border-bottom:1px solid #f3f4f6;">
+                            <button @click="open = !open" :aria-expanded="open" style="width:100%; display:flex; align-items:center; justify-content:space-between; gap:14px; padding:16px 24px; background:none; border:none; cursor:pointer; text-align:left;">
+                                <span style="font-size:0.95rem; font-weight:600; color:#111827; line-height:1.5;">{{ $faq['question'] }}</span>
+                                <svg style="width:18px; height:18px; color:#9ca3af; flex-shrink:0; transition:transform 0.25s;" :style="{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                            </button>
+                            <div x-show="open" x-collapse>
+                                <div style="padding:0 24px 18px; font-size:0.9rem; color:#4b5563; line-height:1.75;">{!! nl2br(e($faq['answer'] ?? '')) !!}</div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+                @else
                 <div style="padding:40px; text-align:center;">
                     <div style="width:64px; height:64px; background:#f0fdf4; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 16px;">
                         <svg style="width:32px; height:32px; color:#16a34a;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     </div>
-                    <h3 style="font-size:1.1rem; font-weight:600; color:#111827; margin-bottom:6px;">Questions & Answers</h3>
-                    <p style="color:#6b7280; font-size:0.9rem;">No questions have been asked about this product yet.</p>
+                    <h3 style="font-size:1.1rem; font-weight:600; color:#111827; margin-bottom:6px;">Frequently Asked Questions</h3>
+                    <p style="color:#6b7280; font-size:0.9rem;">No FAQs have been added for this product yet.</p>
                 </div>
+                @endif
             </div>
 
             <!-- Review Tab -->
