@@ -228,8 +228,8 @@
     <!-- Tabbed Section: Specifications | Details | Q&A | Review -->
     <div id="product-tabs" x-data="{ activeTab: 'specifications' }" style="margin-top:48px;">
         <style>
-            /* Product action buttons (Add to Cart / Buy Now / WhatsApp / Call) — equal height, wrap cleanly */
-            .pd-action-btn { min-height: 52px; line-height: 1.2; text-align: center; }
+            /* Product action buttons (Add to Cart / Buy Now / WhatsApp / Call) — compact, equal height */
+            .pd-action-btn { padding: 11px 12px !important; line-height: 1.2; text-align: center; }
             .prod-tabs { scrollbar-width: none; -ms-overflow-style: none; }
             .prod-tabs::-webkit-scrollbar { display: none; }
             .prod-tabs > button { flex-shrink: 0; white-space: nowrap; }
@@ -247,6 +247,8 @@
                 /* Specs table: tighter cells + readable column split */
                 .pd-spec td               { padding: 11px 14px !important; font-size: 0.82rem !important; }
                 .pd-spec td:first-child   { width: 40% !important; }
+                /* Action buttons: tighter padding/font so the 2×2 grid never overflows */
+                .pd-action-btn { padding: 10px 8px !important; font-size: 0.82rem !important; }
             }
         </style>
         <!-- Tab Headers (scroll horizontally on narrow screens) -->
