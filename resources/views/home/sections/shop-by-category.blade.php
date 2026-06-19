@@ -40,7 +40,7 @@
         </style>
         @else
         {{-- Grid --}}
-        <div style="display:grid; grid-template-columns:repeat({{ $section->desktop_columns }}, 1fr); gap:16px;">
+        <div class="cat-grid-{{ $section->id }}" style="display:grid; grid-template-columns:repeat({{ $section->desktop_columns }}, 1fr); gap:16px;">
             @foreach($categories->take($section->items_count) as $category)
             <a href="{{ route('categories.show', $category) }}" style="text-decoration:none; background:#fff; border-radius:12px; padding:20px 12px; text-align:center; border:1px solid #e5e7eb; transition:all 0.25s; display:flex; flex-direction:column; align-items:center; gap:10px;"
                 onmouseover="this.style.borderColor='var(--color-primary,#16a34a)';this.style.transform='translateY(-3px)'"
@@ -57,6 +57,11 @@
             </a>
             @endforeach
         </div>
+        <style>
+        @media(max-width:767px) {
+            .cat-grid-{{ $section->id }} { grid-template-columns: repeat({{ $section->mobile_columns ?? 2 }}, 1fr) !important; gap:10px !important; }
+        }
+        </style>
         @endif
     </div>
 </section>

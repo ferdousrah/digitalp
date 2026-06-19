@@ -16,7 +16,7 @@
 
 <!-- Hero Section -->
 <section class="hero-section bg-surface-100" style="padding: 12px 0;">
-    <div class="container-custom">
+    <div class="container-custom px-4 sm:px-6 lg:px-8">
         <style>
             #hero-grid {
                 display: grid;

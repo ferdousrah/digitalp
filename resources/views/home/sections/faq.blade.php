@@ -1,6 +1,6 @@
 @if($faqs->isNotEmpty())
 <section style="background:{{ $section->bg_color ?? '#f8fafc' }}; padding:{{ $section->padding_y ?? 64 }}px 0;">
-<div class="container-custom">
+<div class="container-custom px-4 sm:px-6 lg:px-8">
 
     @include('home.sections._section-header', ['section' => $section])
 
