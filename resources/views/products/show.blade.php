@@ -231,8 +231,13 @@
 
     <!-- Tabbed Section: Specifications | Details | Q&A | Review -->
     <div id="product-tabs" x-data="{ activeTab: 'specifications' }" style="margin-top:48px;">
-        <!-- Tab Headers -->
-        <div style="display:flex; border-bottom:1px solid #d1d5db;">
+        <style>
+            .prod-tabs { scrollbar-width: none; -ms-overflow-style: none; }
+            .prod-tabs::-webkit-scrollbar { display: none; }
+            .prod-tabs > button { flex-shrink: 0; white-space: nowrap; }
+        </style>
+        <!-- Tab Headers (scroll horizontally on narrow screens) -->
+        <div class="prod-tabs" style="display:flex; border-bottom:1px solid #d1d5db; overflow-x:auto;">
             <button id="tab-specifications" @click="activeTab = 'specifications'"
                 :style="'padding:12px 28px; font-size:0.925rem; font-weight:600; border:1px solid; border-bottom:none; cursor:pointer; margin-bottom:-1px; margin-right:-1px;' + (activeTab === 'specifications' ? 'background:#111827; color:#fff; border-color:#111827;' : 'background:transparent; color:#374151; border-color:#d1d5db;')">
                 Specifications

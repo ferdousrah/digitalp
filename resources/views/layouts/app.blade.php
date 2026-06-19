@@ -65,10 +65,11 @@
             font-size: {{ $fontSizeBase }}px;
         }
 
-        /* ── Prevent horizontal scroll from off-canvas/fixed widgets (cart drawer, etc.) ──
+        /* ── Prevent horizontal scroll from off-canvas/fixed widgets and stray wide content ──
            `clip` (not `hidden`) clips overflow WITHOUT creating a scroll container, so the
-           sticky header (#site-header) and category bar (#cat-bar) keep working. */
-        html { overflow-x: clip; }
+           sticky header (#site-header) and category bar (#cat-bar) keep working. Applied to
+           BOTH html and body — clip on the root alone doesn't always propagate to the viewport. */
+        html, body { overflow-x: clip; max-width: 100%; }
 
         /* Back-to-top is desktop-only — hide on mobile (the JS sets inline display, so !important).
            WhatsApp float stays, but smaller and tucked closer to the right edge (in line with the cart). */
