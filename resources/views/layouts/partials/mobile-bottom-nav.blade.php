@@ -72,7 +72,5 @@
     /* Lift the floating buttons (WhatsApp / back-to-top) and PWA banner above the bar */
     body > div[style*="bottom: 24px"] { bottom: calc(74px + env(safe-area-inset-bottom)) !important; }
     #pwa-install { bottom: calc(70px + env(safe-area-inset-bottom)) !important; }
-    /* The right-edge floating cart is redundant on mobile now that the bottom bar has Cart */
-    #cart-float { display: none !important; }
 }
 </style>

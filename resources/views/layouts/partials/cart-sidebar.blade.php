@@ -107,14 +107,30 @@
     </div>
 </div>
 
-{{-- Floating cart button --}}
+{{-- Floating cart button — compact on desktop, smaller still on mobile (see styles below) --}}
 <div id="cart-float" onclick="cartOpen()"
-    style="position:fixed; top:50%; right:0; transform:translateY(-50%); z-index:9990; cursor:pointer; border-radius:10px 0 0 10px; overflow:hidden; box-shadow:-4px 0 16px rgba(0,0,0,0.18); transition:transform 0.2s ease;" onmouseover="this.style.transform='translateY(-50%) translateX(-4px)'" onmouseout="this.style.transform='translateY(-50%)'">
-    <div style="background:#f97316; color:#fff; padding:10px 16px; display:flex; flex-direction:column; align-items:center; gap:2px;">
-        <svg style="width:24px; height:24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
-        <span id="cart-float-label" style="font-size:0.7rem; font-weight:700; white-space:nowrap;">0 Items</span>
+    style="position:fixed; top:50%; right:0; transform:translateY(-50%); z-index:9990; cursor:pointer; border-radius:8px 0 0 8px; overflow:hidden; box-shadow:-4px 0 16px rgba(0,0,0,0.18); transition:transform 0.2s ease;" onmouseover="this.style.transform='translateY(-50%) translateX(-4px)'" onmouseout="this.style.transform='translateY(-50%)'">
+    <div class="cart-float-top" style="background:#f97316; color:#fff; display:flex; flex-direction:column; align-items:center; gap:2px;">
+        <svg class="cart-float-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+        <span id="cart-float-label" class="cart-float-label" style="font-weight:700; white-space:nowrap;">0 Items</span>
     </div>
-    <div style="background:#e86810; color:#fff; padding:4px 16px; text-align:center;">
-        <span id="cart-float-total" style="font-size:0.75rem; font-weight:700;">0৳</span>
+    <div class="cart-float-bottom" style="background:#e86810; color:#fff; text-align:center;">
+        <span id="cart-float-total" class="cart-float-total" style="font-weight:700;">0৳</span>
     </div>
 </div>
+<style>
+/* Floating cart sizing — compact on desktop */
+.cart-float-top    { padding: 7px 12px; }
+.cart-float-bottom { padding: 3px 12px; }
+.cart-float-icon   { width: 20px; height: 20px; }
+.cart-float-label  { font-size: 0.6rem; }
+.cart-float-total  { font-size: 0.64rem; }
+/* Smaller still on mobile/tablet so it never overlaps product cards */
+@media (max-width: 1023px) {
+    .cart-float-top    { padding: 5px 8px; gap: 1px; }
+    .cart-float-bottom { padding: 2px 8px; }
+    .cart-float-icon   { width: 16px; height: 16px; }
+    .cart-float-label  { font-size: 0.5rem; }
+    .cart-float-total  { font-size: 0.54rem; }
+}
+</style>

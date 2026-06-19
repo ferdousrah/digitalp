@@ -64,6 +64,11 @@
             font-size: {{ $fontSizeBase }}px;
         }
 
+        /* ── Prevent horizontal scroll from off-canvas/fixed widgets (cart drawer, etc.) ──
+           `clip` (not `hidden`) clips overflow WITHOUT creating a scroll container, so the
+           sticky header (#site-header) and category bar (#cat-bar) keep working. */
+        html { overflow-x: clip; }
+
         /* ── Fonts ── */
         body, button, input, select, textarea { font-family: var(--font-english); }
         :lang(bn), .font-bangla, [data-lang="bn"] { font-family: var(--font-bangla); }
