@@ -25,7 +25,40 @@
 @endphp
 
 <div
-    x-data="libraryPicker({{ $items->toJson() }})"
+    x-data="{
+        items: {{ $items->toJson() }},
+        search: '',
+        hover: null,
+        selectedId: null,
+        get filtered() {
+            if (!this.search) return this.items;
+            const s = this.search.toLowerCase();
+            return this.items.filter(i =>
+                (i.title || '').toLowerCase().includes(s) ||
+                (i.file || '').toLowerCase().includes(s) ||
+                ((i.tags || []).join(' ').toLowerCase().includes(s))
+            );
+        },
+        findStatePath() {
+            const candidates = ['mountedActionsData.0.library_item_id','mountedFormComponentActionsData.0.library_item_id','mountedTableActionsData.0.library_item_id','data.library_item_id'];
+            for (const p of candidates) { try { if (this.$wire.get(p) !== undefined) return p; } catch (e) {} }
+            return 'mountedActionsData.0.library_item_id';
+        },
+        select(id) {
+            this.selectedId = id;
+            try {
+                const path = this.findStatePath();
+                if (path) this.$wire.set(path, String(id), false);
+            } catch (e) {
+                const inp = this.$root.closest('form')?.querySelector('input[name$=library_item_id]');
+                if (inp) { inp.value = id; inp.dispatchEvent(new Event('input', { bubbles: true })); inp.dispatchEvent(new Event('change', { bubbles: true })); }
+            }
+        },
+        syncFromWire() {
+            const path = this.findStatePath();
+            if (path) { const v = this.$wire.get(path); if (v) this.selectedId = parseInt(v); }
+        }
+    }"
     x-init="syncFromWire()"
     style="display:flex; flex-direction:column; gap:0.75rem; min-height:60vh; max-height:70vh;"
 >
@@ -112,70 +145,3 @@
         </div>
     @endif
 </div>
-
-<script>
-    if (typeof window.libraryPicker === 'undefined') {
-        window.libraryPicker = function (items) {
-            return {
-                items: items,
-                search: '',
-                hover: null,
-                selectedId: null,
-                get filtered() {
-                    if (!this.search) return this.items;
-                    const s = this.search.toLowerCase();
-                    return this.items.filter(i =>
-                        (i.title || '').toLowerCase().includes(s) ||
-                        (i.file || '').toLowerCase().includes(s) ||
-                        ((i.tags || []).join(' ').toLowerCase().includes(s))
-                    );
-                },
-                select(id) {
-                    this.selectedId = id;
-                    // Filament's action form is mounted as mountedActions[N].data
-                    // We update the hidden library_item_id field via $wire.set so the
-                    // action handler receives it on submit.
-                    try {
-                        const path = this.findStatePath();
-                        if (path) {
-                            this.$wire.set(path, String(id), false);
-                        }
-                    } catch (e) {
-                        // Fallback: dispatch on hidden input directly
-                        const inp = this.$root.closest('form')?.querySelector('input[type="hidden"][wire\\:model$="library_item_id"], input[type="hidden"][wire\\:model\\.live$="library_item_id"], input[type="hidden"][name$="library_item_id"]');
-                        if (inp) {
-                            inp.value = id;
-                            inp.dispatchEvent(new Event('input', { bubbles: true }));
-                            inp.dispatchEvent(new Event('change', { bubbles: true }));
-                        }
-                    }
-                },
-                syncFromWire() {
-                    // If form already had a value (re-opened modal), reflect it visually
-                    const path = this.findStatePath();
-                    if (path) {
-                        const v = this.$wire.get(path);
-                        if (v) this.selectedId = parseInt(v);
-                    }
-                },
-                /** Walk likely Filament action data paths to find the right one. */
-                findStatePath() {
-                    const candidates = [
-                        'mountedActionsData.0.library_item_id',
-                        'mountedFormComponentActionsData.0.library_item_id',
-                        'mountedTableActionsData.0.library_item_id',
-                        'data.library_item_id',
-                    ];
-                    for (const p of candidates) {
-                        try {
-                            const val = this.$wire.get(p);
-                            if (val !== undefined) return p;
-                        } catch (e) { /* continue */ }
-                    }
-                    // Default to the most common path
-                    return 'mountedActionsData.0.library_item_id';
-                },
-            };
-        };
-    }
-</script>
