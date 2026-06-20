@@ -109,6 +109,54 @@ class Product extends Model implements HasMedia
         return (bool) $this->is_active;
     }
 
+    /** All reviews (any status). */
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    /** Public-facing approved reviews, newest first. */
+    public function approvedReviews(): HasMany
+    {
+        return $this->hasMany(Review::class)->where('status', 'approved')->latest();
+    }
+
+    /** True if the user has a non-cancelled order for this product (paid, or delivered/completed). */
+    public function purchasedBy(?User $user): bool
+    {
+        if (! $user) {
+            return false;
+        }
+
+        return OrderItem::where('product_id', $this->id)
+            ->whereHas('order', function ($q) use ($user) {
+                $q->where('user_id', $user->id)
+                  ->where(function ($q2) {
+                      $q2->whereIn('status', ['delivered', 'completed'])
+                         ->orWhere('payment_status', 'paid');
+                  });
+            })->exists();
+    }
+
+    /** True if the user already reviewed this product (one review per buyer). */
+    public function reviewedBy(?User $user): bool
+    {
+        return $user ? $this->reviews()->where('user_id', $user->id)->exists() : false;
+    }
+
+    /** ['count' => int, 'avg' => float] for approved reviews (uses the loaded relation if present). */
+    public function reviewStats(): array
+    {
+        $reviews = $this->relationLoaded('approvedReviews')
+            ? $this->approvedReviews
+            : $this->approvedReviews()->get();
+
+        return [
+            'count' => $reviews->count(),
+            'avg'   => $reviews->count() ? round($reviews->avg('rating'), 1) : 0.0,
+        ];
+    }
+
     /**
      * The categories that belong to the product.
      */

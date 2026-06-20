@@ -34,6 +34,34 @@
         'priceValidUntil' => now()->addYear()->toDateString(),
         'itemCondition'   => 'https://schema.org/NewCondition',
     ]);
+
+    // Ratings + reviews (only approved) → eligible for star rich snippets
+    $reviewStats = $product->reviewStats();
+    if ($reviewStats['count'] > 0) {
+        $schema['aggregateRating'] = [
+            '@type'       => 'AggregateRating',
+            'ratingValue' => (string) $reviewStats['avg'],
+            'reviewCount' => (string) $reviewStats['count'],
+            'bestRating'  => '5',
+            'worstRating' => '1',
+        ];
+
+        $schema['review'] = $product->approvedReviews->take(10)->map(function ($r) {
+            return array_filter([
+                '@type'         => 'Review',
+                'author'        => ['@type' => 'Person', 'name' => $r->name],
+                'datePublished' => optional($r->created_at)->toDateString(),
+                'name'          => $r->title,
+                'reviewBody'    => $r->comment,
+                'reviewRating'  => [
+                    '@type'       => 'Rating',
+                    'ratingValue' => (string) $r->rating,
+                    'bestRating'  => '5',
+                    'worstRating' => '1',
+                ],
+            ]);
+        })->values()->all();
+    }
 @endphp
 
 <script type="application/ld+json">

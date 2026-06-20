@@ -28,6 +28,8 @@
 @php
     $tc = \App\Filament\Pages\TemplateSettings::defaults();
     foreach ($tc as $k => $d) { $tc[$k] = \App\Services\SettingService::get($k, $d); }
+    $reviewStats = $product->reviewStats();
+    $starPath = 'M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z';
 @endphp
 @include('components.breadcrumb', ['items' => [['label' => 'Products', 'url' => route('products.index')], ['label' => $product->name]]])
 
@@ -132,7 +134,14 @@
             @if($product->brand)
                 <p class="text-sm text-surface-500 uppercase tracking-wide mb-2">{{ $product->brand->name }}</p>
             @endif
-            <h1 class="text-lg md:text-xl font-display mb-4 leading-tight">{{ $product->name }}</h1>
+            <h1 class="text-lg md:text-xl font-display mb-2 leading-tight">{{ $product->name }}</h1>
+
+            @if($reviewStats['count'] > 0)
+            <a href="#product-tabs" onclick="var t=document.getElementById('tab-review'); if(t){t.click();}" style="display:inline-flex; align-items:center; gap:7px; margin-bottom:12px; text-decoration:none;">
+                <span style="display:flex; gap:1px;">@for($i=1;$i<=5;$i++)<svg style="width:15px;height:15px;color:{{ $i <= round($reviewStats['avg']) ? '#f59e0b' : '#d1d5db' }};" fill="currentColor" viewBox="0 0 20 20"><path d="{{ $starPath }}"/></svg>@endfor</span>
+                <span style="font-size:0.82rem; color:#6b7280;">{{ number_format($reviewStats['avg'], 1) }} ({{ $reviewStats['count'] }} review{{ $reviewStats['count'] > 1 ? 's' : '' }})</span>
+            </a>
+            @endif
 
             @if($product->sku)
                 <p class="text-sm text-surface-500 mb-4">SKU: {{ $product->sku }}</p>
@@ -271,7 +280,7 @@
                 :style="'padding:12px 28px; font-size:0.925rem; font-weight:600; border:1px solid; border-bottom:none; cursor:pointer; margin-bottom:-1px; margin-right:-1px;' + (activeTab === 'qa' ? 'background:#111827; color:#fff; border-color:#111827;' : 'background:transparent; color:#374151; border-color:#d1d5db;')">
                 FAQ
             </button>
-            <button @click="activeTab = 'review'"
+            <button id="tab-review" @click="activeTab = 'review'"
                 :style="'padding:12px 28px; font-size:0.925rem; font-weight:600; border:1px solid; border-bottom:none; cursor:pointer; margin-bottom:-1px;' + (activeTab === 'review' ? 'background:#111827; color:#fff; border-color:#111827;' : 'background:transparent; color:#374151; border-color:#d1d5db;')">
                 Review
             </button>
@@ -339,12 +348,87 @@
 
             <!-- Review Tab -->
             <div x-show="activeTab === 'review'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" style="display:none;">
-                <div style="padding:40px; text-align:center;">
-                    <div style="width:64px; height:64px; background:#fef3c7; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 16px;">
-                        <svg style="width:32px; height:32px; color:#f59e0b;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+                @php
+                    $rvUser      = auth()->user();
+                    $rvPurchased = $product->purchasedBy($rvUser);
+                    $rvReviewed  = $product->reviewedBy($rvUser);
+                    $rvInput     = 'width:100%; padding:10px 12px; border:1.5px solid #e5e7eb; border-radius:8px; font-size:0.9rem; outline:none; box-sizing:border-box; margin-bottom:12px;';
+                @endphp
+                <div style="padding:24px;">
+
+                    @if(session('review_submitted'))
+                    <div style="background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; padding:12px 16px; border-radius:10px; margin-bottom:20px; font-size:0.9rem;">{{ session('review_submitted') }}</div>
+                    @endif
+                    @if(session('review_error'))
+                    <div style="background:#fef2f2; border:1px solid #fecaca; color:#991b1b; padding:12px 16px; border-radius:10px; margin-bottom:20px; font-size:0.9rem;">{{ session('review_error') }}</div>
+                    @endif
+
+                    {{-- Rating summary --}}
+                    @if($reviewStats['count'] > 0)
+                    <div style="display:flex; align-items:center; gap:16px; margin-bottom:18px; flex-wrap:wrap;">
+                        <div style="font-size:2.4rem; font-weight:800; color:#111827; line-height:1;">{{ number_format($reviewStats['avg'], 1) }}</div>
+                        <div>
+                            <div style="display:flex; gap:2px;">@for($i=1;$i<=5;$i++)<svg style="width:18px;height:18px;color:{{ $i <= round($reviewStats['avg']) ? '#f59e0b' : '#d1d5db' }};" fill="currentColor" viewBox="0 0 20 20"><path d="{{ $starPath }}"/></svg>@endfor</div>
+                            <div style="font-size:0.85rem; color:#6b7280; margin-top:4px;">Based on {{ $reviewStats['count'] }} review{{ $reviewStats['count'] > 1 ? 's' : '' }}</div>
+                        </div>
                     </div>
-                    <h3 style="font-size:1.1rem; font-weight:600; color:#111827; margin-bottom:6px;">Customer Reviews</h3>
-                    <p style="color:#6b7280; font-size:0.9rem;">No reviews yet. Be the first to review this product.</p>
+                    @endif
+
+                    {{-- Approved reviews --}}
+                    @forelse($product->approvedReviews as $review)
+                    <div style="border-top:1px solid #f3f4f6; padding:16px 0;">
+                        <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px;">
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <span style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.9rem;flex-shrink:0;">{{ strtoupper(substr($review->name,0,1)) }}</span>
+                                <div>
+                                    <div style="font-weight:600; font-size:0.9rem; color:#111827;">{{ $review->name }}@if($review->is_verified)<span style="color:#16a34a; font-size:0.7rem; font-weight:600; margin-left:6px;">✓ Verified Purchase</span>@endif</div>
+                                    <div style="display:flex; gap:1px; margin-top:2px;">@for($i=1;$i<=5;$i++)<svg style="width:13px;height:13px;color:{{ $i <= $review->rating ? '#f59e0b' : '#d1d5db' }};" fill="currentColor" viewBox="0 0 20 20"><path d="{{ $starPath }}"/></svg>@endfor</div>
+                                </div>
+                            </div>
+                            <span style="font-size:0.75rem; color:#9ca3af; white-space:nowrap;">{{ $review->created_at->format('M d, Y') }}</span>
+                        </div>
+                        @if($review->title)<p style="font-weight:600; font-size:0.9rem; color:#111827; margin:10px 0 4px;">{{ $review->title }}</p>@endif
+                        <p style="font-size:0.88rem; color:#4b5563; line-height:1.7; margin:6px 0 0;">{{ $review->comment }}</p>
+                    </div>
+                    @empty
+                    <p style="color:#6b7280; font-size:0.9rem; padding:8px 0 16px;">No reviews yet — only verified buyers can review, so check back soon.</p>
+                    @endforelse
+
+                    {{-- Submission / eligibility (only logged-in buyers can review) --}}
+                    <div style="margin-top:24px; border-top:1px solid #e5e7eb; padding-top:22px;">
+                        @guest
+                            <div style="background:#f9fafb; border:1px solid #e5e7eb; border-radius:10px; padding:16px 18px; font-size:0.9rem; color:#4b5563;">
+                                Please <a href="{{ route('login') }}" style="color:#16a34a; font-weight:700; text-decoration:none;">log in</a> to write a review. Only customers who purchased this product can review it.
+                            </div>
+                        @else
+                            @if($rvReviewed)
+                                <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:16px 18px; font-size:0.9rem; color:#166534;">You've already reviewed this product. Thank you!</div>
+                            @elseif(! $rvPurchased)
+                                <div style="background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:16px 18px; font-size:0.9rem; color:#92400e;">Only verified buyers can review this product. Once your order is delivered, you'll be able to share your experience here.</div>
+                            @else
+                                <h3 style="font-size:1.05rem; font-weight:700; color:#111827; margin:0 0 14px;">Write a Review</h3>
+                                <form method="POST" action="{{ route('products.reviews.store', $product) }}" x-data="{ rating: {{ (int) old('rating', 0) }}, hover: 0 }">
+                                    @csrf
+                                    <div style="margin-bottom:14px;">
+                                        <label style="display:block; font-size:0.82rem; font-weight:600; color:#374151; margin-bottom:6px;">Your rating *</label>
+                                        <div style="display:flex; gap:4px;">
+                                            @for($i=1;$i<=5;$i++)
+                                            <button type="button" @click="rating = {{ $i }}" @mouseenter="hover = {{ $i }}" @mouseleave="hover = 0" aria-label="Rate {{ $i }} star{{ $i>1?'s':'' }}" style="background:none; border:none; cursor:pointer; padding:0; line-height:0;">
+                                                <svg style="width:30px;height:30px;" :style="{ color: ({{ $i }} <= (hover || rating)) ? '#f59e0b' : '#d1d5db' }" fill="currentColor" viewBox="0 0 20 20"><path d="{{ $starPath }}"/></svg>
+                                            </button>
+                                            @endfor
+                                        </div>
+                                        <input type="hidden" name="rating" :value="rating">
+                                        @error('rating')<p style="color:#ef4444; font-size:0.78rem; margin-top:4px;">{{ $message }}</p>@enderror
+                                    </div>
+                                    <input type="text" name="title" value="{{ old('title') }}" placeholder="Review title (optional)" maxlength="150" style="{{ $rvInput }}">
+                                    <textarea name="comment" rows="4" required maxlength="2000" placeholder="Share your experience with this product... *" style="{{ $rvInput }} resize:vertical;">{{ old('comment') }}</textarea>
+                                    @error('comment')<p style="color:#ef4444; font-size:0.78rem; margin:-6px 0 10px;">{{ $message }}</p>@enderror
+                                    <button type="submit" style="display:inline-flex; align-items:center; gap:8px; padding:11px 26px; background:#111827; color:#fff; font-size:0.88rem; font-weight:700; border:none; border-radius:8px; cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='#000'" onmouseout="this.style.background='#111827'">Submit Review</button>
+                                </form>
+                            @endif
+                        @endguest
+                    </div>
                 </div>
             </div>
         </div>

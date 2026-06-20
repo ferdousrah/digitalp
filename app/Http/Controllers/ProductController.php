@@ -58,7 +58,7 @@ class ProductController extends Controller
     public function show(Product $product)
     {
         abort_unless($product->is_active, 404);
-        $product->load(['media', 'categories', 'brand', 'attributeValues.attribute']);
+        $product->load(['media', 'categories', 'brand', 'attributeValues.attribute', 'approvedReviews']);
         $product->increment('view_count');
 
         $relatedProducts = Product::active()
