@@ -242,6 +242,14 @@ class Product extends Model implements HasMedia
     {
         $sizes = ['thumb' => 300, 'medium' => 600, 'large' => 1200];
 
+        // Register WebP variants only when the image library can actually encode WebP.
+        // Prevents "Call to undefined function imagewebp()" on servers whose GD was built
+        // without WebP support; the front-end <picture> tags fall back to JPEG automatically.
+        $webpSupported = match (config('media-library.image_driver', 'gd')) {
+            'imagick' => extension_loaded('imagick') && \Imagick::queryFormats('WEBP'),
+            default   => function_exists('imagewebp'),
+        };
+
         foreach ($sizes as $name => $size) {
             $this->addMediaConversion($name)
                 ->width($size)
@@ -250,12 +258,14 @@ class Product extends Model implements HasMedia
                 ->quality(82)
                 ->nonOptimized();
 
-            $this->addMediaConversion($name . '_webp')
-                ->width($size)
-                ->height($size)
-                ->sharpen(10)
-                ->quality(78)
-                ->format('webp');
+            if ($webpSupported) {
+                $this->addMediaConversion($name . '_webp')
+                    ->width($size)
+                    ->height($size)
+                    ->sharpen(10)
+                    ->quality(78)
+                    ->format('webp');
+            }
         }
     }
 }
