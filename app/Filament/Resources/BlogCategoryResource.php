@@ -27,6 +27,14 @@ class BlogCategoryResource extends Resource
             Forms\Components\TextInput::make('name')->required()->maxLength(255),
             Forms\Components\TextInput::make('slug')->maxLength(255),
             Forms\Components\Textarea::make('description')->rows(3),
+            Forms\Components\Section::make('SEO')
+                ->collapsed()
+                ->schema([
+                    Forms\Components\TextInput::make('meta_title')
+                        ->maxLength(70)->helperText('Recommended ≤ 60 characters. Falls back to the category name.'),
+                    Forms\Components\Textarea::make('meta_description')
+                        ->rows(2)->maxLength(180)->helperText('Recommended ≤ 160 characters.'),
+                ]),
             Forms\Components\Toggle::make('is_active')->default(true),
         ]);
     }

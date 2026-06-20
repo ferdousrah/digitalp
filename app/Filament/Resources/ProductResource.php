@@ -250,6 +250,32 @@ class ProductResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                     static::csvExportBulkAction(),
+                    Tables\Actions\BulkAction::make('fillSeoMeta')
+                        ->label('Fill missing SEO meta')
+                        ->icon('heroicon-o-sparkles')
+                        ->color('success')
+                        ->requiresConfirmation()
+                        ->modalDescription('Generates a meta title and meta description for the selected products where those fields are empty. Existing values are kept.')
+                        ->action(function (\Illuminate\Support\Collection $records) {
+                            $count = 0;
+                            foreach ($records as $product) {
+                                $changed = false;
+                                if (blank($product->meta_title)) {
+                                    $product->meta_title = \Illuminate\Support\Str::limit($product->name, 60, '');
+                                    $changed = true;
+                                }
+                                if (blank($product->meta_description)) {
+                                    $base = trim(strip_tags((string) ($product->short_description ?: $product->description ?: '')));
+                                    $product->meta_description = \Illuminate\Support\Str::limit($base !== '' ? $base : $product->name, 158, '');
+                                    $changed = true;
+                                }
+                                if ($changed) { $product->saveQuietly(); $count++; }
+                            }
+                            \Filament\Notifications\Notification::make()
+                                ->title("Filled SEO meta on {$count} product(s)")
+                                ->success()->send();
+                        })
+                        ->deselectRecordsAfterCompletion(),
                 ]),
             ]);
     }

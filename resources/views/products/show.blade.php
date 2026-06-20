@@ -19,6 +19,9 @@
     @if(!empty($product->faqs))
         @include('partials.schema.faq', ['faqs' => collect($product->faqs)->map(fn ($f) => (object) $f)])
     @endif
+    @if(!empty($product->videos))
+        @include('partials.schema.product-videos', ['product' => $product])
+    @endif
 @endpush
 
 @section('content')

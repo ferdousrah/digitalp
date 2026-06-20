@@ -78,8 +78,11 @@ class AppServiceProvider extends ServiceProvider
         \App\Models\Redirect::saved(fn () => \Illuminate\Support\Facades\Cache::forget('redirects.lookup'));
         \App\Models\Redirect::deleted(fn () => \Illuminate\Support\Facades\Cache::forget('redirects.lookup'));
 
-        // Bust the sitemap cache whenever any indexed model changes
-        $bustSitemap = fn () => \Illuminate\Support\Facades\Cache::forget('sitemap.xml');
+        // Bust every (version-stamped) sitemap when any indexed model changes — one bump invalidates all sub-sitemaps
+        $bustSitemap = fn () => \Illuminate\Support\Facades\Cache::forever(
+            'sitemap.version',
+            ((int) \Illuminate\Support\Facades\Cache::get('sitemap.version', 1)) + 1
+        );
         foreach ([
             \App\Models\Product::class,
             \App\Models\Category::class,

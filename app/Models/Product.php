@@ -95,11 +95,18 @@ class Product extends Model implements HasMedia
      */
     public function toSearchableArray(): array
     {
+        // Keys must be real columns so Scout's DATABASE engine (used locally) works too.
         return [
-            'name' => $this->name,
+            'name'              => $this->name,
             'short_description' => $this->short_description,
-            'sku' => $this->sku,
+            'sku'               => $this->sku,
         ];
+    }
+
+    /** Only active products belong in the search index. */
+    public function shouldBeSearchable(): bool
+    {
+        return (bool) $this->is_active;
     }
 
     /**

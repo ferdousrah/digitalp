@@ -1,5 +1,8 @@
 @extends('layouts.app')
-@section('title', 'Blog')
+@section('title', isset($blogCategory) ? ($blogCategory->meta_title ?: $blogCategory->name) : 'Blog')
+@if(isset($blogCategory))
+@section('meta_description', $blogCategory->meta_description ?: \Illuminate\Support\Str::limit(strip_tags((string) $blogCategory->description), 160))
+@endif
 
 @section('content')
 @include('components.breadcrumb', ['items' => array_filter([['label' => 'Blog', 'url' => isset($blogCategory) ? route('blog.index') : null], isset($blogCategory) ? ['label' => $blogCategory->name] : null])])

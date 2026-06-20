@@ -8,17 +8,13 @@ class SearchController extends Controller
 {
     public function index(Request $request)
     {
-        $query = $request->get('q', '');
+        $query = trim($request->get('q', ''));
         $products = collect();
 
         if (strlen($query) >= 2) {
-            $products = Product::active()
-                ->where(function ($q) use ($query) {
-                    $q->where('name', 'LIKE', "%{$query}%")
-                      ->orWhere('short_description', 'LIKE', "%{$query}%")
-                      ->orWhere('sku', 'LIKE', "%{$query}%");
-                })
-                ->with(['media', 'brand'])
+            // Scout search — uses Meilisearch in production, the database engine locally.
+            $products = Product::search($query)
+                ->query(fn ($builder) => $builder->active()->with(['media', 'brand']))
                 ->paginate(12)
                 ->withQueryString();
         }
@@ -28,14 +24,12 @@ class SearchController extends Controller
 
     public function autocomplete(Request $request)
     {
-        $query = $request->get('q', '');
+        $query = trim($request->get('q', ''));
         if (strlen($query) < 2) return response()->json([]);
 
-        $products = Product::active()
-            ->where('name', 'LIKE', "%{$query}%")
-            ->select('id', 'name', 'slug', 'price', 'compare_price', 'brand_id')
-            ->with(['media', 'brand'])
-            ->limit(8)
+        $products = Product::search($query)
+            ->query(fn ($builder) => $builder->active()->with(['media', 'brand']))
+            ->take(8)
             ->get()
             ->map(fn ($p) => [
                 'name'          => $p->name,

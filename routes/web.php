@@ -31,8 +31,11 @@ Route::middleware(['web', 'auth'])->prefix('admin')->name('admin.')->group(funct
         ->name('orders.labels');
 });
 
-// SEO
-Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
+// SEO — sitemap index + type/page sub-sitemaps (scales past 50k URLs)
+Route::get('/sitemap.xml',                  [\App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
+Route::get('/sitemap-core.xml',             [\App\Http\Controllers\SitemapController::class, 'core']);
+Route::get('/sitemap-products-{page}.xml',  [\App\Http\Controllers\SitemapController::class, 'products'])->whereNumber('page');
+Route::get('/sitemap-blog.xml',             [\App\Http\Controllers\SitemapController::class, 'blog']);
 
 // robots.txt — served dynamically so the Sitemap URL always matches the current domain.
 Route::get('/robots.txt', function () {
