@@ -29,6 +29,11 @@ Route::middleware(['web', 'auth'])->prefix('admin')->name('admin.')->group(funct
         ->name('orders.label');
     Route::get('/orders-labels', [\App\Http\Controllers\Admin\OrderInvoiceController::class, 'labels'])
         ->name('orders.labels');
+
+    // In-modal Media Library picker — upload + delete
+    Route::post('/media-library/upload', [\App\Http\Controllers\Admin\MediaLibraryController::class, 'upload'])->name('media-library.upload');
+    Route::patch('/media-library/{item}', [\App\Http\Controllers\Admin\MediaLibraryController::class, 'update'])->name('media-library.update');
+    Route::delete('/media-library/{item}', [\App\Http\Controllers\Admin\MediaLibraryController::class, 'destroy'])->name('media-library.destroy');
 });
 
 // SEO — sitemap index + type/page sub-sitemaps (scales past 50k URLs)
