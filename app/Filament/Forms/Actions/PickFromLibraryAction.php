@@ -70,8 +70,18 @@ class PickFromLibraryAction
                     ->body($item->title)
                     ->success()->send();
 
-                if (method_exists($livewire, 'fillForm')) {
-                    $livewire->fillForm($record->fresh()->toArray());
+                // Refresh the upload field so the new media shows immediately. Best-effort:
+                // the media is already persisted, so this must never break the request.
+                // Use is_callable (respects visibility — EditRecord::fillForm is protected,
+                // method_exists would wrongly pass it and crash).
+                try {
+                    if (is_callable([$livewire, 'refreshFormData'])) {
+                        $livewire->refreshFormData([$collection]);
+                    } elseif (is_callable([$livewire, 'fillForm'])) {
+                        $livewire->fillForm($record->fresh()->toArray());
+                    }
+                } catch (\Throwable $e) {
+                    // Media is attached regardless; it will appear on the next render.
                 }
             });
     }
