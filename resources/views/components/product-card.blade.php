@@ -156,7 +156,7 @@
             <p class="pc-brand" style="font-size:0.7rem; color:{{ $pc['pc_brand_color'] }}; text-transform:uppercase; letter-spacing:0.08em; font-weight:600; margin-bottom:6px;">{{ $product->brand->name }}</p>
         @endif
 
-        <h3 style="font-size:0.925rem; font-weight:600; color:{{ $pc['pc_name_color'] }}; margin-bottom:8px; line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">
+        <h3 style="font-size:0.925rem; font-weight:600; color:{{ $pc['pc_name_color'] }}; margin-bottom:8px; line-height:1.4; min-height:2.8em; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">
             <a href="{{ route('products.show', $product) }}" style="text-decoration:none; color:inherit; transition:color 0.2s;"
                 onmouseover="this.style.color='{{ $pc['pc_name_hover_color'] }}'"
                 onmouseout="this.style.color='{{ $pc['pc_name_color'] }}'">{{ $product->name }}</a>

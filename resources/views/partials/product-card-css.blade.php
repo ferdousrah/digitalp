@@ -20,6 +20,8 @@
 @endphp
 <style>
     /* ── Static card behaviour (device-independent) ── */
+    /* Equal-height cards across a row (override any align-items:start / items-start on the grid) */
+    .product-grid { align-items: stretch !important; }
     .product-card { transition: all 0.35s cubic-bezier(.4,0,.2,1); }
     .product-card:hover {
         box-shadow: 0 12px 40px {{ $pc['pc_card_hover_shadow'] }};
