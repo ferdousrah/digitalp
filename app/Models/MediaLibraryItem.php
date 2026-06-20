@@ -12,7 +12,7 @@ class MediaLibraryItem extends Model implements HasMedia
 {
     use InteractsWithMedia;
 
-    protected $fillable = ['title', 'alt_text', 'tags', 'description', 'uploaded_by'];
+    protected $fillable = ['title', 'hash', 'alt_text', 'tags', 'description', 'uploaded_by'];
 
     protected function casts(): array
     {

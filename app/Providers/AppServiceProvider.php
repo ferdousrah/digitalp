@@ -78,6 +78,12 @@ class AppServiceProvider extends ServiceProvider
         \App\Models\Redirect::saved(fn () => \Illuminate\Support\Facades\Cache::forget('redirects.lookup'));
         \App\Models\Redirect::deleted(fn () => \Illuminate\Support\Facades\Cache::forget('redirects.lookup'));
 
+        // Mirror product image uploads into the reusable Media Library (deduped by content hash)
+        \Illuminate\Support\Facades\Event::listen(
+            \Spatie\MediaLibrary\MediaCollections\Events\MediaHasBeenAddedEvent::class,
+            \App\Listeners\MirrorUploadToMediaLibrary::class
+        );
+
         // Bust every (version-stamped) sitemap when any indexed model changes — one bump invalidates all sub-sitemaps
         $bustSitemap = fn () => \Illuminate\Support\Facades\Cache::forever(
             'sitemap.version',
