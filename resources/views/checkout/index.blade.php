@@ -206,6 +206,10 @@
 }
 /* Order Review table → stacked cards on phones (3 columns would overflow & get clipped) */
 @media (max-width: 640px) {
+    /* Force block flow so the table-sizing algorithm can never widen the container */
+    .co-order-table,
+    .co-order-table tbody,
+    .co-order-table tfoot { display: block; width: 100%; }
     .co-order-table thead { display: none; }
     .co-order-table tbody tr {
         display: flex;
