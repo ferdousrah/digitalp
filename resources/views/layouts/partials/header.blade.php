@@ -44,7 +44,7 @@
             <button @click="mobileMenuOpen = !mobileMenuOpen" class="mobile-hamburger" aria-label="Menu"
                     style="align-items:center; justify-content:center; width:42px; height:42px; padding:0; color:#374151; background:none; border:none; cursor:pointer;">
                 <i x-show="!mobileMenuOpen" class="fi fi-rr-menu-burger" style="font-size:24px; line-height:1;"></i>
-                <i x-show="mobileMenuOpen" class="fi fi-rr-cross" style="font-size:24px; line-height:1;"></i>
+                <i x-show="mobileMenuOpen" x-cloak class="fi fi-rr-cross" style="font-size:24px; line-height:1;"></i>
             </button>
 
             <!-- Logo -->
