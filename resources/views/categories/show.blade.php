@@ -7,21 +7,28 @@
     if (collect(['brand','attr','min_price','max_price','in_stock','sort','page'])->contains(fn ($k) => request()->filled($k))) {
         app(\App\Services\SeoService::class)->noindex()->canonical(route('categories.show', $category));
     }
+
+    // Breadcrumb reflects the real category hierarchy (e.g. Makeup › Eyes › Eye Shadow),
+    // which drives the BreadcrumbList rich result + internal linking. Ancestors are
+    // ordered root → parent by Kalnoy's nested-set relation.
+    $ancestorCrumbs = ($category->relationLoaded('ancestors') ? $category->ancestors : collect())
+        ->map(fn ($a) => ['label' => $a->name, 'url' => route('categories.show', $a)])
+        ->all();
 @endphp
 
 @push('seo')
-    @include('partials.schema.breadcrumbs', ['items' => [
-        ['label' => 'Home',     'url' => url('/')],
-        ['label' => 'Products', 'url' => route('products.index')],
-        ['label' => $category->name],
-    ]])
+    @include('partials.schema.breadcrumbs', ['items' => array_merge(
+        [['label' => 'Home', 'url' => url('/')]],
+        $ancestorCrumbs,
+        [['label' => $category->name]],
+    )])
     @if(!empty($category->faqs))
         @include('partials.schema.faq', ['faqs' => collect($category->faqs)->map(fn ($f) => (object) $f)])
     @endif
 @endpush
 
 @section('content')
-@include('components.breadcrumb', ['items' => [['label' => 'Products', 'url' => route('products.index')], ['label' => $category->name]]])
+@include('components.breadcrumb', ['items' => array_merge($ancestorCrumbs, [['label' => $category->name]])])
 
 <div class="container-custom px-4 sm:px-6 lg:px-8 pb-16">
     <h1 class="text-3xl font-display mb-2">{{ $category->name }}</h1>

@@ -50,7 +50,7 @@ class CategoryController extends Controller
     public function show(Category $category, Request $request)
     {
         abort_unless($category->is_active, 404);
-        $category->load('children', 'media');
+        $category->load('children', 'media', 'ancestors');
 
         $descendantIds = $category->descendants()->pluck('id')->push($category->id);
 
