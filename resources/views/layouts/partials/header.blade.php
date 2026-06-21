@@ -422,14 +422,9 @@
     /* Wishlist & Compare live in the bottom nav on mobile — keep the top bar to just the cart */
     .header-action-wishlist, .header-action-compare { display: none !important; }
 }
-@keyframes catBarSlideIn {
-    from { transform: translateY(-100%); opacity: 0; }
-    to   { transform: translateY(0);    opacity: 1; }
-}
-#cat-bar.is-stuck {
-    animation: catBarSlideIn 0.28s ease forwards;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.3) !important;
-}
+/* Auto-hide cat-bar: shadow while stuck, slide up out of view when scrolling down */
+#cat-bar.is-stuck { box-shadow: 0 4px 16px rgba(0,0,0,0.3) !important; }
+#cat-bar.cat-bar-hidden { transform: translateY(-100%) !important; box-shadow: none !important; }
 </style>
 
 <script>
@@ -438,17 +433,42 @@
     var catBar   = document.getElementById('cat-bar');
     if (!sentinel || !catBar) return;
 
+    var stuck = false;
+    var lastY = window.scrollY || window.pageYOffset || 0;
+
+    // "Stuck" = scrolled past the header; only then does shadow + auto-hide apply.
     var observer = new IntersectionObserver(function (entries) {
         entries.forEach(function (entry) {
-            if (!entry.isIntersecting) {
+            stuck = !entry.isIntersecting;
+            if (stuck) {
                 catBar.classList.add('is-stuck');
             } else {
+                // Back near the top — always reveal and drop the stuck styling.
                 catBar.classList.remove('is-stuck');
+                catBar.classList.remove('cat-bar-hidden');
             }
         });
     }, { threshold: 0, rootMargin: '0px' });
-
     observer.observe(sentinel);
+
+    // Auto-hide on scroll down, reveal on scroll up (only while stuck).
+    var ticking = false;
+    window.addEventListener('scroll', function () {
+        if (ticking) return;
+        ticking = true;
+        window.requestAnimationFrame(function () {
+            var y = window.scrollY || window.pageYOffset || 0;
+            if (stuck) {
+                if (y > lastY + 4) {
+                    catBar.classList.add('cat-bar-hidden');     // scrolling down → hide
+                } else if (y < lastY - 4) {
+                    catBar.classList.remove('cat-bar-hidden');  // scrolling up → reveal
+                }
+            }
+            lastY = y;
+            ticking = false;
+        });
+    }, { passive: true });
 })();
 </script>
 
