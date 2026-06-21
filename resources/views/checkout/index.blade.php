@@ -204,6 +204,24 @@
 @media (max-width: 768px) {
     .co-grid-2 { grid-template-columns: 1fr; }
 }
+/* Order Review table → stacked cards on phones (3 columns would overflow & get clipped) */
+@media (max-width: 640px) {
+    .co-order-table thead { display: none; }
+    .co-order-table tbody tr {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        row-gap: 10px;
+        padding: 14px 16px;
+        border-bottom: 1px solid #f3f4f6;
+    }
+    .co-order-table tbody td { padding: 0 !important; border: none; }
+    .co-order-table tbody td:nth-child(1) { flex: 1 1 100%; }
+    .co-order-table tbody td:nth-child(2) { flex: 0 0 auto; text-align: left !important; }
+    .co-order-table tbody td:nth-child(3) { flex: 1 1 auto; text-align: right !important; }
+    .co-order-table tfoot tr { display: flex; justify-content: space-between; align-items: center; }
+    .co-order-table tfoot td { padding: 12px 16px !important; }
+}
 /* Coupon accordion slide transition */
 .co-acc-enter { transition: opacity 0.25s ease, transform 0.25s ease; }
 .co-acc-enter-from { opacity: 0; transform: translateY(-8px); }
@@ -262,7 +280,7 @@
                                 <span style="margin-left:auto; font-size:0.8rem; color:#6b7280;" x-text="cartItems.length + (cartItems.length !== 1 ? ' items' : ' item')"></span>
                             </div>
                             <div class="co-card-body" style="padding:0;">
-                                <table style="width:100%; border-collapse:collapse; font-size:0.85rem;">
+                                <table class="co-order-table" style="width:100%; border-collapse:collapse; font-size:0.85rem;">
                                     <thead>
                                         <tr style="background:#f9fafb; border-bottom:1px solid #f0f0f0;">
                                             <th style="text-align:left; padding:10px 20px; font-size:0.76rem; font-weight:700; color:#6b7280; text-transform:uppercase; letter-spacing:0.05em;">Product</th>
