@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\CategoryResource\Pages;
 use App\Models\Category;
+use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -44,10 +45,18 @@ class CategoryResource extends Resource
                                     ->rows(3),
                                 Forms\Components\Select::make('parent_id')
                                     ->label('Parent Category')
-                                    ->relationship('parent', 'name')
+                                    ->relationship(
+                                        name: 'parent',
+                                        titleAttribute: 'name',
+                                        modifyQueryUsing: fn (Builder $query, ?Category $record) =>
+                                            $query->when($record, fn ($q) => $q->whereKeyNot($record->getKey()))
+                                                  ->orderBy('name'),
+                                    )
+                                    ->getOptionLabelFromRecordUsing(fn (Category $record) => static::categoryPath($record))
                                     ->searchable()
                                     ->preload()
-                                    ->nullable(),
+                                    ->nullable()
+                                    ->helperText('Leave empty for a top-level category. Nesting supports up to 3 levels (Parent › Child › Sub-child).'),
                                 Forms\Components\Toggle::make('is_active')
                                     ->default(true),
                                 Forms\Components\TextInput::make('sort_order')
@@ -149,5 +158,28 @@ class CategoryResource extends Resource
             'create' => Pages\CreateCategory::route('/create'),
             'edit' => Pages\EditCategory::route('/{record}/edit'),
         ];
+    }
+
+    /**
+     * Build a breadcrumb-style hierarchy path (e.g. "Skin Care › Cleansers › Toners")
+     * so the Parent Category dropdown is unambiguous across 3 nesting levels.
+     * A single cached map keeps this O(1) per option (no N+1 on preload).
+     */
+    protected static function categoryPath(Category $record): string
+    {
+        static $map = null;
+        if ($map === null) {
+            $map = Category::query()->get(['id', 'name', 'parent_id'])->keyBy('id');
+        }
+
+        $parts = [];
+        $node  = $map->get($record->getKey()) ?? $record;
+        $guard = 0;
+        while ($node && $guard++ < 6) {
+            array_unshift($parts, $node->name);
+            $node = $node->parent_id ? $map->get($node->parent_id) : null;
+        }
+
+        return implode(' › ', $parts);
     }
 }

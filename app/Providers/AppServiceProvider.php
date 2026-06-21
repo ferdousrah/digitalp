@@ -116,14 +116,18 @@ class AppServiceProvider extends ServiceProvider
         }
 
         view()->composer('layouts.partials.header', function ($view) {
+            // Load 3 levels deep: parent → child → grandchild (active + ordered at each level)
+            $orderedActiveChildren = fn ($q) => $q->active()->orderBy('sort_order')
+                ->with(['children' => fn ($q2) => $q2->active()->orderBy('sort_order')]);
+
             $view->with('megaCategories', \App\Models\Category::active()
                 ->whereNull('parent_id')
-                ->with(['children' => fn ($q) => $q->active()->orderBy('sort_order')])
+                ->with(['children' => $orderedActiveChildren])
                 ->orderBy('sort_order')
                 ->get()
             );
             $view->with('menuItems', \App\Models\MenuItem::where('is_active', true)
-                ->with('category.children')
+                ->with(['category.children' => $orderedActiveChildren])
                 ->orderBy('sort_order')
                 ->get()
             );

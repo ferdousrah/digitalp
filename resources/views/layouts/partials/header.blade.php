@@ -210,7 +210,23 @@
                             </button>
                             <div x-show="open" x-collapse style="background:#fff;">
                                 @foreach($mmCat->children as $mmSub)
-                                    <a href="{{ route('categories.show', $mmSub) }}" class="mm-sub" style="display:block; padding:9px 16px 9px 32px; font-size:0.69rem; color:#555; text-decoration:none;">{{ $mmSub->name }}</a>
+                                    @php $mmGrand = $mmSub->children ?? collect(); @endphp
+                                    @if($mmGrand->count())
+                                        {{-- 3rd-level: nested accordion --}}
+                                        <div x-data="{ subOpen: false }" class="mm-sub">
+                                            <button @click="subOpen = !subOpen" :aria-expanded="subOpen" style="width:100%; display:flex; align-items:center; justify-content:space-between; gap:8px; padding:9px 16px 9px 32px; background:none; border:none; cursor:pointer; text-align:left;">
+                                                <span :style="{ color: subOpen ? '#f97316' : '#555' }" style="font-size:0.69rem;">{{ $mmSub->name }}</span>
+                                                <svg :style="{ transform: subOpen ? 'rotate(-90deg)' : 'rotate(0deg)', color: subOpen ? '#f97316' : '#c4c4c4' }" style="width:13px; height:13px; transition:transform 0.25s; flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                                            </button>
+                                            <div x-show="subOpen" x-collapse style="background:#fafafa;">
+                                                @foreach($mmGrand as $mmGc)
+                                                    <a href="{{ route('categories.show', $mmGc) }}" class="mm-sub" style="display:block; padding:8px 16px 8px 48px; font-size:0.67rem; color:#666; text-decoration:none;">{{ $mmGc->name }}</a>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    @else
+                                        <a href="{{ route('categories.show', $mmSub) }}" class="mm-sub" style="display:block; padding:9px 16px 9px 32px; font-size:0.69rem; color:#555; text-decoration:none;">{{ $mmSub->name }}</a>
+                                    @endif
                                 @endforeach
                             </div>
                         </div>
@@ -316,12 +332,41 @@
                             x-transition:leave="transition ease-in duration-100"
                             x-transition:leave-start="opacity-100 translate-y-0"
                             x-transition:leave-end="opacity-0 translate-y-1"
-                            style="position:absolute; top:100%; left:0; min-width:210px; box-shadow:0 8px 24px rgba(0,0,0,0.12); z-index:100; border-radius:0 0 8px 8px; overflow:hidden;">
+                            style="position:absolute; top:100%; left:0; min-width:210px; box-shadow:0 8px 24px rgba(0,0,0,0.12); z-index:100; border-radius:0 0 8px 8px;">
                             @foreach($children as $subCat)
-                            <a href="{{ route('categories.show', $subCat) }}"
-                                style="display:block; padding:9px 18px; font-size:0.875rem; text-decoration:none; border-bottom:1px solid rgba(0,0,0,0.05); transition:background 0.15s, color 0.15s;">
-                                {{ $subCat->name }}
-                            </a>
+                                @php $grandChildren = $subCat->children ?? collect(); @endphp
+                                @if($grandChildren->count())
+                                {{-- 3rd-level: flyout to the right on hover --}}
+                                <div x-data="{ subOpen: false, subTimer: null }" style="position:relative;"
+                                    @mouseenter="clearTimeout(subTimer); subOpen = true"
+                                    @mouseleave="subTimer = setTimeout(() => subOpen = false, 150)">
+                                    <a href="{{ route('categories.show', $subCat) }}"
+                                        style="display:flex; align-items:center; justify-content:space-between; gap:10px; padding:9px 18px; font-size:0.875rem; text-decoration:none; border-bottom:1px solid rgba(0,0,0,0.05); transition:background 0.15s, color 0.15s;">
+                                        <span>{{ $subCat->name }}</span>
+                                        <i class="fi fi-rr-angle-small-right" style="font-size:13px; opacity:0.6;"></i>
+                                    </a>
+                                    <div x-show="subOpen" x-cloak class="nav-submenu"
+                                        x-transition:enter="transition ease-out duration-150"
+                                        x-transition:enter-start="opacity-0 translate-x-1"
+                                        x-transition:enter-end="opacity-100 translate-x-0"
+                                        x-transition:leave="transition ease-in duration-100"
+                                        x-transition:leave-start="opacity-100 translate-x-0"
+                                        x-transition:leave-end="opacity-0 translate-x-1"
+                                        style="position:absolute; top:0; left:100%; min-width:200px; box-shadow:0 8px 24px rgba(0,0,0,0.12); z-index:110; border-radius:0 8px 8px 8px;">
+                                        @foreach($grandChildren as $gChild)
+                                        <a href="{{ route('categories.show', $gChild) }}"
+                                            style="display:block; padding:9px 18px; font-size:0.85rem; text-decoration:none; border-bottom:1px solid rgba(0,0,0,0.05); transition:background 0.15s, color 0.15s;">
+                                            {{ $gChild->name }}
+                                        </a>
+                                        @endforeach
+                                    </div>
+                                </div>
+                                @else
+                                <a href="{{ route('categories.show', $subCat) }}"
+                                    style="display:block; padding:9px 18px; font-size:0.875rem; text-decoration:none; border-bottom:1px solid rgba(0,0,0,0.05); transition:background 0.15s, color 0.15s;">
+                                    {{ $subCat->name }}
+                                </a>
+                                @endif
                             @endforeach
                         </div>
                         @endif
