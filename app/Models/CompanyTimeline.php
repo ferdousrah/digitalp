@@ -6,10 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use App\Models\Concerns\HasResponsiveImages;
 
 class CompanyTimeline extends Model implements HasMedia
 {
-    use InteractsWithMedia;
+    use InteractsWithMedia, HasResponsiveImages;
 
     protected $table = 'company_timeline';
 
@@ -49,5 +51,10 @@ class CompanyTimeline extends Model implements HasMedia
     {
         $this->addMediaCollection('timeline_image')
             ->singleFile();
+    }
+
+    public function registerMediaConversions(?Media $media = null): void
+    {
+        $this->registerResponsiveConversions(['medium' => 700]);
     }
 }

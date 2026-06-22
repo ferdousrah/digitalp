@@ -6,10 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use App\Models\Concerns\HasResponsiveImages;
 
 class Testimonial extends Model implements HasMedia
 {
-    use InteractsWithMedia;
+    use InteractsWithMedia, HasResponsiveImages;
 
     /**
      * The attributes that are mass assignable.
@@ -54,5 +56,10 @@ class Testimonial extends Model implements HasMedia
     {
         $this->addMediaCollection('client_photo')
             ->singleFile();
+    }
+
+    public function registerMediaConversions(?Media $media = null): void
+    {
+        $this->registerResponsiveConversions(['thumb' => 200]);
     }
 }

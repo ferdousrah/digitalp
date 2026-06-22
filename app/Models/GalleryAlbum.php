@@ -7,12 +7,14 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use App\Models\Concerns\HasResponsiveImages;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 
 class GalleryAlbum extends Model implements HasMedia
 {
-    use InteractsWithMedia, HasSlug;
+    use InteractsWithMedia, HasSlug, HasResponsiveImages;
 
     /**
      * The attributes that are mass assignable.
@@ -72,5 +74,10 @@ class GalleryAlbum extends Model implements HasMedia
     {
         $this->addMediaCollection('album_cover')
             ->singleFile();
+    }
+
+    public function registerMediaConversions(?Media $media = null): void
+    {
+        $this->registerResponsiveConversions(['medium' => 700]);
     }
 }

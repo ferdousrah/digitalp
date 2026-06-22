@@ -51,7 +51,11 @@
         }
 
     @endphp
-    <link rel="stylesheet" href="{{ $googleFontsUrl }}">
+    {{-- Google Fonts — loaded non-blocking (print-media swap, same pattern as the icon CSS below)
+         so the font request never delays first paint. `display=swap` (in the URL) paints fallback
+         text immediately, then swaps when the webfont arrives. <noscript> covers no-JS visitors. --}}
+    <link rel="stylesheet" href="{{ $googleFontsUrl }}" media="print" onload="this.media='all'; this.onload=null;">
+    <noscript><link rel="stylesheet" href="{{ $googleFontsUrl }}"></noscript>
     <style>
         :root {
             --font-english:          '{{ $fontEnglish }}', sans-serif;

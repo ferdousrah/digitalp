@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class Slider extends Model implements HasMedia
 {
@@ -66,5 +67,37 @@ class Slider extends Model implements HasMedia
     {
         $this->addMediaCollection('slide_image')
             ->singleFile();
+    }
+
+    /**
+     * Resized + WebP variants so the hero (usually the page's LCP element) isn't the
+     * full-size original upload. `medium` (800w) covers mobile + side banners; `large`
+     * (1600w) covers the desktop slider with headroom for retina. WebP is registered
+     * only when the image library can encode it — the <picture> tags fall back to JPEG.
+     */
+    public function registerMediaConversions(?Media $media = null): void
+    {
+        $sizes = ['medium' => 800, 'large' => 1600];
+
+        $webpSupported = match (config('media-library.image_driver', 'gd')) {
+            'imagick' => extension_loaded('imagick') && \Imagick::queryFormats('WEBP'),
+            default   => function_exists('imagewebp'),
+        };
+
+        foreach ($sizes as $name => $width) {
+            $this->addMediaConversion($name)
+                ->width($width)
+                ->quality(82)
+                ->nonOptimized()
+                ->performOnCollections('slide_image');
+
+            if ($webpSupported) {
+                $this->addMediaConversion($name . '_webp')
+                    ->width($width)
+                    ->quality(78)
+                    ->format('webp')
+                    ->performOnCollections('slide_image');
+            }
+        }
     }
 }

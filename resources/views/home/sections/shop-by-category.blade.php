@@ -16,13 +16,12 @@
                     class="cat-card-{{ $section->id }}"
                     onmouseover="this.style.borderColor='var(--color-primary,#16a34a)';this.style.boxShadow='0 4px 16px rgba(0,0,0,0.1)';this.style.transform='translateY(-3px)'"
                     onmouseout="this.style.borderColor='#e5e7eb';this.style.boxShadow='none';this.style.transform='none'">
-                    @if($category->getFirstMediaUrl('category_image'))
-                        <img src="{{ $category->getFirstMediaUrl('category_image') }}" loading="lazy" decoding="async" alt="{{ $category->name }}" style="width:56px; height:56px; object-fit:cover; border-radius:8px;">
-                    @else
+                    <x-media-image :model="$category" collection="category_image" size="medium" :alt="$category->name"
+                        style="width:56px; height:56px; object-fit:cover; border-radius:8px;">
                         <div style="width:56px; height:56px; background:linear-gradient(135deg,#f0fdf4,#dcfce7); border-radius:8px; display:flex; align-items:center; justify-content:center;">
                             <svg style="width:28px;height:28px;color:#16a34a;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
                         </div>
-                    @endif
+                    </x-media-image>
                     <span style="font-size:0.85rem; font-weight:600; color:#111827; line-height:1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;">{{ $category->name }}</span>
                     <span style="font-size:0.72rem; color:#9ca3af;">{{ $category->products_count ?? 0 }} items</span>
                 </a>

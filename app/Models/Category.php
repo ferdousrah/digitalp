@@ -7,14 +7,16 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Kalnoy\Nestedset\NodeTrait;
+use App\Models\Concerns\HasResponsiveImages;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 
 class Category extends Model implements HasMedia
 {
-    use SoftDeletes, NodeTrait, InteractsWithMedia, HasSlug;
+    use SoftDeletes, NodeTrait, InteractsWithMedia, HasSlug, HasResponsiveImages;
 
     /**
      * The attributes that are mass assignable.
@@ -94,5 +96,13 @@ class Category extends Model implements HasMedia
         // Wide banner shown in the mobile category-browser section header (parent categories).
         $this->addMediaCollection('category_banner')
             ->singleFile();
+    }
+
+    public function registerMediaConversions(?Media $media = null): void
+    {
+        // Card/icon thumbnail (shop-by-category, mobile category list)
+        $this->registerResponsiveConversions(['medium' => 600], ['category_image']);
+        // Wide section banner (mobile category page)
+        $this->registerResponsiveConversions(['large' => 1000], ['category_banner']);
     }
 }

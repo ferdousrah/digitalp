@@ -49,13 +49,20 @@
         <section style="margin-bottom:22px;">
 
             {{-- Banner header — parent category's banner as the FULL section background (text overlaid) --}}
-            @php $bannerUrl = $category->getFirstMediaUrl('category_banner') ?: $category->getFirstMediaUrl('category_image'); @endphp
+            @php
+                $bWebp = $category->getFirstMediaUrl('category_banner', 'large_webp') ?: $category->getFirstMediaUrl('category_image', 'medium_webp');
+                $bJpg  = $category->getFirstMediaUrl('category_banner', 'large') ?: $category->getFirstMediaUrl('category_banner')
+                         ?: $category->getFirstMediaUrl('category_image', 'medium') ?: $category->getFirstMediaUrl('category_image');
+            @endphp
             <a href="{{ route('categories.show', $category) }}" class="mcat-banner"
                style="position:relative; display:flex; align-items:center; background:{{ $p['bg'] }}; border-radius:14px; margin-bottom:12px; text-decoration:none; overflow:hidden;">
-                @if($bannerUrl)
+                @if($bJpg)
                     {{-- full-bleed banner image --}}
-                    <img src="{{ $bannerUrl }}" alt="{{ $category->name }}" loading="lazy" decoding="async"
-                         style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;">
+                    <picture>
+                        @if($bWebp)<source type="image/webp" srcset="{{ $bWebp }}">@endif
+                        <img src="{{ $bJpg }}" alt="{{ $category->name }}" loading="lazy" decoding="async"
+                             style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;">
+                    </picture>
                     {{-- left-to-right scrim so the overlaid text stays readable --}}
                     <span style="position:absolute; inset:0; background:linear-gradient(to right, {{ $p['bg'] }} 0%, {{ $p['bg'] }}f2 32%, {{ $p['bg'] }}80 58%, transparent 90%);"></span>
                 @endif
@@ -88,11 +95,9 @@
                 @foreach($category->children as $child)
                 <a href="{{ route('categories.show', $child) }}" style="display:flex; flex-direction:column; align-items:center; gap:6px; text-decoration:none;">
                     <span style="width:100%; aspect-ratio:1; border-radius:12px; background:#f1f5f9; display:flex; align-items:center; justify-content:center; overflow:hidden;">
-                        @if($child->getFirstMediaUrl('category_image'))
-                            <img src="{{ $child->getFirstMediaUrl('category_image') }}" alt="{{ $child->name }}" loading="lazy" decoding="async" style="width:100%; height:100%; object-fit:cover;">
-                        @else
+                        <x-media-image :model="$child" collection="category_image" size="medium" :alt="$child->name" style="width:100%; height:100%; object-fit:cover;">
                             <svg style="width:24px; height:24px; color:#94a3b8;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-                        @endif
+                        </x-media-image>
                     </span>
                     <span class="mcat-tile-label" style="font-weight:600; color:#334155; text-align:center; line-height:1.2; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">{{ $child->name }}</span>
                 </a>

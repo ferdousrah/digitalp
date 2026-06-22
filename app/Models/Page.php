@@ -7,12 +7,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Builder;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use App\Models\Concerns\HasResponsiveImages;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 
 class Page extends Model implements HasMedia
 {
-    use SoftDeletes, InteractsWithMedia, HasSlug;
+    use SoftDeletes, InteractsWithMedia, HasSlug, HasResponsiveImages;
 
     /**
      * The attributes that are mass assignable.
@@ -69,5 +71,10 @@ class Page extends Model implements HasMedia
     {
         $this->addMediaCollection('page_image')
             ->singleFile();
+    }
+
+    public function registerMediaConversions(?Media $media = null): void
+    {
+        $this->registerResponsiveConversions(['large' => 1200]);
     }
 }

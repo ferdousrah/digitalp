@@ -1,11 +1,20 @@
 @extends('layouts.app')
 @section('title', \App\Services\SettingService::get('meta_title', \App\Services\SettingService::get('site_name', config('app.name'))))
 
-{{-- Preload the first hero slide image — usually the page's LCP element, worth prioritising --}}
-@php $__heroImg = optional($sliders->first())->getFirstMediaUrl('slide_image'); @endphp
-@if($__heroImg)
+{{-- Preload the first hero slide image — usually the page's LCP element, worth prioritising.
+     Responsive preload (imagesrcset) so phones grab the 800w variant and desktops the 1600w,
+     in WebP where available. Falls back to the original if conversions aren't generated yet. --}}
+@php
+    $__hero      = $sliders->first();
+    $__heroLarge = $__hero ? ($__hero->getFirstMediaUrl('slide_image', 'large_webp') ?: $__hero->getFirstMediaUrl('slide_image', 'large') ?: $__hero->getFirstMediaUrl('slide_image')) : null;
+    $__heroMed   = $__hero ? ($__hero->getFirstMediaUrl('slide_image', 'medium_webp') ?: $__hero->getFirstMediaUrl('slide_image', 'medium') ?: $__heroLarge) : null;
+@endphp
+@if($__heroLarge)
     @push('seo')
-        <link rel="preload" as="image" href="{{ $__heroImg }}" fetchpriority="high">
+        <link rel="preload" as="image"
+              imagesrcset="{{ $__heroMed }} 800w, {{ $__heroLarge }} 1600w"
+              imagesizes="(max-width: 767px) 100vw, 66vw"
+              fetchpriority="high">
     @endpush
 @endif
 
@@ -61,13 +70,27 @@
 
                 {{-- Slides --}}
                 @forelse($sliders as $i => $slide)
-                @php $img = $slide->getFirstMediaUrl('slide_image'); @endphp
+                @php
+                    $imgLarge     = $slide->getFirstMediaUrl('slide_image', 'large') ?: $slide->getFirstMediaUrl('slide_image');
+                    $imgLargeWebp = $slide->getFirstMediaUrl('slide_image', 'large_webp');
+                    $imgMed       = $slide->getFirstMediaUrl('slide_image', 'medium') ?: $imgLarge;
+                    $imgMedWebp   = $slide->getFirstMediaUrl('slide_image', 'medium_webp');
+                @endphp
                 <div class="hero-slide" data-index="{{ $i }}"
                      style="position:absolute; inset:0; opacity:{{ $i === 0 ? 1 : 0 }}; transition:opacity 0.6s ease; z-index:{{ $i === 0 ? 1 : 0 }};">
-                    @if($img)
-                        <img src="{{ $img }}" alt="{{ $slide->title }}"
-                             @if($i === 0) decoding="async" fetchpriority="high" @else loading="lazy" decoding="async" @endif
-                             style="width:100%; height:100%; object-fit:cover; display:block;">
+                    @if($imgLarge)
+                        <picture>
+                            @if($imgLargeWebp || $imgMedWebp)
+                            <source type="image/webp"
+                                    srcset="{{ ($imgMedWebp ?: $imgMed) }} 800w, {{ ($imgLargeWebp ?: $imgLarge) }} 1600w"
+                                    sizes="(max-width: 767px) 100vw, 66vw">
+                            @endif
+                            <img src="{{ $imgLarge }}" alt="{{ $slide->title }}"
+                                 srcset="{{ $imgMed }} 800w, {{ $imgLarge }} 1600w"
+                                 sizes="(max-width: 767px) 100vw, 66vw"
+                                 @if($i === 0) decoding="async" fetchpriority="high" @else loading="lazy" decoding="async" @endif
+                                 style="width:100%; height:100%; object-fit:cover; display:block;">
+                        </picture>
                     @else
                         <div style="width:100%; height:100%; background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460); display:flex; align-items:center; justify-content:center;">
                             <svg style="width:80px;height:80px;color:rgba(255,255,255,0.2)" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
@@ -128,10 +151,16 @@
 
                 {{-- Banner 1 — flex:1 so it stretches to fill remaining height --}}
                 @if($banner1)
-                @php $b1img = $banner1->getFirstMediaUrl('slide_image'); @endphp
+                @php
+                    $b1img  = $banner1->getFirstMediaUrl('slide_image', 'medium') ?: $banner1->getFirstMediaUrl('slide_image');
+                    $b1webp = $banner1->getFirstMediaUrl('slide_image', 'medium_webp');
+                @endphp
                 <div style="flex:1; border-radius:10px; overflow:hidden; position:relative; min-height:120px;">
-                    <img src="{{ $b1img }}" alt="{{ $banner1->title ?? '' }}" decoding="async"
-                         style="width:100%; height:100%; object-fit:cover; display:block;">
+                    <picture>
+                        @if($b1webp)<source type="image/webp" srcset="{{ $b1webp }}">@endif
+                        <img src="{{ $b1img }}" alt="{{ $banner1->title ?? '' }}" loading="lazy" decoding="async"
+                             style="width:100%; height:100%; object-fit:cover; display:block;">
+                    </picture>
                     @if($banner1->link_url)
                     <a href="{{ $banner1->link_url }}" style="position:absolute; inset:0; cursor:pointer;"
                        aria-label="{{ $banner1->title ?? 'Banner' }}"></a>
@@ -141,10 +170,16 @@
 
                 {{-- Banner 2 — flex:1 so it stretches; if Banner 1 is missing, this fills full height --}}
                 @if($banner2)
-                @php $b2img = $banner2->getFirstMediaUrl('slide_image'); @endphp
+                @php
+                    $b2img  = $banner2->getFirstMediaUrl('slide_image', 'medium') ?: $banner2->getFirstMediaUrl('slide_image');
+                    $b2webp = $banner2->getFirstMediaUrl('slide_image', 'medium_webp');
+                @endphp
                 <div style="flex:1; border-radius:10px; overflow:hidden; position:relative; min-height:120px;">
-                    <img src="{{ $b2img }}" alt="{{ $banner2->title ?? '' }}" decoding="async"
-                         style="width:100%; height:100%; object-fit:cover; display:block;">
+                    <picture>
+                        @if($b2webp)<source type="image/webp" srcset="{{ $b2webp }}">@endif
+                        <img src="{{ $b2img }}" alt="{{ $banner2->title ?? '' }}" loading="lazy" decoding="async"
+                             style="width:100%; height:100%; object-fit:cover; display:block;">
+                    </picture>
                     @if($banner2->link_url)
                     <a href="{{ $banner2->link_url }}" style="position:absolute; inset:0; cursor:pointer;"
                        aria-label="{{ $banner2->title ?? 'Banner' }}"></a>

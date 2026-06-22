@@ -7,10 +7,12 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use App\Models\Concerns\HasResponsiveImages;
 
 class GalleryItem extends Model implements HasMedia
 {
-    use InteractsWithMedia;
+    use InteractsWithMedia, HasResponsiveImages;
 
     /**
      * The attributes that are mass assignable.
@@ -62,5 +64,10 @@ class GalleryItem extends Model implements HasMedia
     {
         $this->addMediaCollection('item_image')
             ->singleFile();
+    }
+
+    public function registerMediaConversions(?Media $media = null): void
+    {
+        $this->registerResponsiveConversions(['medium' => 600, 'large' => 1200]);
     }
 }

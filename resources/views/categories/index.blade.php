@@ -15,13 +15,12 @@
         @foreach($categories as $category)
         <div class="bg-white rounded-xl shadow-sm border border-surface-200 overflow-hidden group hover:shadow-md transition-shadow duration-300 gsap-stagger-item">
             <a href="{{ route('categories.show', $category) }}" class="block relative overflow-hidden aspect-[16/10]">
-                @if($category->getFirstMediaUrl('category_image'))
-                    <img src="{{ $category->getFirstMediaUrl('category_image') }}" alt="{{ $category->name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" decoding="async">
-                @else
+                <x-media-image :model="$category" collection="category_image" size="medium" :alt="$category->name"
+                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                     <div class="w-full h-full bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center">
                         <svg class="w-16 h-16 text-primary-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
                     </div>
-                @endif
+                </x-media-image>
                 <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </a>
 

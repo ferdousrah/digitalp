@@ -23,9 +23,8 @@
         @forelse($posts as $post)
         <article class="bg-white rounded-xl shadow-sm border border-surface-200 overflow-hidden group gsap-stagger-item">
             <a href="{{ route('blog.show', $post) }}" class="block aspect-video overflow-hidden bg-surface-100">
-                @if($post->getFirstMediaUrl('featured_image'))
-                    <img src="{{ $post->getFirstMediaUrl('featured_image') }}" alt="{{ $post->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" decoding="async">
-                @endif
+                <x-media-image :model="$post" collection="featured_image" size="medium" :alt="$post->title"
+                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
             </a>
             <div class="p-6">
                 @if($post->category)<span class="text-xs text-primary-600 font-semibold uppercase tracking-wide">{{ $post->category->name }}</span>@endif

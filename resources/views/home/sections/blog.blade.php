@@ -1,5 +1,6 @@
 @props(['section', 'posts'])
 @if($posts->count())
+<style>.hs-blog-img{transition:transform 0.4s;}.hs-blog-img:hover{transform:scale(1.05);}</style>
 <section style="background:{{ $section->bg_color }}; padding:{{ $section->padding_y }}px 0;">
     <div class="container-custom px-4 sm:px-6 lg:px-8">
         @include('home.sections._section-header', ['section' => $section])
@@ -10,7 +11,8 @@
                 onmouseout="this.style.boxShadow='none';this.style.transform='none'">
                 @if($post->getFirstMediaUrl('featured_image'))
                 <div style="aspect-ratio:16/9; overflow:hidden;">
-                    <img src="{{ $post->getFirstMediaUrl('featured_image') }}" loading="lazy" decoding="async" alt="{{ $post->title }}" style="width:100%;height:100%;object-fit:cover;transition:transform 0.4s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    <x-media-image :model="$post" collection="featured_image" size="medium" :alt="$post->title"
+                        class="hs-blog-img" style="width:100%;height:100%;object-fit:cover;" />
                 </div>
                 @endif
                 <div style="padding:20px;">

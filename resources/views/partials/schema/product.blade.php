@@ -35,6 +35,48 @@
         'itemCondition'   => 'https://schema.org/NewCondition',
     ]);
 
+    // Shipping + return policy → unlocks the free "merchant listing" rich result and
+    // clears Search Console's recommended-field warnings. Admin-tunable via settings.
+    $shipRate   = (float) \App\Services\SettingService::get('seo_shipping_rate', 80);
+    $returnDays = (int) \App\Services\SettingService::get('seo_return_days', 7);
+
+    $schema['offers']['shippingDetails'] = [
+        '@type'        => 'OfferShippingDetails',
+        'shippingRate' => [
+            '@type'    => 'MonetaryAmount',
+            'value'    => (string) $shipRate,
+            'currency' => 'BDT',
+        ],
+        'shippingDestination' => [
+            '@type'          => 'DefinedRegion',
+            'addressCountry' => 'BD',
+        ],
+        'deliveryTime' => [
+            '@type'        => 'ShippingDeliveryTime',
+            'handlingTime' => [
+                '@type'    => 'QuantitativeValue',
+                'minValue' => 0,
+                'maxValue' => 1,
+                'unitCode' => 'DAY',
+            ],
+            'transitTime' => [
+                '@type'    => 'QuantitativeValue',
+                'minValue' => 1,
+                'maxValue' => 3,
+                'unitCode' => 'DAY',
+            ],
+        ],
+    ];
+
+    $schema['offers']['hasMerchantReturnPolicy'] = [
+        '@type'                => 'MerchantReturnPolicy',
+        'applicableCountry'    => 'BD',
+        'returnPolicyCategory' => 'https://schema.org/MerchantReturnFiniteReturnWindow',
+        'merchantReturnDays'   => $returnDays,
+        'returnMethod'         => 'https://schema.org/ReturnByMail',
+        'returnFees'           => 'https://schema.org/FreeReturn',
+    ];
+
     // Ratings + reviews (only approved) → eligible for star rich snippets
     $reviewStats = $product->reviewStats();
     if ($reviewStats['count'] > 0) {

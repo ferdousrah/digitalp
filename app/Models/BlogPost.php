@@ -10,12 +10,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Laravel\Scout\Searchable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use App\Models\Concerns\HasResponsiveImages;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 
 class BlogPost extends Model implements HasMedia
 {
-    use HasFactory, SoftDeletes, InteractsWithMedia, HasSlug, Searchable;
+    use HasFactory, SoftDeletes, InteractsWithMedia, HasSlug, Searchable, HasResponsiveImages;
 
     /**
      * The attributes that are mass assignable.
@@ -102,5 +104,10 @@ class BlogPost extends Model implements HasMedia
     {
         $this->addMediaCollection('featured_image')
             ->singleFile();
+    }
+
+    public function registerMediaConversions(?Media $media = null): void
+    {
+        $this->registerResponsiveConversions(['medium' => 600, 'large' => 1200]);
     }
 }
