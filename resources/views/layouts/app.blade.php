@@ -28,10 +28,12 @@
     <script defer src="{{ asset('js/tracking.js') }}?v={{ filemtime(public_path('js/tracking.js')) }}"></script>
 
     {{-- DNS prefetch + preconnect to cut RTT on first request to fonts CDN --}}
+    {{-- Keep preconnects sparing (Lighthouse warns past a handful). Only the origins that
+         serve render-critical *files* get a full preconnect: gstatic (font files) + the icon
+         CDN. The Google Fonts CSS host (googleapis) is now loaded async, so dns-prefetch is enough. --}}
     <link rel="dns-prefetch" href="https://fonts.googleapis.com">
     <link rel="dns-prefetch" href="https://fonts.gstatic.com">
     <link rel="dns-prefetch" href="https://cdn-uicons.flaticon.com">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://cdn-uicons.flaticon.com" crossorigin>
     @php
