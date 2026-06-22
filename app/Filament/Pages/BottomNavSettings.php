@@ -107,7 +107,7 @@ class BottomNavSettings extends Page implements HasForms
                 ]),
 
             Section::make('Items')
-                ->description('Each tab in the bar (max 6). Icons use Flaticon UICons classes, e.g. "fi-rr-home" — browse at flaticon.com/uicons/interface-icons.')
+                ->description('Each tab in the bar (max 6). Icon = one of the built-in names: home, apps, tags, gift, star, search, heart, user, shopping-cart, shopping-bag, box-open, marker, phone-call, envelope, link. (Legacy "fi-rr-…" values still work; unknown names show a link icon.)')
                 ->schema([
                     Repeater::make('bottom_nav_items')
                         ->hiddenLabel()
@@ -121,8 +121,8 @@ class BottomNavSettings extends Page implements HasForms
                                 ->label('Label')->required()->maxLength(20),
 
                             TextInput::make('icon')
-                                ->label('Icon class')->required()
-                                ->placeholder('fi-rr-home')->default('fi-rr-link'),
+                                ->label('Icon name')->required()
+                                ->placeholder('home')->default('link'),
 
                             Select::make('action')
                                 ->label('Action')->required()->default('link')

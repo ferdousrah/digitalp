@@ -84,7 +84,7 @@
             <button onclick="cartOpen()" aria-label="{{ $label }}" class="mbn-item"
                     style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; padding:8px 0 7px; background:none; border:none; cursor:pointer; color:{{ $labelColor }};">
                 <span style="position:relative; display:inline-flex; line-height:1;">
-                    <i class="fi {{ $icon }}" style="font-size:20px; line-height:1; color:{{ $iconColor }};"></i>
+                    <x-app-icon :name="$icon" :size="20" :style="'color:' . $iconColor . ';'" />
                     <span id="cart-bottom-badge" style="position:absolute; top:-6px; right:-8px; background:{{ $bn['bottom_nav_badge_bg'] }}; color:{{ $bn['bottom_nav_badge_text'] }}; font-size:0.62rem; font-weight:700; min-width:16px; height:16px; padding:0 4px; border-radius:9px; display:none; align-items:center; justify-content:center; line-height:1;">0</span>
                 </span>
                 <span style="font-size:0.66rem; font-weight:{{ $weight }};">{{ $label }}</span>
@@ -92,7 +92,7 @@
         @else
             <a href="{{ $href }}" aria-label="{{ $label }}" class="mbn-item"
                style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; padding:8px 0 7px; text-decoration:none; color:{{ $labelColor }};">
-                <i class="fi {{ $icon }}" style="font-size:20px; line-height:1; color:{{ $iconColor }};"></i>
+                <x-app-icon :name="$icon" :size="20" :style="'color:' . $iconColor . ';'" />
                 <span style="font-size:0.66rem; font-weight:{{ $weight }};">{{ $label }}</span>
             </a>
         @endif

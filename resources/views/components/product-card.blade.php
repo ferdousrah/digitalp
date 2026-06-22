@@ -181,7 +181,7 @@
                 style="flex:1; display:flex; align-items:center; justify-content:center; gap:5px; padding:9px 6px; background:{{ $tc['color_btn_cart_bg'] }}; color:{{ $tc['color_btn_cart_text'] }}; border:none; cursor:pointer; font-size:0.75rem; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; transition:background 0.2s, color 0.2s;"
                 onmouseover="this.style.background='{{ $tc['color_btn_cart_hover_bg'] }}';this.style.color='{{ $tc['color_btn_cart_hover_text'] }}'"
                 onmouseout="this.style.background='{{ $tc['color_btn_cart_bg'] }}';this.style.color='{{ $tc['color_btn_cart_text'] }}'">
-                <i class="fi fi-rr-shopping-cart" style="font-size:12px; line-height:1;"></i>
+                <x-app-icon name="shopping-cart" :size="12" />
                 <span>Add to Cart</span>
             </button>
 
@@ -191,7 +191,7 @@
                 style="flex:1; display:flex; align-items:center; justify-content:center; gap:5px; padding:9px 6px; background:{{ $tc['color_btn_buy_bg'] }}; color:{{ $tc['color_btn_buy_text'] }}; border:none; font-size:0.75rem; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; cursor:pointer; transition:background 0.2s, color 0.2s;"
                 onmouseover="this.style.background='{{ $tc['color_btn_buy_hover_bg'] }}';this.style.color='{{ $tc['color_btn_buy_hover_text'] }}'"
                 onmouseout="this.style.background='{{ $tc['color_btn_buy_bg'] }}';this.style.color='{{ $tc['color_btn_buy_text'] }}'">
-                <i class="fi fi-rr-bolt" style="font-size:12px; line-height:1;"></i>
+                <x-app-icon name="bolt" :size="12" />
                 <span>Buy Now</span>
             </button>
         </div>

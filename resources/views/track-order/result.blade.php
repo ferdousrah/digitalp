@@ -52,12 +52,12 @@ $sc = $statusColors[$order->status] ?? $statusColors['pending'];
             </div>
             @if($order->payment_status === 'paid')
             <div style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:50px; background:#f0fdf4; border:1px solid #bbf7d0;">
-                <i class="fi fi-rr-check-circle" style="color:#16a34a; font-size:14px; line-height:1;"></i>
+                <x-app-icon name="check-circle" :size="14" style="color:#16a34a;" />
                 <span style="font-size:0.82rem; font-weight:700; color:#15803d;">Payment Confirmed</span>
             </div>
             @elseif($order->payment_status === 'pending')
             <div style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:50px; background:#fffbeb; border:1px solid #fde68a;">
-                <i class="fi fi-rr-clock" style="color:#d97706; font-size:14px; line-height:1;"></i>
+                <x-app-icon name="clock" :size="14" style="color:#d97706;" />
                 <span style="font-size:0.82rem; font-weight:700; color:#92400e;">Payment Pending</span>
             </div>
             @endif
@@ -90,7 +90,7 @@ $sc = $statusColors[$order->status] ?? $statusColors['pending'];
                         border:3px solid {{ $done ? '#f97316' : '#e5e7eb' }};
                         box-shadow:{{ $active ? '0 0 0 5px rgba(249,115,22,0.2)' : 'none' }};
                         transition:all 0.3s ease;">
-                        <i class="fi {{ $step['icon'] }}" style="font-size:18px; line-height:1; color:{{ $done ? '#fff' : '#9ca3af' }};"></i>
+                        <x-app-icon :name="$step['icon']" :size="18" :style="'color:' . ($done ? '#fff' : '#9ca3af') . ';'" />
                     </div>
                     <div style="text-align:center;">
                         <div style="font-size:0.78rem; font-weight:{{ $active ? '800' : '600' }}; color:{{ $done ? '#111827' : '#9ca3af' }};">{{ $step['label'] }}</div>
@@ -103,19 +103,19 @@ $sc = $statusColors[$order->status] ?? $statusColors['pending'];
 
         @if($order->status === 'shipped')
         <div style="margin-top:20px; background:#f5f3ff; border:1px solid #ddd6fe; border-radius:8px; padding:12px 16px; font-size:0.84rem; color:#5b21b6; display:flex; align-items:center; gap:8px;">
-            <i class="fi fi-rr-truck-side" style="font-size:18px; line-height:1;"></i>
+            <x-app-icon name="truck-side" :size="18" />
             Your order is on its way! Expected delivery within 2-5 business days.
         </div>
         @elseif($order->status === 'delivered' || $order->status === 'completed')
         <div style="margin-top:20px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:12px 16px; font-size:0.84rem; color:#15803d; display:flex; align-items:center; gap:8px;">
-            <i class="fi fi-rr-party-horn" style="font-size:18px; line-height:1;"></i>
+            <x-app-icon name="party-horn" :size="18" />
             Your order has been delivered. Thank you for shopping with us!
         </div>
         @endif
     </div>
     @else
     <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:14px; padding:20px 24px; display:flex; align-items:center; gap:14px;">
-        <i class="fi fi-rr-cross-circle" style="font-size:28px; color:#ef4444; flex-shrink:0; line-height:1;"></i>
+        <x-app-icon name="cross-circle" :size="28" style="color:#ef4444; flex-shrink:0;" />
         <div>
             <div style="font-size:0.95rem; font-weight:700; color:#dc2626;">Order Cancelled</div>
             <div style="font-size:0.84rem; color:#991b1b; margin-top:2px;">This order has been cancelled. Please contact us if you have any questions.</div>
@@ -130,7 +130,7 @@ $sc = $statusColors[$order->status] ?? $statusColors['pending'];
         <div style="background:#fff; border-radius:14px; box-shadow:0 2px 12px rgba(0,0,0,0.07); padding:24px;">
             <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">
                 <div style="width:36px; height:36px; background:#fff7ed; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                    <i class="fi fi-rr-marker" style="font-size:16px; color:#f97316; line-height:1;"></i>
+                    <x-app-icon name="marker" :size="16" style="color:#f97316;" />
                 </div>
                 <h3 style="font-size:0.82rem; font-weight:800; color:#111827; text-transform:uppercase; letter-spacing:0.06em; margin:0;">Shipping Address</h3>
             </div>
@@ -146,7 +146,7 @@ $sc = $statusColors[$order->status] ?? $statusColors['pending'];
         <div style="background:#fff; border-radius:14px; box-shadow:0 2px 12px rgba(0,0,0,0.07); padding:24px;">
             <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">
                 <div style="width:36px; height:36px; background:#fff7ed; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                    <i class="fi fi-rr-credit-card" style="font-size:16px; color:#f97316; line-height:1;"></i>
+                    <x-app-icon name="credit-card" :size="16" style="color:#f97316;" />
                 </div>
                 <h3 style="font-size:0.82rem; font-weight:800; color:#111827; text-transform:uppercase; letter-spacing:0.06em; margin:0;">Payment Summary</h3>
             </div>
@@ -181,7 +181,7 @@ $sc = $statusColors[$order->status] ?? $statusColors['pending'];
     <div style="background:#fff; border-radius:14px; box-shadow:0 2px 12px rgba(0,0,0,0.07); overflow:hidden;">
         <div style="padding:20px 24px; border-bottom:1px solid #f3f4f6; display:flex; align-items:center; gap:10px;">
             <div style="width:36px; height:36px; background:#fff7ed; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                <i class="fi fi-rr-shopping-bag" style="font-size:16px; color:#f97316; line-height:1;"></i>
+                <x-app-icon name="shopping-bag" :size="16" style="color:#f97316;" />
             </div>
             <h3 style="font-size:0.82rem; font-weight:800; color:#111827; text-transform:uppercase; letter-spacing:0.06em; margin:0;">
                 Order Items <span style="font-size:0.75rem; color:#9ca3af; font-weight:600; text-transform:none;">({{ $order->items->count() }} {{ Str::plural('item', $order->items->count()) }})</span>
@@ -194,7 +194,7 @@ $sc = $statusColors[$order->status] ?? $statusColors['pending'];
                     style="width:60px; height:60px; object-fit:cover; border-radius:8px; border:1px solid #e5e7eb; flex-shrink:0;">
             @else
                 <div style="width:60px; height:60px; background:#f3f4f6; border-radius:8px; border:1px solid #e5e7eb; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                    <i class="fi fi-rr-picture" style="font-size:22px; color:#d1d5db; line-height:1;"></i>
+                    <x-app-icon name="picture" :size="22" style="color:#d1d5db;" />
                 </div>
             @endif
             <div style="flex:1; min-width:0;">
@@ -212,21 +212,21 @@ $sc = $statusColors[$order->status] ?? $statusColors['pending'];
             style="display:inline-flex; align-items:center; gap:8px; padding:11px 22px; background:#fff; border:1.5px solid #e5e7eb; border-radius:8px; font-size:0.85rem; font-weight:700; color:#374151; text-decoration:none; transition:all 0.2s;"
             onmouseover="this.style.borderColor='#f97316'; this.style.color='#f97316';"
             onmouseout="this.style.borderColor='#e5e7eb'; this.style.color='#374151';">
-            <i class="fi fi-rr-arrow-left" style="line-height:1;"></i>
+            <x-app-icon name="arrow-left" size="1em" />
             Track Another Order
         </a>
         <a href="{{ route('checkout.invoice', $order->order_number) }}"
             style="display:inline-flex; align-items:center; gap:8px; padding:11px 22px; background:#f97316; border:1.5px solid #f97316; border-radius:8px; font-size:0.85rem; font-weight:700; color:#fff; text-decoration:none; transition:all 0.2s;"
             onmouseover="this.style.background='#ea6c0a';"
             onmouseout="this.style.background='#f97316';">
-            <i class="fi fi-rr-file-download" style="line-height:1;"></i>
+            <x-app-icon name="file-download" size="1em" />
             Download Invoice
         </a>
         <a href="{{ route('products.index') }}"
             style="display:inline-flex; align-items:center; gap:8px; padding:11px 22px; background:#fff; border:1.5px solid #e5e7eb; border-radius:8px; font-size:0.85rem; font-weight:700; color:#374151; text-decoration:none; transition:all 0.2s;"
             onmouseover="this.style.borderColor='#16a34a'; this.style.color='#16a34a';"
             onmouseout="this.style.borderColor='#e5e7eb'; this.style.color='#374151';">
-            <i class="fi fi-rr-shopping-cart" style="line-height:1;"></i>
+            <x-app-icon name="shopping-cart" size="1em" />
             Continue Shopping
         </a>
     </div>

@@ -36,7 +36,7 @@
             style="display:inline-flex; align-items:center; gap:8px; padding:11px 28px; background:#111827; color:#fff; font-size:0.875rem; font-weight:700; border-radius:8px; text-decoration:none; transition:background 0.2s;"
             onmouseover="this.style.background='#000'"
             onmouseout="this.style.background='#111827'">
-            <i class="fi fi-rr-envelope" style="line-height:1;"></i>
+            <x-app-icon name="envelope" size="1em" />
             {{ sc('home', 'faq_cta_btn', 'Contact Us') }}
         </a>
     </div>

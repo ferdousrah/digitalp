@@ -43,8 +43,8 @@
             <!-- Mobile hamburger (left — mobile only) -->
             <button @click="mobileMenuOpen = !mobileMenuOpen" class="mobile-hamburger" aria-label="Menu"
                     style="align-items:center; justify-content:center; width:42px; height:42px; padding:0; color:#374151; background:none; border:none; cursor:pointer;">
-                <i x-show="!mobileMenuOpen" class="fi fi-rr-menu-burger" style="font-size:24px; line-height:1;"></i>
-                <i x-show="mobileMenuOpen" x-cloak class="fi fi-rr-cross" style="font-size:24px; line-height:1;"></i>
+                <x-app-icon name="menu-burger" :size="24" x-show="!mobileMenuOpen" />
+                <x-app-icon name="cross" :size="24" x-show="mobileMenuOpen" x-cloak />
             </button>
 
             <!-- Logo -->
@@ -79,7 +79,7 @@
                         onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none';"
                         autocomplete="off">
                     <button type="submit" aria-label="Search" style="position:absolute; right:0; top:0; bottom:0; width:52px; display:flex; align-items:center; justify-content:center; background:transparent; border:none; cursor:pointer; color:#9ca3af; transition:color 0.2s;" onmouseover="this.style.color='#16a34a'" onmouseout="this.style.color='#9ca3af'">
-                        <i class="fi fi-rr-search" style="font-size:18px; line-height:1;"></i>
+                        <x-app-icon name="search" :size="18" />
                     </button>
                     <div data-search-results class="hidden" style="position:absolute; top:calc(100% + 6px); left:0; right:0; background:#fff; border:1px solid #e5e7eb; border-radius:16px; box-shadow:0 8px 32px rgba(0,0,0,0.12); z-index:100; max-height:280px; overflow-y:auto;"></div>
                 </form>
@@ -90,7 +90,7 @@
 
                 <!-- Track Order (desktop only) -->
                 <a href="{{ route('track-order.index') }}" style="display:none; flex-direction:column; align-items:center; gap:2px; padding:8px 12px; color:#374151; text-decoration:none; transition:color 0.2s;" class="lg-flex-col" onmouseover="this.style.color='#16a34a'" onmouseout="this.style.color='#374151'">
-                    <i class="fi fi-rr-box-open" style="font-size:22px; line-height:1;"></i>
+                    <x-app-icon name="box-open" :size="22" />
                     <span style="font-size:0.7125rem; font-weight:500; white-space:nowrap;">{{ sc('navbar', 'track_order', 'Track Order') }}</span>
                 </a>
 
@@ -98,7 +98,7 @@
                 @auth
                     <div x-data="{ open:false }" @click.outside="open=false" class="lg-flex-col" style="display:none; position:relative;">
                         <button @click="open=!open" style="display:flex; flex-direction:column; align-items:center; gap:2px; padding:8px 12px; color:#374151; background:none; border:none; cursor:pointer; transition:color 0.2s;" onmouseover="this.style.color='#16a34a'" onmouseout="this.style.color='#374151'" aria-label="Account">
-                            <i class="fi fi-rr-user" style="font-size:22px; line-height:1;"></i>
+                            <x-app-icon name="user" :size="22" />
                             <span style="font-size:0.7125rem; font-weight:500; white-space:nowrap; max-width:90px; overflow:hidden; text-overflow:ellipsis;">{{ explode(' ', auth()->user()->name ?? 'Account')[0] ?: 'Account' }}</span>
                         </button>
                         <div x-show="open" x-cloak x-transition style="position:absolute; top:100%; right:0; min-width:200px; background:#fff; border:1px solid #e5e7eb; border-radius:10px; box-shadow:0 12px 28px rgba(15,23,42,0.12); padding:6px; z-index:60;">
@@ -127,28 +127,28 @@
                     </div>
                 @else
                     <a href="{{ route('login') }}" style="display:none; flex-direction:column; align-items:center; gap:2px; padding:8px 12px; color:#374151; text-decoration:none; transition:color 0.2s;" class="lg-flex-col" onmouseover="this.style.color='#16a34a'" onmouseout="this.style.color='#374151'">
-                        <i class="fi fi-rr-user" style="font-size:22px; line-height:1;"></i>
+                        <x-app-icon name="user" :size="22" />
                         <span style="font-size:0.7125rem; font-weight:500; white-space:nowrap;">{{ sc('navbar', 'sign_in', 'Sign In') }}</span>
                     </a>
                 @endauth
 
                 <!-- Wishlist -->
                 <a href="{{ route('wishlist.index') }}" class="header-action-wishlist" style="display:flex; flex-direction:column; align-items:center; gap:2px; padding:8px 10px; color:#374151; text-decoration:none; transition:color 0.2s; position:relative;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#374151'" aria-label="Wishlist">
-                    <i class="fi fi-rr-heart" style="font-size:22px; line-height:1;"></i>
+                    <x-app-icon name="heart" :size="22" />
                     <span class="header-icon-label" style="font-size:0.7125rem; font-weight:500;">{{ sc('navbar', 'wishlist', 'Wishlist') }}</span>
                     <span id="wishlist-badge" style="position:absolute; top:2px; right:4px; background:#ef4444; color:#fff; font-size:0.6625rem; font-weight:700; min-width:16px; height:16px; border-radius:50%; display:{{ ($wishlistCount ?? 0) > 0 ? 'flex' : 'none' }}; align-items:center; justify-content:center; line-height:1;">{{ $wishlistCount ?? 0 }}</span>
                 </a>
 
                 <!-- Compare -->
                 <a href="{{ route('compare.index') }}" class="header-action-compare" style="display:flex; flex-direction:column; align-items:center; gap:2px; padding:8px 10px; color:#374151; text-decoration:none; transition:color 0.2s; position:relative;" onmouseover="this.style.color='#16a34a'" onmouseout="this.style.color='#374151'" aria-label="Compare">
-                    <i class="fi fi-rr-chart-histogram" style="font-size:22px; line-height:1;"></i>
+                    <x-app-icon name="chart-histogram" :size="22" />
                     <span class="header-icon-label" style="font-size:0.7125rem; font-weight:500;">{{ sc('navbar', 'compare', 'Compare') }}</span>
                     <span id="compare-badge" style="position:absolute; top:2px; right:4px; background:#f97316; color:#fff; font-size:0.6625rem; font-weight:700; min-width:16px; height:16px; border-radius:50%; display:{{ ($compareCount ?? 0) > 0 ? 'flex' : 'none' }}; align-items:center; justify-content:center; line-height:1;">{{ $compareCount ?? 0 }}</span>
                 </a>
 
                 <!-- Cart -->
                 <button onclick="cartOpen()" style="display:flex; flex-direction:column; align-items:center; gap:2px; padding:8px 10px; color:#374151; background:none; border:none; cursor:pointer; transition:color 0.2s; position:relative;" onmouseover="this.style.color='#f97316'" onmouseout="this.style.color='#374151'" aria-label="Cart">
-                    <i class="fi fi-rr-shopping-cart" style="font-size:22px; line-height:1;"></i>
+                    <x-app-icon name="shopping-cart" :size="22" />
                     <span class="header-icon-label" style="font-size:0.7125rem; font-weight:500;">{{ sc('navbar', 'cart', 'Cart') }}</span>
                     <span id="cart-header-badge" style="position:absolute; top:2px; right:4px; background:#f97316; color:#fff; font-size:0.6625rem; font-weight:700; min-width:16px; height:16px; border-radius:50%; display:none; align-items:center; justify-content:center; line-height:1;">0</span>
                 </button>
@@ -191,7 +191,7 @@
             <a href="{{ $mmUser ? route('account.index') : route('login') }}"
                style="display:flex; align-items:center; gap:13px; margin:14px; padding:15px 16px; border-radius:14px; background:#f97316; text-decoration:none; box-shadow:0 6px 16px rgba(249,115,22,0.28);">
                 <span style="width:46px; height:46px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 1px 3px rgba(0,0,0,0.12);">
-                    <i class="fi fi-sr-user" style="font-size:24px; color:#94a3b8; line-height:1;"></i>
+                    <x-app-icon name="sr-user" :size="24" style="color:#94a3b8;" />
                 </span>
                 <span style="display:flex; flex-direction:column; line-height:1.25; min-width:0;">
                     <strong style="color:#fff; font-size:1.02rem; font-weight:800;">{{ $mmUser ? 'Hi, ' . explode(' ', $mmUser->name)[0] : 'Hello there!' }}</strong>
@@ -321,7 +321,7 @@
                             onmouseout="this.style.color='rgba(255,255,255,0.75)'; this.style.background='transparent'">
                             {{ $item->label }}
                             @if($children->count())
-                                <i class="fi fi-rr-angle-small-down" style="font-size:12px; opacity:0.7;"></i>
+                                <x-app-icon name="angle-small-down" :size="12" style="opacity:0.7;" />
                             @endif
                         </a>
                         @if($children->count())
@@ -343,7 +343,7 @@
                                     <a href="{{ route('categories.show', $subCat) }}"
                                         style="display:flex; align-items:center; justify-content:space-between; gap:10px; padding:9px 18px; font-size:0.875rem; text-decoration:none; border-bottom:1px solid rgba(0,0,0,0.05); transition:background 0.15s, color 0.15s;">
                                         <span>{{ $subCat->name }}</span>
-                                        <i class="fi fi-rr-angle-small-right" style="font-size:13px; opacity:0.6;"></i>
+                                        <x-app-icon name="angle-small-right" :size="13" style="opacity:0.6;" />
                                     </a>
                                     <div x-show="subOpen" x-cloak class="nav-submenu"
                                         x-transition:enter="transition ease-out duration-150"

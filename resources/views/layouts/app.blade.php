@@ -27,15 +27,12 @@
          and runs after HTML is fully parsed but before DOMContentLoaded. --}}
     <script defer src="{{ asset('js/tracking.js') }}?v={{ filemtime(public_path('js/tracking.js')) }}"></script>
 
-    {{-- DNS prefetch + preconnect to cut RTT on first request to fonts CDN --}}
-    {{-- Keep preconnects sparing (Lighthouse warns past a handful). Only the origins that
-         serve render-critical *files* get a full preconnect: gstatic (font files) + the icon
-         CDN. The Google Fonts CSS host (googleapis) is now loaded async, so dns-prefetch is enough. --}}
+    {{-- DNS prefetch + preconnect for the fonts CDN. Icons are now inline SVG (<x-icon>),
+         so the Flaticon CDN is gone entirely. Google Fonts CSS host (googleapis) is loaded
+         async, so dns-prefetch is enough; gstatic serves the font files → full preconnect. --}}
     <link rel="dns-prefetch" href="https://fonts.googleapis.com">
     <link rel="dns-prefetch" href="https://fonts.gstatic.com">
-    <link rel="dns-prefetch" href="https://cdn-uicons.flaticon.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://cdn-uicons.flaticon.com" crossorigin>
     @php
         use App\Services\SettingService;
         $fontEnglish  = SettingService::get('font_english', 'Inter');
@@ -228,16 +225,6 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    {{-- Flaticon UICons — async-loaded so they don't block first paint.
-         Pattern: load as `print` media (browsers download non-blockingly) then
-         flip to `all` once the file arrives. <noscript> fallback for the rare
-         no-JS visitor. --}}
-    <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-rounded/css/uicons-regular-rounded.css" media="print" onload="this.media='all'; this.onload=null;">
-    <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/2.6.0/uicons-solid-rounded/css/uicons-solid-rounded.css" media="print" onload="this.media='all'; this.onload=null;">
-    <noscript>
-        <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-rounded/css/uicons-regular-rounded.css">
-        <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/2.6.0/uicons-solid-rounded/css/uicons-solid-rounded.css">
-    </noscript>
     @stack('styles')
 </head>
 <body class="min-h-screen flex flex-col">

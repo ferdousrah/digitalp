@@ -16,7 +16,7 @@
         {{-- Error --}}
         @if(session('error'))
         <div style="background:#fef2f2; border:1px solid #fecaca; border-left:4px solid #ef4444; border-radius:8px; padding:14px 18px; margin-bottom:20px; font-size:0.85rem; color:#dc2626; display:flex; align-items:center; gap:10px;">
-            <i class="fi fi-rr-cross-circle" style="font-size:18px; flex-shrink:0;"></i>
+            <x-app-icon name="cross-circle" :size="18" style="flex-shrink:0;" />
             {{ session('error') }}
         </div>
         @endif
@@ -31,7 +31,7 @@
                         {{ sc('track', 'order_number_label', 'Order Number') }} <span style="color:#ef4444;">*</span>
                     </label>
                     <div style="position:relative;">
-                        <i class="fi fi-rr-receipt" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); font-size:16px; color:#9ca3af; line-height:1;"></i>
+                        <x-app-icon name="receipt" :size="16" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#9ca3af;" />
                         <input type="text" name="order_number" value="{{ old('order_number') }}" required
                             placeholder="{{ sc('track', 'order_number_placeholder', 'e.g. ORD-ABC123XYZ') }}"
                             style="width:100%; padding:11px 14px 11px 44px; border:1.5px solid {{ $errors->has('order_number') ? '#ef4444' : '#e5e7eb' }}; border-radius:8px; font-size:0.9rem; color:#111827; outline:none; box-sizing:border-box; transition:border-color 0.2s, box-shadow 0.2s;"
@@ -46,7 +46,7 @@
                         {{ sc('track', 'phone_label', 'Phone Number') }} <span style="color:#ef4444;">*</span>
                     </label>
                     <div style="position:relative;">
-                        <i class="fi fi-rr-phone-call" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); font-size:16px; color:#9ca3af; line-height:1;"></i>
+                        <x-app-icon name="phone-call" :size="16" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#9ca3af;" />
                         <input type="text" name="phone" value="{{ old('phone') }}" required
                             placeholder="{{ sc('track', 'phone_placeholder', '01XXXXXXXXX') }}"
                             style="width:100%; padding:11px 14px 11px 44px; border:1.5px solid {{ $errors->has('phone') ? '#ef4444' : '#e5e7eb' }}; border-radius:8px; font-size:0.9rem; color:#111827; outline:none; box-sizing:border-box; transition:border-color 0.2s, box-shadow 0.2s;"
