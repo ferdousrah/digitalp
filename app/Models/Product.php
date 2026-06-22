@@ -223,8 +223,10 @@ class Product extends Model implements HasMedia
      */
     public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('product_images')
-            ->useFallbackUrl('/images/placeholder-product.jpg');
+        // No useFallbackUrl: the missing /images/placeholder-product.jpg 404'd. When a
+        // product has no image, getFirstMediaUrl() now returns '' and the <x-product-image>
+        // / <x-media-image> component renders its own inline-SVG placeholder instead.
+        $this->addMediaCollection('product_images');
 
         // Multiple thumbnails — the product card shows them as a hover slider when >1.
         $this->addMediaCollection('product_thumbnail');

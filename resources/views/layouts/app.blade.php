@@ -241,6 +241,20 @@
     @stack('styles')
 </head>
 <body class="min-h-screen flex flex-col">
+    {{-- Carousel drag/nav helpers defined up-front: auto-scrolling strips move under the
+         cursor during (slow) loads and fire inline on{mousedown,move,up,leave} handlers before
+         a bottom-of-page script would exist — causing "hsCarouselDragMove is not defined". --}}
+    <script>
+    function hsCarouselNav(id, dir) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        var itemWidth = el.firstElementChild ? el.firstElementChild.offsetWidth + 20 : 200;
+        el.scrollBy({ left: dir * itemWidth, behavior: 'smooth' });
+    }
+    function hsCarouselDragStart(e, el) { el._drag = { active: true, x: e.pageX, left: el.scrollLeft }; el.style.cursor = 'grabbing'; el.style.userSelect = 'none'; }
+    function hsCarouselDragMove(e, el) { if (!el._drag || !el._drag.active) return; e.preventDefault(); el.scrollLeft = el._drag.left - (e.pageX - el._drag.x); }
+    function hsCarouselDragEnd(e, el) { if (!el._drag) return; el._drag.active = false; el.style.cursor = 'grab'; el.style.userSelect = ''; }
+    </script>
     <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary-500 text-white px-4 py-2 rounded z-50">
         Skip to main content
     </a>
@@ -1016,31 +1030,8 @@
     </script>
 
     <script>
-    // Homepage section carousel helpers
-    function hsCarouselNav(id, dir) {
-        var el = document.getElementById(id);
-        if (!el) return;
-        var itemWidth = el.firstElementChild ? el.firstElementChild.offsetWidth + 20 : 200;
-        el.scrollBy({ left: dir * itemWidth, behavior: 'smooth' });
-    }
-    // Mouse drag to scroll
-    function hsCarouselDragStart(e, el) {
-        el._drag = { active: true, x: e.pageX, left: el.scrollLeft };
-        el.style.cursor = 'grabbing';
-        el.style.userSelect = 'none';
-    }
-    function hsCarouselDragMove(e, el) {
-        if (!el._drag || !el._drag.active) return;
-        e.preventDefault();
-        el.scrollLeft = el._drag.left - (e.pageX - el._drag.x);
-    }
-    function hsCarouselDragEnd(e, el) {
-        if (!el._drag) return;
-        el._drag.active = false;
-        el.style.cursor = 'grab';
-        el.style.userSelect = '';
-    }
-    // Touch swipe support
+    // Homepage section carousel helpers — drag/nav fns are defined early (right after <body>)
+    // so inline handlers never fire before they exist. Touch + init stay here (need the DOM).
     function hsCarouselInit() {
         document.querySelectorAll('.hs-carousel').forEach(function(el) {
             el.style.cursor = 'grab';

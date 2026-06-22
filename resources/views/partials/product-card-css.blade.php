@@ -57,6 +57,9 @@
     .pc-slider-prev { left: 8px; }
     .pc-slider-next { right: 8px; }
     .pc-slider-prev:hover, .pc-slider-next:hover { background: #fff; }
+    /* Keep vertical centering on click — overrides the global `button:active { translateY(1px) }`
+       micro-interaction, which would otherwise drop these absolutely-centered arrows downward. */
+    .pc-slider-prev:active, .pc-slider-next:active { transform: translateY(-50%) !important; }
     .product-card:hover .pc-slider-prev,
     .product-card:hover .pc-slider-next { opacity: 1; }
     .pc-slider-dots {
