@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Kalnoy\Nestedset\NodeTrait;
 use App\Models\Concerns\HasResponsiveImages;
+use App\Models\Concerns\ReusableSlug;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -16,7 +17,7 @@ use Spatie\Sluggable\SlugOptions;
 
 class Category extends Model implements HasMedia
 {
-    use SoftDeletes, NodeTrait, InteractsWithMedia, HasSlug, HasResponsiveImages;
+    use SoftDeletes, NodeTrait, InteractsWithMedia, HasResponsiveImages, HasSlug, ReusableSlug;
 
     /**
      * The attributes that are mass assignable.

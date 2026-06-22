@@ -12,12 +12,13 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use App\Models\Concerns\HasResponsiveImages;
+use App\Models\Concerns\ReusableSlug;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 
 class BlogPost extends Model implements HasMedia
 {
-    use HasFactory, SoftDeletes, InteractsWithMedia, HasSlug, Searchable, HasResponsiveImages;
+    use HasFactory, SoftDeletes, InteractsWithMedia, Searchable, HasResponsiveImages, HasSlug, ReusableSlug;
 
     /**
      * The attributes that are mass assignable.

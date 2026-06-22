@@ -9,12 +9,13 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use App\Models\Concerns\HasResponsiveImages;
+use App\Models\Concerns\ReusableSlug;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 
 class Page extends Model implements HasMedia
 {
-    use SoftDeletes, InteractsWithMedia, HasSlug, HasResponsiveImages;
+    use SoftDeletes, InteractsWithMedia, HasResponsiveImages, HasSlug, ReusableSlug;
 
     /**
      * The attributes that are mass assignable.
