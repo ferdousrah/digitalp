@@ -240,8 +240,30 @@
         </div>
     </div>
 
-    <!-- Tabbed Section: Specifications | Details | Q&A | Review -->
-    <div id="product-tabs" x-data="{ activeTab: 'specifications' }" style="margin-top:48px;">
+    <!-- Tabbed Section — tabs are dynamic: empty built-in tabs hide, and admin-defined
+         custom tabs (Size Chart, How to Use, Ingredients…) slot in per product type. -->
+    @php
+        $tabAttrRows = $product->attributeValues->filter(fn ($av) => $av->attribute && filled($av->value));
+        $tabSpecRows = collect($product->specifications ?: [])->filter(fn ($v) => filled($v));
+        $hasSpecData = $tabAttrRows->count() || $tabSpecRows->count();
+
+        $customTabs = collect($product->custom_tabs ?: [])
+            ->filter(fn ($t) => ! empty($t['title']) && ! empty($t['content']))
+            ->values();
+
+        $hasFaqs = collect($product->faqs ?: [])->filter(fn ($f) => ! empty($f['question']))->count() > 0;
+
+        $tabs = [];
+        if ($hasSpecData)                  $tabs[] = ['key' => 'specifications', 'label' => 'Specifications'];
+        if (filled($product->description)) $tabs[] = ['key' => 'details', 'label' => 'Details'];
+        foreach ($customTabs as $ci => $ct) $tabs[] = ['key' => 'custom-' . $ci, 'label' => $ct['title']];
+        if ($hasFaqs)                      $tabs[] = ['key' => 'faq', 'label' => 'FAQ'];
+        $tabs[] = ['key' => 'qa',     'label' => 'Q&A'];
+        $tabs[] = ['key' => 'review', 'label' => 'Reviews'];
+
+        $defaultTab = $tabs[0]['key'] ?? 'qa';
+    @endphp
+    <div id="product-tabs" x-data="{ activeTab: '{{ (session('question_success') || old('question')) ? 'qa' : $defaultTab }}' }" style="margin-top:48px;">
         <style>
             /* Product action buttons (Add to Cart / Buy Now / WhatsApp / Call) — compact, equal height */
             .pd-action-btn { padding: 11px 12px !important; line-height: 1.2; text-align: center; }
@@ -268,22 +290,12 @@
         </style>
         <!-- Tab Headers (scroll horizontally on narrow screens) -->
         <div class="prod-tabs" style="display:flex; border-bottom:1px solid #d1d5db; overflow-x:auto;">
-            <button id="tab-specifications" @click="activeTab = 'specifications'"
-                :style="'padding:12px 28px; font-size:0.925rem; font-weight:600; border:1px solid; border-bottom:none; cursor:pointer; margin-bottom:-1px; margin-right:-1px;' + (activeTab === 'specifications' ? 'background:#111827; color:#fff; border-color:#111827;' : 'background:transparent; color:#374151; border-color:#d1d5db;')">
-                Specifications
+            @foreach($tabs as $tab)
+            <button id="tab-{{ $tab['key'] }}" @click="activeTab = '{{ $tab['key'] }}'"
+                :style="'padding:12px 28px; font-size:0.925rem; font-weight:600; border:1px solid; border-bottom:none; cursor:pointer; margin-bottom:-1px; margin-right:-1px;' + (activeTab === '{{ $tab['key'] }}' ? 'background:#111827; color:#fff; border-color:#111827;' : 'background:transparent; color:#374151; border-color:#d1d5db;')">
+                {{ $tab['label'] }}
             </button>
-            <button @click="activeTab = 'details'"
-                :style="'padding:12px 28px; font-size:0.925rem; font-weight:600; border:1px solid; border-bottom:none; cursor:pointer; margin-bottom:-1px; margin-right:-1px;' + (activeTab === 'details' ? 'background:#111827; color:#fff; border-color:#111827;' : 'background:transparent; color:#374151; border-color:#d1d5db;')">
-                Details
-            </button>
-            <button @click="activeTab = 'qa'"
-                :style="'padding:12px 28px; font-size:0.925rem; font-weight:600; border:1px solid; border-bottom:none; cursor:pointer; margin-bottom:-1px; margin-right:-1px;' + (activeTab === 'qa' ? 'background:#111827; color:#fff; border-color:#111827;' : 'background:transparent; color:#374151; border-color:#d1d5db;')">
-                FAQ
-            </button>
-            <button id="tab-review" @click="activeTab = 'review'"
-                :style="'padding:12px 28px; font-size:0.925rem; font-weight:600; border:1px solid; border-bottom:none; cursor:pointer; margin-bottom:-1px;' + (activeTab === 'review' ? 'background:#111827; color:#fff; border-color:#111827;' : 'background:transparent; color:#374151; border-color:#d1d5db;')">
-                Review
-            </button>
+            @endforeach
         </div>
 
         <!-- Tab Content -->
@@ -291,11 +303,26 @@
 
             <!-- Specifications Tab -->
             <div x-show="activeTab === 'specifications'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
-                @if($product->specifications && count($product->specifications))
+                @php
+                    // Structured attribute values (Color, Size, Material…) assigned to the product,
+                    // PLUS the free-form specifications JSON. Both render in one table.
+                    $attrRows = $product->attributeValues
+                        ->filter(fn ($av) => $av->attribute && filled($av->value));
+                    $specRows = collect($product->specifications ?: [])->filter(fn ($v) => filled($v));
+                    $hasSpecData = $attrRows->count() || $specRows->count();
+                @endphp
+                @if($hasSpecData)
                 <table class="pd-spec" style="width:100%; border-collapse:collapse;">
                     <tbody>
                         @php $specIndex = 0; @endphp
-                        @foreach($product->specifications as $key => $value)
+                        @foreach($attrRows as $av)
+                        <tr style="border-bottom:1px solid #f3f4f6; {{ $specIndex % 2 === 0 ? 'background:#fff;' : 'background:#f9fafb;' }}">
+                            <td style="padding:14px 24px; width:35%; font-weight:600; color:#111827; font-size:0.9rem; vertical-align:top;">{{ $av->attribute->name }}</td>
+                            <td style="padding:14px 24px; color:#374151; font-size:0.9rem; vertical-align:top;">{{ $av->value }}</td>
+                        </tr>
+                        @php $specIndex++; @endphp
+                        @endforeach
+                        @foreach($specRows as $key => $value)
                         <tr style="border-bottom:1px solid #f3f4f6; {{ $specIndex % 2 === 0 ? 'background:#fff;' : 'background:#f9fafb;' }}">
                             <td style="padding:14px 24px; width:35%; font-weight:600; color:#111827; font-size:0.9rem; vertical-align:top;">{{ $key }}</td>
                             <td style="padding:14px 24px; color:#374151; font-size:0.9rem; vertical-align:top;">{{ $value }}</td>
@@ -318,8 +345,15 @@
                 @endif
             </div>
 
+            <!-- Custom Tabs (admin-defined per product: Size Chart, How to Use, Ingredients…) -->
+            @foreach($customTabs as $ci => $ct)
+            <div x-show="activeTab === 'custom-{{ $ci }}'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" style="display:none;">
+                <div style="padding:24px;" class="prose prose-sm sm:prose-base lg:prose-lg max-w-none">{!! $ct['content'] !!}</div>
+            </div>
+            @endforeach
+
             <!-- FAQ Tab -->
-            <div x-show="activeTab === 'qa'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" style="display:none;">
+            <div x-show="activeTab === 'faq'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" style="display:none;">
                 @if(!empty($product->faqs) && count($product->faqs))
                 <div style="padding:6px 0;">
                     @foreach($product->faqs as $faq)
@@ -344,6 +378,54 @@
                     <p style="color:#6b7280; font-size:0.9rem;">No FAQs have been added for this product yet.</p>
                 </div>
                 @endif
+            </div>
+
+            <!-- Q&A Tab (public questions → admin answers) -->
+            <div x-show="activeTab === 'qa'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" style="display:none;">
+                <div style="padding:24px;">
+                    @if(session('question_success'))
+                    <div style="background:#f0fdf4; border:1px solid #bbf7d0; color:#15803d; border-radius:8px; padding:12px 16px; margin-bottom:18px; font-size:0.88rem;">{{ session('question_success') }}</div>
+                    @endif
+
+                    @forelse($product->publishedQuestions as $q)
+                    <div style="border-bottom:1px solid #f3f4f6; padding:16px 0;">
+                        <div style="display:flex; gap:10px;">
+                            <span style="flex-shrink:0; width:24px; height:24px; border-radius:50%; background:#eef2ff; color:#4f46e5; font-weight:800; font-size:0.78rem; display:flex; align-items:center; justify-content:center;">Q</span>
+                            <div>
+                                <p style="margin:0; font-weight:600; color:#111827; font-size:0.92rem; line-height:1.5;">{{ $q->question }}</p>
+                                <p style="margin:3px 0 0; font-size:0.74rem; color:#9ca3af;">Asked by {{ $q->name }}{{ $q->answered_at ? ' · ' . $q->answered_at->format('d M Y') : '' }}</p>
+                            </div>
+                        </div>
+                        <div style="display:flex; gap:10px; margin-top:10px;">
+                            <span style="flex-shrink:0; width:24px; height:24px; border-radius:50%; background:#f0fdf4; color:#16a34a; font-weight:800; font-size:0.78rem; display:flex; align-items:center; justify-content:center;">A</span>
+                            <p style="margin:0; color:#4b5563; font-size:0.9rem; line-height:1.7;">{!! nl2br(e($q->answer)) !!}</p>
+                        </div>
+                    </div>
+                    @empty
+                    <p style="color:#6b7280; font-size:0.9rem; margin:0 0 18px;">No questions answered yet. Ask the first one below!</p>
+                    @endforelse
+
+                    <div style="margin-top:24px; background:#f9fafb; border:1px solid #eef0f2; border-radius:12px; padding:20px;">
+                        <h4 style="margin:0 0 4px; font-size:1rem; font-weight:700; color:#111827;">Have a question about this product?</h4>
+                        <p style="margin:0 0 14px; font-size:0.82rem; color:#6b7280;">Ask away — our team will answer it here.</p>
+                        @if($errors->any())
+                        <div style="background:#fef2f2; border:1px solid #fecaca; color:#dc2626; border-radius:8px; padding:10px 14px; margin-bottom:12px; font-size:0.82rem;">
+                            @foreach($errors->all() as $e)<div>{{ $e }}</div>@endforeach
+                        </div>
+                        @endif
+                        <form method="POST" action="{{ route('products.questions.store', $product) }}">
+                            @csrf
+                            <input type="text" name="name" required maxlength="100" placeholder="Your name"
+                                value="{{ old('name', auth()->user()->name ?? '') }}"
+                                style="width:100%; padding:11px 14px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:0.9rem; outline:none; box-sizing:border-box; margin-bottom:12px;"
+                                onfocus="this.style.borderColor='#f97316'" onblur="this.style.borderColor='#e2e8f0'">
+                            <textarea name="question" required maxlength="1000" rows="3" placeholder="Type your question…"
+                                style="width:100%; padding:11px 14px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:0.9rem; outline:none; resize:vertical; box-sizing:border-box; margin-bottom:12px;"
+                                onfocus="this.style.borderColor='#f97316'" onblur="this.style.borderColor='#e2e8f0'">{{ old('question') }}</textarea>
+                            <button type="submit" style="padding:11px 24px; background:#f97316; color:#fff; border:none; border-radius:8px; font-weight:700; font-size:0.85rem; cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='#ea6c0a'" onmouseout="this.style.background='#f97316'">Submit question</button>
+                        </form>
+                    </div>
+                </div>
             </div>
 
             <!-- Review Tab -->

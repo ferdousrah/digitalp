@@ -80,6 +80,7 @@ Route::get('/products', [ProductController::class, 'index'])->name('products.ind
 Route::get('/products/{product:slug}', [ProductController::class, 'show'])->name('products.show');
 Route::get('/products/{product:slug}/quick-view', [ProductController::class, 'quickView'])->name('products.quickView');
 Route::post('/products/{product:slug}/reviews', [\App\Http\Controllers\ReviewController::class, 'store'])->middleware('auth')->name('products.reviews.store');
+Route::post('/products/{product:slug}/questions', [\App\Http\Controllers\ProductQuestionController::class, 'store'])->name('products.questions.store');
 
 // Categories
 Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');

@@ -36,6 +36,7 @@ class RolePermissionSeeder extends Seeder
         'gallery_albums'   => 'Gallery Albums',
         'testimonials'     => 'Testimonials',
         'reviews'          => 'Product Reviews',
+        'product_questions' => 'Product Q&A',
         'sliders'          => 'Sliders',
         'newsletter'       => 'Newsletter Subscribers',
         'contacts'         => 'Contact Submissions',

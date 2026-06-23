@@ -179,6 +179,20 @@ class ProductResource extends Resource
                         Forms\Components\TextInput::make('dimensions')->maxLength(255),
                         Forms\Components\TextInput::make('warranty_info')->maxLength(255),
                     ]),
+                    Forms\Components\Tabs\Tab::make('Custom Tabs')->schema([
+                        Forms\Components\Repeater::make('custom_tabs')
+                            ->label('Extra tabs')
+                            ->helperText('Add product-type-specific tabs (e.g. Size Chart, Care Guide, How to Use, Ingredients). Each shows as its own tab on the product page. Content supports rich text + images.')
+                            ->reorderable()->collapsible()->cloneable()
+                            ->itemLabel(fn (array $state): ?string => $state['title'] ?? 'Tab')
+                            ->schema([
+                                Forms\Components\TextInput::make('title')->required()->maxLength(40)
+                                    ->placeholder('Size Chart'),
+                                Forms\Components\RichEditor::make('content')->required()
+                                    ->helperText('Use the image button to add a size-chart image, table, etc.'),
+                            ])
+                            ->addActionLabel('Add tab'),
+                    ]),
                     Forms\Components\Tabs\Tab::make('FAQ')->schema([
                         Forms\Components\Repeater::make('faqs')
                             ->label('Frequently Asked Questions')

@@ -46,6 +46,7 @@ class Product extends Model implements HasMedia
         'meta_title',
         'meta_description',
         'specifications',
+        'custom_tabs',
         'faqs',
         'videos',
         'thumbnail_video',
@@ -72,6 +73,7 @@ class Product extends Model implements HasMedia
             'is_best_seller' => 'boolean',
             'in_stock'       => 'boolean',
             'specifications'  => 'array',
+            'custom_tabs'     => 'array',
             'faqs'            => 'array',
             'videos'          => 'array',
             'thumbnail_video' => 'array',
@@ -119,6 +121,18 @@ class Product extends Model implements HasMedia
     public function approvedReviews(): HasMany
     {
         return $this->hasMany(Review::class)->where('status', 'approved')->latest();
+    }
+
+    /** Customer questions (all). */
+    public function questions(): HasMany
+    {
+        return $this->hasMany(ProductQuestion::class);
+    }
+
+    /** Answered + published questions shown on the product page, newest first. */
+    public function publishedQuestions(): HasMany
+    {
+        return $this->hasMany(ProductQuestion::class)->published()->latest('answered_at');
     }
 
     /** True if the user has a non-cancelled order for this product (paid, or delivered/completed). */
