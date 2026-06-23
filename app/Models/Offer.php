@@ -6,6 +6,7 @@ use App\Models\Concerns\HasResponsiveImages;
 use App\Models\Concerns\ReusableSlug;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -39,12 +40,23 @@ class Offer extends Model implements HasMedia
 
     public function registerMediaCollections(): void
     {
+        // Wide banner — shown on the detail page.
         $this->addMediaCollection('offer_banner')->singleFile();
+        // Square card thumbnail — shown on the /offers grid (falls back to the banner).
+        $this->addMediaCollection('offer_thumbnail')->singleFile();
     }
 
     public function registerMediaConversions(?Media $media = null): void
     {
         $this->registerResponsiveConversions(['medium' => 700, 'large' => 1400]);
+    }
+
+    /** Products featured in this offer (optional — empty = information-only offer). */
+    public function products(): BelongsToMany
+    {
+        return $this->belongsToMany(Product::class)
+            ->withPivot('sort_order')
+            ->orderByPivot('sort_order');
     }
 
     /** Active offers whose window (if set) is currently open, ordered for display. */

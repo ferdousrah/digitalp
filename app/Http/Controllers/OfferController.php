@@ -21,7 +21,10 @@ class OfferController extends Controller
     public function show(Offer $offer)
     {
         abort_unless($offer->is_active, 404);
-        $offer->load('media');
+        $offer->load([
+            'media',
+            'products' => fn ($q) => $q->where('is_active', true)->with('media', 'brand'),
+        ]);
 
         $more = Offer::visible()->where('id', '!=', $offer->id)->with('media')->take(3)->get();
 

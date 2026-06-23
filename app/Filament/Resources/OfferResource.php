@@ -40,9 +40,13 @@ class OfferResource extends Resource
                         ->label('Tagline')->maxLength(255)
                         ->placeholder('Easy installments with zero interest'),
                     SpatieMediaLibraryFileUpload::make('offer_banner')
-                        ->collection('offer_banner')->label('Banner image')
+                        ->collection('offer_banner')->label('Banner image (detail page)')
                         ->image()->imageEditor()
-                        ->helperText('Wide promo banner shown on the card + detail page. Recommended ~1400×700.'),
+                        ->helperText('Wide promo banner shown on the offer detail page. Recommended ~1400×700.'),
+                    SpatieMediaLibraryFileUpload::make('offer_thumbnail')
+                        ->collection('offer_thumbnail')->label('Card thumbnail (offers grid)')
+                        ->image()->imageEditor()->imageEditorAspectRatios([null, '1:1'])
+                        ->helperText('Square image shown on the offers grid. Recommended ~600×600. If left empty, the banner is used (shown un-cropped).'),
                     Forms\Components\RichEditor::make('body')
                         ->label('Details / Terms')->columnSpanFull()
                         ->helperText('Full promotion details, terms & conditions, product links, etc.'),
@@ -61,6 +65,14 @@ class OfferResource extends Resource
                     Forms\Components\Toggle::make('is_active')->default(true),
                     Forms\Components\TextInput::make('sort_order')->numeric()->default(0),
                 ])->columns(2),
+
+                Forms\Components\Tabs\Tab::make('Products')->schema([
+                    Forms\Components\Select::make('products')
+                        ->relationship('products', 'name')
+                        ->multiple()->searchable()->preload()
+                        ->label('Featured products')
+                        ->helperText('Products shown as a grid on the offer page. Leave empty for an information-only offer.'),
+                ]),
 
                 Forms\Components\Tabs\Tab::make('SEO')->schema([
                     Forms\Components\TextInput::make('meta_title')->maxLength(255),

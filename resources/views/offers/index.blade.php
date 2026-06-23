@@ -27,11 +27,14 @@
                 } elseif ($offer->ends_at) {
                     $dateBadge = 'UNTIL ' . strtoupper($offer->ends_at->format('d M Y'));
                 }
+                // Prefer a dedicated card thumbnail; fall back to the wide banner.
+                $hasThumb = (bool) $offer->getFirstMediaUrl('offer_thumbnail');
+                $cardColl = $hasThumb ? 'offer_thumbnail' : 'offer_banner';
             @endphp
             <div class="offer-card">
                 <a href="{{ route('offers.show', $offer) }}" class="offer-card-media" aria-label="{{ $offer->title }}">
-                    <x-media-image :model="$offer" collection="offer_banner" size="medium" :alt="$offer->title"
-                        class="offer-card-img">
+                    <x-media-image :model="$offer" :collection="$cardColl" size="medium" :alt="$offer->title"
+                        class="offer-card-img {{ $hasThumb ? 'is-thumb' : 'is-banner' }}">
                         <div class="offer-card-ph"><x-app-icon name="gift" :size="34" style="color:#d1d5db;" /></div>
                     </x-media-image>
                     @if($dateBadge)
@@ -69,8 +72,12 @@
         transition: box-shadow 0.25s, transform 0.25s;
     }
     .offer-card:hover { box-shadow: 0 12px 30px rgba(0,0,0,0.10); transform: translateY(-3px); }
+    /* Square media area. A dedicated thumbnail (admin-uploaded) fills it via cover; if only
+       the wide banner exists, it's shown contained (letterboxed) so nothing gets cropped. */
     .offer-card-media { position: relative; display: block; aspect-ratio: 1/1; background: #f8fafc; overflow: hidden; }
-    .offer-card-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .offer-card-img { width: 100%; height: 100%; display: block; }
+    .offer-card-img.is-thumb  { object-fit: cover; }
+    .offer-card-img.is-banner { object-fit: contain; }
     .offer-card-ph { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg,#f9fafb,#f3f4f6); }
     .offer-card-date {
         position: absolute; left: 12px; right: 12px; bottom: 12px;

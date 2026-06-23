@@ -76,6 +76,18 @@
 
     </div>
 
+    {{-- Featured products in this offer (our own product-card design) --}}
+    @if($offer->products->isNotEmpty())
+    <div style="max-width:1200px; margin:40px auto 0;">
+        <h2 style="font-size:1.2rem; font-weight:800; color:#111827; margin:0 0 18px; text-align:center;">Products in this offer</h2>
+        <div class="product-grid" style="display:grid; align-items:start; justify-items:stretch;">
+            @foreach($offer->products as $product)
+                <x-product-card :product="$product" />
+            @endforeach
+        </div>
+    </div>
+    @endif
+
     {{-- More offers --}}
     @if($more->isNotEmpty())
     <div style="max-width:1100px; margin:48px auto 0;">
