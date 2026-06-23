@@ -60,7 +60,7 @@ class BottomNavSettings extends Page implements HasForms
         return [
             ['label' => 'Home',       'icon' => 'fi-rr-home',          'action' => 'link',    'url' => '/'],
             ['label' => 'Categories', 'icon' => 'fi-rr-apps',          'action' => 'link',    'url' => '/categories/all'],
-            ['label' => 'Offers',     'icon' => 'fi-rr-tags',          'action' => 'link',    'url' => '/products?sale=1'],
+            ['label' => 'Offers',     'icon' => 'fi-rr-tags',          'action' => 'link',    'url' => '/offers'],
             ['label' => 'Cart',       'icon' => 'fi-rr-shopping-cart', 'action' => 'cart',    'url' => '#cart'],
             ['label' => 'Profile',    'icon' => 'fi-rr-user',          'action' => 'account', 'url' => '/account'],
         ];

@@ -114,6 +114,10 @@ Route::get('/blog/{blogPost:slug}', [BlogController::class, 'show'])->name('blog
 Route::get('/services', [ServiceController::class, 'index'])->name('services.index');
 Route::get('/services/{service:slug}', [ServiceController::class, 'show'])->name('services.show');
 
+// Offers / Promotions
+Route::get('/offers', [\App\Http\Controllers\OfferController::class, 'index'])->name('offers.index');
+Route::get('/offers/{offer:slug}', [\App\Http\Controllers\OfferController::class, 'show'])->name('offers.show');
+
 // Contact
 Route::get('/contact', [ContactController::class, 'index'])->name('contact.index');
 Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');

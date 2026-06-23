@@ -32,6 +32,7 @@ class RolePermissionSeeder extends Seeder
         'faqs'             => 'FAQs',
         'faq_categories'   => 'FAQ Categories',
         'services'         => 'Services',
+        'offers'           => 'Offers',
         'gallery_albums'   => 'Gallery Albums',
         'testimonials'     => 'Testimonials',
         'reviews'          => 'Product Reviews',
