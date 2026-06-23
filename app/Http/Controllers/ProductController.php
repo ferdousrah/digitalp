@@ -15,25 +15,24 @@ class ProductController extends Controller
     {
         $baseQuery = Product::query()->active()->with(['media', 'categories', 'brand']);
 
-        // If a category is selected, get its filter attributes
-        $filterAttributes = [];
-        $priceRange = ['min' => 0, 'max' => 0];
-        $selectedCategory = null;
+        // Filter attributes: scoped to the selected category, or all filterable attributes
+        // (used by the products listed) when browsing all products.
+        $selectedCategory = $request->filled('category')
+            ? Category::where('slug', $request->category)->first()
+            : null;
 
-        if ($request->filled('category')) {
-            $selectedCategory = Category::where('slug', $request->category)->first();
-            if ($selectedCategory) {
-                $categoryIds = $selectedCategory->descendants()->pluck('id')
-                    ->push($selectedCategory->id)->toArray();
-
-                // Build a base query for counting (products in this category, active, without attr filters)
-                $countQuery = Product::query()->active()
-                    ->whereHas('categories', fn ($q) => $q->whereIn('categories.id', $categoryIds));
-
-                $filterAttributes = $this->filterService->getFilterData($categoryIds, $countQuery);
-                $priceRange = $this->filterService->getPriceRange($countQuery);
-            }
+        if ($selectedCategory) {
+            $categoryIds = $selectedCategory->descendants()->pluck('id')
+                ->push($selectedCategory->id)->toArray();
+            $countQuery = Product::query()->active()
+                ->whereHas('categories', fn ($q) => $q->whereIn('categories.id', $categoryIds));
+        } else {
+            $categoryIds = [];
+            $countQuery = Product::query()->active();
         }
+
+        $filterAttributes = $this->filterService->getFilterData($categoryIds, $countQuery);
+        $priceRange = $this->filterService->getPriceRange($countQuery);
 
         if (empty($priceRange['max'])) {
             $priceRange = $this->filterService->getPriceRange(Product::query()->active());

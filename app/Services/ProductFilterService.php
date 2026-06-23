@@ -71,11 +71,11 @@ class ProductFilterService
      */
     public function getFilterData(array $categoryIds, Builder $baseQuery): array
     {
-        if (empty($categoryIds)) return [];
-
-        // Get attributes linked to these categories
+        // Category-scoped attributes when a category is selected; otherwise (e.g. the
+        // all-products page) show every filterable attribute that the listed products use.
         $attributes = ProductAttribute::where('is_filterable', true)
-            ->whereHas('categories', fn ($q) => $q->whereIn('categories.id', $categoryIds))
+            ->when(! empty($categoryIds), fn ($q) =>
+                $q->whereHas('categories', fn ($c) => $c->whereIn('categories.id', $categoryIds)))
             ->orderBy('sort_order')
             ->get();
 
