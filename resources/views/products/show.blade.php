@@ -240,8 +240,8 @@
         </div>
     </div>
 
-    <!-- Tabbed Section — fixed tabs: Description (the General-tab description), Q&A, Reviews.
-         Custom Tabs (Ingredients, Specifications, Size Chart, How to Use…) slot in after Description. -->
+    <!-- Tabbed Section — Description + Specifications (auto, from the Details tab) are built-in;
+         Custom Tabs (Size Chart, Ingredients, How to Use…) slot in after; Q&A + Reviews are fixed. -->
     @php
         $customTabs = collect($product->custom_tabs ?: [])
             ->filter(fn ($t) => ! empty($t['title']) && ! empty($t['content']))
@@ -249,8 +249,21 @@
 
         $hasFaqs = collect($product->faqs ?: [])->filter(fn ($f) => ! empty($f['question']))->count() > 0;
 
+        // Auto "Specifications" tab — structured attribute values + the Details-tab fields
+        // (specifications key/value, weight, dimensions, warranty). No retyping needed.
+        $specAttrRows = $product->attributeValues->filter(fn ($av) => $av->attribute && filled($av->value));
+        $specKvRows   = collect($product->specifications ?: [])->filter(fn ($v) => filled($v));
+        $specExtra    = collect([
+            'Weight'     => $product->weight,
+            'Dimensions' => $product->dimensions,
+            'Warranty'   => $product->warranty_info,
+        ])->filter(fn ($v) => filled($v));
+        $hasSpec = $specAttrRows->count() || $specKvRows->count() || $specExtra->count();
+        $specTitle = filled($product->spec_tab_title) ? $product->spec_tab_title : 'Specifications';
+
         $tabs = [];
         if (filled($product->description))  $tabs[] = ['key' => 'description', 'label' => 'Description'];
+        if ($hasSpec)                       $tabs[] = ['key' => 'specifications', 'label' => $specTitle];
         foreach ($customTabs as $ci => $ct) $tabs[] = ['key' => 'custom-' . $ci, 'label' => $ct['title']];
         if ($hasFaqs)                       $tabs[] = ['key' => 'faq', 'label' => 'FAQ'];
         $tabs[] = ['key' => 'qa',     'label' => 'Q&A'];
@@ -303,7 +316,39 @@
             </div>
             @endif
 
-            <!-- Custom Tabs (admin-defined per product: Specifications, Ingredients, Size Chart, How to Use…) -->
+            <!-- Specifications Tab (auto — structured attributes + the Details-tab fields) -->
+            @if($hasSpec)
+            <div x-show="activeTab === 'specifications'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" style="display:none;">
+                <table class="pd-spec" style="width:100%; border-collapse:collapse;">
+                    <tbody>
+                        @php $si = 0; @endphp
+                        @foreach($specAttrRows as $av)
+                        <tr style="border-bottom:1px solid #f3f4f6; {{ $si % 2 === 0 ? 'background:#fff;' : 'background:#f9fafb;' }}">
+                            <td style="padding:14px 24px; width:35%; font-weight:600; color:#111827; font-size:0.9rem; vertical-align:top;">{{ $av->attribute->name }}</td>
+                            <td style="padding:14px 24px; color:#374151; font-size:0.9rem; vertical-align:top;">{{ $av->value }}</td>
+                        </tr>
+                        @php $si++; @endphp
+                        @endforeach
+                        @foreach($specKvRows as $key => $value)
+                        <tr style="border-bottom:1px solid #f3f4f6; {{ $si % 2 === 0 ? 'background:#fff;' : 'background:#f9fafb;' }}">
+                            <td style="padding:14px 24px; width:35%; font-weight:600; color:#111827; font-size:0.9rem; vertical-align:top;">{{ $key }}</td>
+                            <td style="padding:14px 24px; color:#374151; font-size:0.9rem; vertical-align:top;">{{ $value }}</td>
+                        </tr>
+                        @php $si++; @endphp
+                        @endforeach
+                        @foreach($specExtra as $key => $value)
+                        <tr style="border-bottom:1px solid #f3f4f6; {{ $si % 2 === 0 ? 'background:#fff;' : 'background:#f9fafb;' }}">
+                            <td style="padding:14px 24px; width:35%; font-weight:600; color:#111827; font-size:0.9rem; vertical-align:top;">{{ $key }}</td>
+                            <td style="padding:14px 24px; color:#374151; font-size:0.9rem; vertical-align:top;">{{ $value }}</td>
+                        </tr>
+                        @php $si++; @endphp
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            @endif
+
+            <!-- Custom Tabs (admin-defined per product: Size Chart, Ingredients, How to Use…) -->
             @foreach($customTabs as $ci => $ct)
             <div x-show="activeTab === 'custom-{{ $ci }}'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" style="display:none;">
                 <div style="padding:24px;" class="prose prose-sm sm:prose-base lg:prose-lg max-w-none">{!! $ct['content'] !!}</div>

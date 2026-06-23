@@ -174,8 +174,11 @@ class ProductResource extends Resource
                             ),
                     ]),
                     Forms\Components\Tabs\Tab::make('Details')->schema([
+                        Forms\Components\TextInput::make('spec_tab_title')
+                            ->label('Tab title')->maxLength(40)->placeholder('Specifications')
+                            ->helperText('Heading for this tab on the product page (e.g. Specifications, Product Details, Ingredients). Defaults to "Specifications".'),
                         Forms\Components\KeyValue::make('specifications')
-                            ->helperText('Note: the storefront now shows info via the "Custom Tabs" tab (Specifications, Size Chart, etc.). This field is kept for data only — add a Custom Tab to display specs.'),
+                            ->helperText('Shown automatically under the tab title above, together with Weight/Dimensions/Warranty and any product attributes. (Use Custom Tabs for free-form content like Size Chart / How to Use.)'),
                         Forms\Components\TextInput::make('weight')->maxLength(255)->placeholder('e.g. 100gm or 1.63 kg'),
                         Forms\Components\TextInput::make('dimensions')->maxLength(255),
                         Forms\Components\TextInput::make('warranty_info')->maxLength(255),
