@@ -33,6 +33,7 @@ class Order extends Model
             'delivered_at'     => 'datetime',
             'cancelled_at'     => 'datetime',
             'refunded_at'      => 'datetime',
+            'review_request_sent_at' => 'datetime',
         ];
     }
 

@@ -25,7 +25,13 @@ return [
     ],
 
     'resend' => [
-        'key' => env('RESEND_KEY'),
+        'key'  => env('RESEND_KEY'),
+        'from' => env('RESEND_FROM'), // e.g. "Qloraa <noreply@qloraa.com>" (verified sender)
+    ],
+
+    // Auto review-request after an order is delivered (email via Resend + SMS via the SMS driver).
+    'review_request' => [
+        'enabled' => (bool) env('REVIEW_REQUEST_ENABLED', true),
     ],
 
     'slack' => [

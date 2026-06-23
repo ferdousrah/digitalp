@@ -37,6 +37,9 @@ class OrderObserver
             }
             if ($after === 'delivered' && !$order->delivered_at) {
                 $order->forceFill(['delivered_at' => now()])->saveQuietly();
+                // Ask the customer to review what they bought (email + SMS). After-response so
+                // it never blocks the admin's "mark delivered" action; idempotent in the service.
+                \App\Jobs\SendReviewRequest::dispatchAfterResponse($order);
             }
             if ($after === 'cancelled' && !$order->cancelled_at) {
                 $order->forceFill(['cancelled_at' => now()])->saveQuietly();

@@ -500,16 +500,19 @@
                                 <div style="background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:16px 18px; font-size:0.9rem; color:#92400e;">Only verified buyers can review this product. Once your order is delivered, you'll be able to share your experience here.</div>
                             @else
                                 <h3 style="font-size:1.05rem; font-weight:700; color:#111827; margin:0 0 14px;">Write a Review</h3>
-                                <form method="POST" action="{{ route('products.reviews.store', $product) }}" x-data="{ rating: {{ (int) old('rating', 0) }}, hover: 0 }">
+                                <form method="POST" action="{{ route('products.reviews.store', $product) }}" x-data="{ rating: {{ (int) old('rating', 0) }}, hover: 0, labels: ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'] }">
                                     @csrf
                                     <div style="margin-bottom:14px;">
                                         <label style="display:block; font-size:0.82rem; font-weight:600; color:#374151; margin-bottom:6px;">Your rating *</label>
-                                        <div style="display:flex; gap:4px;">
+                                        <div style="display:flex; gap:4px; align-items:center;">
                                             @for($i=1;$i<=5;$i++)
                                             <button type="button" @click="rating = {{ $i }}" @mouseenter="hover = {{ $i }}" @mouseleave="hover = 0" aria-label="Rate {{ $i }} star{{ $i>1?'s':'' }}" style="background:none; border:none; cursor:pointer; padding:0; line-height:0;">
                                                 <svg style="width:30px;height:30px;" :style="{ color: ({{ $i }} <= (hover || rating)) ? '#f59e0b' : '#d1d5db' }" fill="currentColor" viewBox="0 0 20 20"><path d="{{ $starPath }}"/></svg>
                                             </button>
                                             @endfor
+                                            {{-- Label clarifies what each rating means, so customers rate intentionally --}}
+                                            <span x-show="(hover || rating) > 0" x-cloak x-text="labels[hover || rating]"
+                                                  style="margin-left:10px; font-size:0.9rem; font-weight:700; color:#f59e0b; min-width:80px;"></span>
                                         </div>
                                         <input type="hidden" name="rating" :value="rating">
                                         @error('rating')<p style="color:#ef4444; font-size:0.78rem; margin-top:4px;">{{ $message }}</p>@enderror
