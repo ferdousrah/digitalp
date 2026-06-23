@@ -70,8 +70,9 @@ class AccountController extends Controller
     public function updateProfile(Request $request)
     {
         $data = $request->validate([
-            'name'  => 'required|string|max:120',
-            'email' => 'nullable|email|max:255',
+            'name'   => 'required|string|max:120',
+            'email'  => 'nullable|email|max:255',
+            'avatar' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048', // 2 MB
         ]);
 
         $user = Auth::user();
@@ -85,7 +86,17 @@ class AccountController extends Controller
             }
         }
 
-        $user->fill($data)->save();
+        if ($request->hasFile('avatar')) {
+            // Replace any previous avatar.
+            if ($user->avatar) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($user->avatar);
+            }
+            $user->avatar = $request->file('avatar')->store('avatars', 'public');
+        }
+
+        $user->name  = $data['name'];
+        $user->email = $data['email'] ?? null;
+        $user->save();
 
         return back()->with('success', 'Profile updated.');
     }

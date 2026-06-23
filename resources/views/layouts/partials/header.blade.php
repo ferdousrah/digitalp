@@ -98,7 +98,11 @@
                 @auth
                     <div x-data="{ open:false }" @click.outside="open=false" class="lg-flex-col" style="display:none; position:relative;">
                         <button @click="open=!open" style="display:flex; flex-direction:column; align-items:center; gap:2px; padding:8px 12px; color:#374151; background:none; border:none; cursor:pointer; transition:color 0.2s;" onmouseover="this.style.color='#16a34a'" onmouseout="this.style.color='#374151'" aria-label="Account">
-                            <x-app-icon name="user" :size="22" />
+                            @if(auth()->user()->avatarUrl())
+                                <img src="{{ auth()->user()->avatarUrl() }}" alt="" style="width:24px; height:24px; border-radius:50%; object-fit:cover;">
+                            @else
+                                <x-app-icon name="user" :size="22" />
+                            @endif
                             <span style="font-size:0.7125rem; font-weight:500; white-space:nowrap; max-width:90px; overflow:hidden; text-overflow:ellipsis;">{{ explode(' ', auth()->user()->name ?? 'Account')[0] ?: 'Account' }}</span>
                         </button>
                         <div x-show="open" x-cloak x-transition style="position:absolute; top:100%; right:0; min-width:200px; background:#fff; border:1px solid #e5e7eb; border-radius:10px; box-shadow:0 12px 28px rgba(15,23,42,0.12); padding:6px; z-index:60;">
@@ -190,8 +194,12 @@
             <!-- Orange user card -->
             <a href="{{ $mmUser ? route('account.index') : route('login') }}"
                style="display:flex; align-items:center; gap:13px; margin:14px; padding:15px 16px; border-radius:14px; background:#f97316; text-decoration:none; box-shadow:0 6px 16px rgba(249,115,22,0.28);">
-                <span style="width:46px; height:46px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 1px 3px rgba(0,0,0,0.12);">
-                    <x-app-icon name="sr-user" :size="24" style="color:#94a3b8;" />
+                <span style="width:46px; height:46px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.12);">
+                    @if($mmUser && $mmUser->avatarUrl())
+                        <img src="{{ $mmUser->avatarUrl() }}" alt="{{ $mmUser->name }}" style="width:100%; height:100%; object-fit:cover;">
+                    @else
+                        <x-app-icon name="sr-user" :size="24" style="color:#94a3b8;" />
+                    @endif
                 </span>
                 <span style="display:flex; flex-direction:column; line-height:1.25; min-width:0;">
                     <strong style="color:#fff; font-size:1.02rem; font-weight:800;">{{ $mmUser ? 'Hi, ' . explode(' ', $mmUser->name)[0] : 'Hello there!' }}</strong>

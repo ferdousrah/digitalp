@@ -17,9 +17,13 @@
             {{-- Sidebar --}}
             <aside id="account-sidebar" style="background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:24px; position:sticky; top:24px;">
                 <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px; padding-bottom:20px; border-bottom:1px solid #f1f5f9;">
-                    <div style="width:48px; height:48px; border-radius:50%; background:linear-gradient(135deg,#f97316,#ea580c); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1.1rem; flex-shrink:0;">
-                        {{ strtoupper(mb_substr($user->name ?? 'C', 0, 1)) }}
-                    </div>
+                    @if($user->avatarUrl())
+                        <img src="{{ $user->avatarUrl() }}" alt="{{ $user->name }}" style="width:48px; height:48px; border-radius:50%; object-fit:cover; flex-shrink:0; border:2px solid #fde7d3;">
+                    @else
+                        <div style="width:48px; height:48px; border-radius:50%; background:linear-gradient(135deg,#f97316,#ea580c); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1.1rem; flex-shrink:0;">
+                            {{ strtoupper(mb_substr($user->name ?? 'C', 0, 1)) }}
+                        </div>
+                    @endif
                     <div style="min-width:0;">
                         <p style="margin:0; font-weight:700; color:#0f172a; font-size:0.95rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ $user->name ?: 'Customer' }}</p>
                         <p style="margin:0; font-size:0.78rem; color:#64748b;">{{ \App\Support\PhoneNormalizer::display($user->phone ?? '') ?: $user->email }}</p>
@@ -79,8 +83,31 @@
                     <h2 style="margin:0 0 4px; font-size:1.1rem; font-weight:800; color:#0f172a;">Your details</h2>
                     <p style="margin:0 0 20px; color:#64748b; font-size:0.88rem;">Add your name and email so we can keep you updated about orders.</p>
 
-                    <form method="POST" action="{{ route('account.profile.update') }}" id="account-profile-form" style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                    <form method="POST" action="{{ route('account.profile.update') }}" id="account-profile-form" enctype="multipart/form-data" style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
                         @csrf
+
+                        {{-- Avatar --}}
+                        <div style="grid-column:1/-1; display:flex; align-items:center; gap:16px; padding-bottom:16px; border-bottom:1px solid #f1f5f9;">
+                            <img id="avatar-preview"
+                                 src="{{ $user->avatarUrl() ?? '' }}"
+                                 alt="Profile photo"
+                                 style="width:72px; height:72px; border-radius:50%; object-fit:cover; border:2px solid #fde7d3; flex-shrink:0; {{ $user->avatarUrl() ? '' : 'display:none;' }}">
+                            <div id="avatar-initial"
+                                 style="width:72px; height:72px; border-radius:50%; background:linear-gradient(135deg,#f97316,#ea580c); color:#fff; display:{{ $user->avatarUrl() ? 'none' : 'flex' }}; align-items:center; justify-content:center; font-weight:800; font-size:1.7rem; flex-shrink:0;">
+                                {{ strtoupper(mb_substr($user->name ?? 'C', 0, 1)) }}
+                            </div>
+                            <div>
+                                <label style="display:inline-flex; align-items:center; gap:8px; cursor:pointer; padding:9px 16px; background:#fff; border:1.5px solid #e2e8f0; border-radius:8px; font-size:0.85rem; font-weight:600; color:#475569; transition:border-color 0.2s;"
+                                       onmouseover="this.style.borderColor='#f97316'" onmouseout="this.style.borderColor='#e2e8f0'">
+                                    <x-app-icon name="picture" :size="16" /> Change photo
+                                    <input type="file" name="avatar" accept="image/jpeg,image/png,image/webp" style="display:none;"
+                                           onchange="(function(inp){var f=inp.files&&inp.files[0]; if(!f)return; var r=new FileReader(); r.onload=function(e){var img=document.getElementById('avatar-preview'); img.src=e.target.result; img.style.display='block'; var ini=document.getElementById('avatar-initial'); if(ini)ini.style.display='none';}; r.readAsDataURL(f);})(this)">
+                                </label>
+                                <p style="margin:6px 0 0; font-size:0.74rem; color:#94a3b8;">JPG, PNG or WebP — up to 2 MB.</p>
+                                @error('avatar')<p style="color:#ef4444; font-size:0.78rem; margin:6px 0 0;">{{ $message }}</p>@enderror
+                            </div>
+                        </div>
+
                         <div>
                             <label style="display:block; font-size:0.78rem; font-weight:700; color:#475569; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.05em;">Full name</label>
                             <input type="text" name="name" value="{{ old('name', $user->name === 'Customer' ? '' : $user->name) }}" required maxlength="120"

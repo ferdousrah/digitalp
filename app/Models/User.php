@@ -16,11 +16,20 @@ class User extends Authenticatable implements FilamentUser
 
     protected $fillable = [
         'name',
+        'avatar',
         'email',
         'phone',
         'password',
         'phone_verified_at',
     ];
+
+    /** Public URL for the uploaded avatar, or null when none is set. */
+    public function avatarUrl(): ?string
+    {
+        return $this->avatar
+            ? \Illuminate\Support\Facades\Storage::disk('public')->url($this->avatar)
+            : null;
+    }
 
     protected $hidden = [
         'password',
