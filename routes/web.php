@@ -42,6 +42,9 @@ Route::get('/sitemap-core.xml',             [\App\Http\Controllers\SitemapContro
 Route::get('/sitemap-products-{page}.xml',  [\App\Http\Controllers\SitemapController::class, 'products'])->whereNumber('page');
 Route::get('/sitemap-blog.xml',             [\App\Http\Controllers\SitemapController::class, 'blog']);
 
+// Google Merchant Center product feed (submit this URL as a scheduled fetch in Merchant Center)
+Route::get('/feed/google-merchant.xml',     [\App\Http\Controllers\MerchantFeedController::class, 'feed'])->name('feed.google-merchant');
+
 // robots.txt — served dynamically so the Sitemap URL always matches the current domain.
 Route::get('/robots.txt', function () {
     $lines = [
