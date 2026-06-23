@@ -383,10 +383,36 @@
                 @endif
             @endforeach
         </nav>
-        <a href="{{ route('products.index') }}" style="display:inline-flex; align-items:center; gap:6px; padding:8px 18px; background:#f97316; color:#fff; border-radius:6px; font-size:0.8425rem; font-weight:700; text-decoration:none; letter-spacing:0.06em; flex-shrink:0; transition:background 0.2s; margin-left:16px;" onmouseover="this.style.background='#ea6c0a'" onmouseout="this.style.background='#f97316'">
-            <svg style="width:13px; height:13px;" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-            FLASH SALE
+        @php
+            use App\Filament\Pages\FlashSaleSettings;
+            $fb = [];
+            foreach (FlashSaleSettings::defaults() as $fbK => $fbD) { $fb[$fbK] = \App\Services\SettingService::get($fbK, $fbD); }
+            $fbOn  = fn ($v) => in_array($v, ['1', 1, true, 'true'], true);
+            $fbUrl = $fb['flash_btn_url'] ?: '/';
+            if (! preg_match('#^https?://#i', $fbUrl) && ! str_starts_with($fbUrl, '#')) {
+                $fbParts = explode('?', $fbUrl, 2);
+                $fbUrl   = url($fbParts[0] ?: '/') . (isset($fbParts[1]) ? '?' . $fbParts[1] : '');
+            }
+        @endphp
+        @if($fbOn($fb['flash_btn_enabled']))
+        <a href="{{ $fbUrl }}" {{ $fbOn($fb['flash_btn_new_tab']) ? 'target=_blank rel=noopener' : '' }}
+           class="flash-sale-btn{{ $fbOn($fb['flash_btn_pulse']) ? ' flash-sale-pulse' : '' }}"
+           style="--flash-ring:color-mix(in srgb, {{ $fb['flash_btn_bg'] }} 55%, transparent);
+                  display:inline-flex; align-items:center; gap:6px; flex-shrink:0; text-decoration:none; margin-left:16px;
+                  padding:{{ (int) $fb['flash_btn_padding_y'] }}px {{ (int) $fb['flash_btn_padding_x'] }}px;
+                  background:{{ $fb['flash_btn_bg'] }}; color:{{ $fb['flash_btn_text_color'] }};
+                  border-radius:{{ (int) $fb['flash_btn_radius'] }}px;
+                  font-size:{{ (float) $fb['flash_btn_font_size'] }}px; font-weight:{{ (int) $fb['flash_btn_font_weight'] }};
+                  letter-spacing:{{ (float) $fb['flash_btn_letter_spacing'] }}em;
+                  transition:background 0.2s, color 0.2s;{{ $fbOn($fb['flash_btn_uppercase']) ? ' text-transform:uppercase;' : '' }}"
+           onmouseover="this.style.background='{{ $fb['flash_btn_hover_bg'] }}';this.style.color='{{ $fb['flash_btn_hover_text'] }}'"
+           onmouseout="this.style.background='{{ $fb['flash_btn_bg'] }}';this.style.color='{{ $fb['flash_btn_text_color'] }}'">
+            @if($fbOn($fb['flash_btn_show_icon']))
+                <x-app-icon :name="$fb['flash_btn_icon']" :size="13" />
+            @endif
+            {{ $fb['flash_btn_text'] }}
         </a>
+        @endif
     </div>
 </div>
 
@@ -425,6 +451,14 @@
 /* Auto-hide cat-bar: shadow while stuck, slide up out of view when scrolling down */
 #cat-bar.is-stuck { box-shadow: 0 4px 16px rgba(0,0,0,0.3) !important; }
 #cat-bar.cat-bar-hidden { transform: translateY(-100%) !important; box-shadow: none !important; }
+/* Flash Sale button — optional attention pulse (glow ring derived from its own bg colour) */
+@keyframes flashSalePulse {
+    0%   { box-shadow: 0 0 0 0 var(--flash-ring, rgba(249,115,22,0.45)); }
+    70%  { box-shadow: 0 0 0 8px transparent; }
+    100% { box-shadow: 0 0 0 0 transparent; }
+}
+.flash-sale-pulse { animation: flashSalePulse 1.6s ease-out infinite; }
+@media (prefers-reduced-motion: reduce) { .flash-sale-pulse { animation: none; } }
 </style>
 
 <script>
