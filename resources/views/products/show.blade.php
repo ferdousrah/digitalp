@@ -240,13 +240,9 @@
         </div>
     </div>
 
-    <!-- Tabbed Section — tabs are dynamic: empty built-in tabs hide, and admin-defined
-         custom tabs (Size Chart, How to Use, Ingredients…) slot in per product type. -->
+    <!-- Tabbed Section — only Q&A + Reviews are fixed. Everything else (Specifications, Details,
+         Size Chart, How to Use…) is an admin-defined Custom Tab, so each product type shows its own. -->
     @php
-        $tabAttrRows = $product->attributeValues->filter(fn ($av) => $av->attribute && filled($av->value));
-        $tabSpecRows = collect($product->specifications ?: [])->filter(fn ($v) => filled($v));
-        $hasSpecData = $tabAttrRows->count() || $tabSpecRows->count();
-
         $customTabs = collect($product->custom_tabs ?: [])
             ->filter(fn ($t) => ! empty($t['title']) && ! empty($t['content']))
             ->values();
@@ -254,10 +250,8 @@
         $hasFaqs = collect($product->faqs ?: [])->filter(fn ($f) => ! empty($f['question']))->count() > 0;
 
         $tabs = [];
-        if ($hasSpecData)                  $tabs[] = ['key' => 'specifications', 'label' => 'Specifications'];
-        if (filled($product->description)) $tabs[] = ['key' => 'details', 'label' => 'Details'];
         foreach ($customTabs as $ci => $ct) $tabs[] = ['key' => 'custom-' . $ci, 'label' => $ct['title']];
-        if ($hasFaqs)                      $tabs[] = ['key' => 'faq', 'label' => 'FAQ'];
+        if ($hasFaqs)                       $tabs[] = ['key' => 'faq', 'label' => 'FAQ'];
         $tabs[] = ['key' => 'qa',     'label' => 'Q&A'];
         $tabs[] = ['key' => 'review', 'label' => 'Reviews'];
 
@@ -301,51 +295,7 @@
         <!-- Tab Content -->
         <div style="border:1px solid #d1d5db; border-top:none; background:#fff;">
 
-            <!-- Specifications Tab -->
-            <div x-show="activeTab === 'specifications'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
-                @php
-                    // Structured attribute values (Color, Size, Material…) assigned to the product,
-                    // PLUS the free-form specifications JSON. Both render in one table.
-                    $attrRows = $product->attributeValues
-                        ->filter(fn ($av) => $av->attribute && filled($av->value));
-                    $specRows = collect($product->specifications ?: [])->filter(fn ($v) => filled($v));
-                    $hasSpecData = $attrRows->count() || $specRows->count();
-                @endphp
-                @if($hasSpecData)
-                <table class="pd-spec" style="width:100%; border-collapse:collapse;">
-                    <tbody>
-                        @php $specIndex = 0; @endphp
-                        @foreach($attrRows as $av)
-                        <tr style="border-bottom:1px solid #f3f4f6; {{ $specIndex % 2 === 0 ? 'background:#fff;' : 'background:#f9fafb;' }}">
-                            <td style="padding:14px 24px; width:35%; font-weight:600; color:#111827; font-size:0.9rem; vertical-align:top;">{{ $av->attribute->name }}</td>
-                            <td style="padding:14px 24px; color:#374151; font-size:0.9rem; vertical-align:top;">{{ $av->value }}</td>
-                        </tr>
-                        @php $specIndex++; @endphp
-                        @endforeach
-                        @foreach($specRows as $key => $value)
-                        <tr style="border-bottom:1px solid #f3f4f6; {{ $specIndex % 2 === 0 ? 'background:#fff;' : 'background:#f9fafb;' }}">
-                            <td style="padding:14px 24px; width:35%; font-weight:600; color:#111827; font-size:0.9rem; vertical-align:top;">{{ $key }}</td>
-                            <td style="padding:14px 24px; color:#374151; font-size:0.9rem; vertical-align:top;">{{ $value }}</td>
-                        </tr>
-                        @php $specIndex++; @endphp
-                        @endforeach
-                    </tbody>
-                </table>
-                @else
-                <div style="padding:40px; text-align:center; color:#9ca3af;">No specifications available for this product.</div>
-                @endif
-            </div>
-
-            <!-- Details Tab -->
-            <div x-show="activeTab === 'details'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" style="display:none;">
-                @if($product->description)
-                <div style="padding:24px;" class="prose prose-sm sm:prose-base lg:prose-lg max-w-none">{!! $product->description !!}</div>
-                @else
-                <div style="padding:40px; text-align:center; color:#9ca3af;">No detailed description available for this product.</div>
-                @endif
-            </div>
-
-            <!-- Custom Tabs (admin-defined per product: Size Chart, How to Use, Ingredients…) -->
+            <!-- Custom Tabs (admin-defined per product: Specifications, Details, Size Chart, How to Use…) -->
             @foreach($customTabs as $ci => $ct)
             <div x-show="activeTab === 'custom-{{ $ci }}'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" style="display:none;">
                 <div style="padding:24px;" class="prose prose-sm sm:prose-base lg:prose-lg max-w-none">{!! $ct['content'] !!}</div>

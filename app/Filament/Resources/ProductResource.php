@@ -174,7 +174,8 @@ class ProductResource extends Resource
                             ),
                     ]),
                     Forms\Components\Tabs\Tab::make('Details')->schema([
-                        Forms\Components\KeyValue::make('specifications'),
+                        Forms\Components\KeyValue::make('specifications')
+                            ->helperText('Note: the storefront now shows info via the "Custom Tabs" tab (Specifications, Size Chart, etc.). This field is kept for data only — add a Custom Tab to display specs.'),
                         Forms\Components\TextInput::make('weight')->maxLength(255),
                         Forms\Components\TextInput::make('dimensions')->maxLength(255),
                         Forms\Components\TextInput::make('warranty_info')->maxLength(255),
