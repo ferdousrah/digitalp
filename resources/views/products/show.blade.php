@@ -7,15 +7,28 @@
         ->ogType('product')
         ->image($product->getFirstMediaUrl('product_thumbnail', 'large') ?: $product->getFirstMediaUrl('product_images', 'large'))
         ->canonical(route('products.show', $product));
+
+    // Breadcrumb from the product's primary category hierarchy (Home › Hair Care › … › Product),
+    // falling back to "Products" when the product isn't in any category.
+    $primaryCat = $product->categories->first();
+    $catCrumbs  = [];
+    if ($primaryCat) {
+        foreach ($primaryCat->ancestors as $anc) {
+            $catCrumbs[] = ['label' => $anc->name, 'url' => route('categories.show', $anc)];
+        }
+        $catCrumbs[] = ['label' => $primaryCat->name, 'url' => route('categories.show', $primaryCat)];
+    } else {
+        $catCrumbs[] = ['label' => 'Products', 'url' => route('products.index')];
+    }
 @endphp
 
 @push('seo')
     @include('partials.schema.product', ['product' => $product])
-    @include('partials.schema.breadcrumbs', ['items' => [
-        ['label' => 'Home',     'url' => url('/')],
-        ['label' => 'Products', 'url' => route('products.index')],
-        ['label' => $product->name],
-    ]])
+    @include('partials.schema.breadcrumbs', ['items' => array_merge(
+        [['label' => 'Home', 'url' => url('/')]],
+        $catCrumbs,
+        [['label' => $product->name]],
+    )])
     @if(!empty($product->faqs))
         @include('partials.schema.faq', ['faqs' => collect($product->faqs)->map(fn ($f) => (object) $f)])
     @endif
@@ -31,7 +44,7 @@
     $reviewStats = $product->reviewStats();
     $starPath = 'M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z';
 @endphp
-@include('components.breadcrumb', ['items' => [['label' => 'Products', 'url' => route('products.index')], ['label' => $product->name]]])
+@include('components.breadcrumb', ['items' => array_merge($catCrumbs, [['label' => $product->name]])])
 
 <div class="container-custom px-4 sm:px-6 lg:px-8 pb-16">
     <div class="grid lg:grid-cols-2 gap-8 lg:gap-12 relative">
