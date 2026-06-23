@@ -54,6 +54,9 @@
                 $allMedia = $product->getMedia('product_images');
                 $mainImage = $product->getFirstMediaUrl('product_images', 'large') ?: $product->getFirstMediaUrl('product_thumbnail', 'large');
                 $fullImage = $product->getFirstMediaUrl('product_images') ?: $product->getFirstMediaUrl('product_thumbnail');
+                // Main image alt = its saved alt text, falling back to the product name.
+                $mainMedia = $product->getFirstMedia('product_images') ?: $product->getFirstMedia('product_thumbnail');
+                $mainAlt   = ($mainMedia?->getCustomProperty('alt')) ?: $product->name;
 
                 // Normalise videos with parsed YouTube IDs / file URLs
                 $videos = collect($product->videos ?? [])->map(function ($v) {
@@ -85,7 +88,7 @@
                          style="width: 70px; height: 70px; min-height: 70px; border-radius: 8px; overflow: hidden; flex-shrink: 0;"
                          data-kind="image"
                          data-large="{{ $media->getUrl('large') }}" data-zoom="{{ $media->getUrl() }}">
-                        <img src="{{ $media->getUrl('thumb') }}" alt="{{ $product->name }}" loading="lazy" decoding="async" style="width: 100%; height: 100%; object-fit: cover;">
+                        <img src="{{ $media->getUrl('thumb') }}" alt="{{ $media->getCustomProperty('alt') ?: $product->name }}" loading="lazy" decoding="async" style="width: 100%; height: 100%; object-fit: cover;">
                     </div>
                     @endforeach
                     @foreach($videos as $video)
@@ -111,7 +114,7 @@
                 <div style="flex: 1; min-width: 0; position: relative;" id="image-wrapper">
                     <div id="zoom-container" class="bg-surface-50 border border-surface-200 rounded-xl overflow-hidden relative {{ $mainImage ? 'cursor-crosshair' : '' }}" style="aspect-ratio: 1/1;">
                         @if($mainImage)
-                            <img id="main-image" src="{{ $mainImage }}" data-zoom="{{ $fullImage ?: $mainImage }}" alt="{{ $product->name }}" decoding="async" fetchpriority="high" class="w-full h-full object-contain p-6">
+                            <img id="main-image" src="{{ $mainImage }}" data-zoom="{{ $fullImage ?: $mainImage }}" alt="{{ $mainAlt }}" decoding="async" fetchpriority="high" class="w-full h-full object-contain p-6">
                         @else
                             <div class="w-full h-full flex items-center justify-center">
                                 <svg class="w-32 h-32 text-surface-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>

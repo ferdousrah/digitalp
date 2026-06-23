@@ -17,8 +17,11 @@
 @php
     // Prefer the resized conversion; fall back to the original upload if it isn't
     // generated yet (e.g. before `media-library:regenerate` runs on a fresh deploy).
-    $jpg  = $model->getFirstMediaUrl($collection, $size) ?: $model->getFirstMediaUrl($collection);
-    $webp = $model->getFirstMediaUrl($collection, $size . '_webp');
+    $media = $model->getFirstMedia($collection);
+    $jpg   = $model->getFirstMediaUrl($collection, $size) ?: $model->getFirstMediaUrl($collection);
+    $webp  = $model->getFirstMediaUrl($collection, $size . '_webp');
+    // The image's own saved alt text wins over the caller's generic fallback.
+    $alt   = ($media?->getCustomProperty('alt')) ?: $alt;
 @endphp
 
 @if($jpg)

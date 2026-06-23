@@ -63,7 +63,10 @@ class PickFromLibraryAction
                     ->preservingOriginal()
                     ->usingName($item->title ?: $libraryMedia->name)
                     ->usingFileName(basename($libraryMedia->file_name))
-                    ->withCustomProperties(['from_library' => true]) // skip auto-mirror back into the library
+                    ->withCustomProperties([
+                        'from_library' => true,           // skip auto-mirror back into the library
+                        'alt'          => $item->alt_text, // carry the library item's alt text to the frontend
+                    ])
                     ->toMediaCollection($collection, 'public');
 
                 Notification::make()

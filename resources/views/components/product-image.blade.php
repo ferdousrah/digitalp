@@ -14,15 +14,18 @@
 ])
 
 @php
-    $jpg  = $product->getFirstMediaUrl($collection, $size);
-    $webp = $product->getFirstMediaUrl($collection, $size . '_webp');
+    $media = $product->getFirstMedia($collection);
+    $jpg   = $product->getFirstMediaUrl($collection, $size);
+    $webp  = $product->getFirstMediaUrl($collection, $size . '_webp');
     if (!$jpg && $collection === 'product_thumbnail') {
         // Fall back to first image from gallery if thumbnail is missing
+        $media = $product->getFirstMedia('product_images');
         $jpg  = $product->getFirstMediaUrl('product_images', $size);
         $webp = $product->getFirstMediaUrl('product_images', $size . '_webp');
     }
 
-    $altText = $alt ?? $product->name;
+    // Prefer an explicit alt, then the image's saved alt text, then the product name.
+    $altText = $alt ?? ($media?->getCustomProperty('alt') ?: $product->name);
     $loading = $eager ? 'eager' : 'lazy';
     $fetchPriority = $eager ? 'high' : 'auto';
 
