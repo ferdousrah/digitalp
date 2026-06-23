@@ -249,16 +249,15 @@
 
         $hasFaqs = collect($product->faqs ?: [])->filter(fn ($f) => ! empty($f['question']))->count() > 0;
 
-        // Auto "Specifications" tab — structured attribute values + the Details-tab fields
-        // (specifications key/value, weight, dimensions, warranty). No retyping needed.
-        $specAttrRows = $product->attributeValues->filter(fn ($av) => $av->attribute && filled($av->value));
-        $specKvRows   = collect($product->specifications ?: [])->filter(fn ($v) => filled($v));
-        $specExtra    = collect([
+        // Auto "Specifications" tab — the Details-tab fields only (specifications key/value,
+        // weight, dimensions, warranty). Attributes are for filtering/variants, not shown here.
+        $specKvRows = collect($product->specifications ?: [])->filter(fn ($v) => filled($v));
+        $specExtra  = collect([
             'Weight'     => $product->weight,
             'Dimensions' => $product->dimensions,
             'Warranty'   => $product->warranty_info,
         ])->filter(fn ($v) => filled($v));
-        $hasSpec = $specAttrRows->count() || $specKvRows->count() || $specExtra->count();
+        $hasSpec = $specKvRows->count() || $specExtra->count();
         $specTitle = filled($product->spec_tab_title) ? $product->spec_tab_title : 'Specifications';
 
         $tabs = [];
@@ -322,13 +321,6 @@
                 <table class="pd-spec" style="width:100%; border-collapse:collapse;">
                     <tbody>
                         @php $si = 0; @endphp
-                        @foreach($specAttrRows as $av)
-                        <tr style="border-bottom:1px solid #f3f4f6; {{ $si % 2 === 0 ? 'background:#fff;' : 'background:#f9fafb;' }}">
-                            <td style="padding:14px 24px; width:35%; font-weight:600; color:#111827; font-size:0.9rem; vertical-align:top;">{{ $av->attribute->name }}</td>
-                            <td style="padding:14px 24px; color:#374151; font-size:0.9rem; vertical-align:top;">{{ $av->value }}</td>
-                        </tr>
-                        @php $si++; @endphp
-                        @endforeach
                         @foreach($specKvRows as $key => $value)
                         <tr style="border-bottom:1px solid #f3f4f6; {{ $si % 2 === 0 ? 'background:#fff;' : 'background:#f9fafb;' }}">
                             <td style="padding:14px 24px; width:35%; font-weight:600; color:#111827; font-size:0.9rem; vertical-align:top;">{{ $key }}</td>
