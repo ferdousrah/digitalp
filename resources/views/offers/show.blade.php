@@ -42,7 +42,7 @@
 
         {{-- Body --}}
         @if($offer->body)
-        <div class="offer-body prose max-w-none" style="color:#374151; line-height:1.7;">
+        <div class="offer-body prose max-w-none" style="color:#374151; line-height:1.7; background:#fff; border:1px solid #e5e7eb; border-radius:14px; padding:24px 28px; box-shadow:0 1px 3px rgba(0,0,0,0.04);">
             {!! $offer->body !!}
         </div>
         @endif
@@ -107,7 +107,11 @@
     .offer-body ul,.offer-body ol { margin:0 0 1em 1.4em; } .offer-body li { margin:0.3em 0; }
     .offer-body a { color:#f97316; text-decoration:underline; }
     .offer-body img { max-width:100%; height:auto; border-radius:10px; margin:1em 0; }
-    @media (max-width:767px) { .more-offers-grid { grid-template-columns:1fr !important; } }
+    .offer-body > :first-child { margin-top:0; } .offer-body > :last-child { margin-bottom:0; }
+    @media (max-width:767px) {
+        .more-offers-grid { grid-template-columns:1fr !important; }
+        .offer-body { padding:18px 16px !important; }
+    }
 </style>
 
 @if($offer->is_live)
