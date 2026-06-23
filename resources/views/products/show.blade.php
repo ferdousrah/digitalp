@@ -240,8 +240,8 @@
         </div>
     </div>
 
-    <!-- Tabbed Section — only Q&A + Reviews are fixed. Everything else (Specifications, Details,
-         Size Chart, How to Use…) is an admin-defined Custom Tab, so each product type shows its own. -->
+    <!-- Tabbed Section — fixed tabs: Description (the General-tab description), Q&A, Reviews.
+         Custom Tabs (Ingredients, Specifications, Size Chart, How to Use…) slot in after Description. -->
     @php
         $customTabs = collect($product->custom_tabs ?: [])
             ->filter(fn ($t) => ! empty($t['title']) && ! empty($t['content']))
@@ -250,6 +250,7 @@
         $hasFaqs = collect($product->faqs ?: [])->filter(fn ($f) => ! empty($f['question']))->count() > 0;
 
         $tabs = [];
+        if (filled($product->description))  $tabs[] = ['key' => 'description', 'label' => 'Description'];
         foreach ($customTabs as $ci => $ct) $tabs[] = ['key' => 'custom-' . $ci, 'label' => $ct['title']];
         if ($hasFaqs)                       $tabs[] = ['key' => 'faq', 'label' => 'FAQ'];
         $tabs[] = ['key' => 'qa',     'label' => 'Q&A'];
@@ -295,7 +296,14 @@
         <!-- Tab Content -->
         <div style="border:1px solid #d1d5db; border-top:none; background:#fff;">
 
-            <!-- Custom Tabs (admin-defined per product: Specifications, Details, Size Chart, How to Use…) -->
+            <!-- Description Tab (fixed — the product's main description from the General tab) -->
+            @if(filled($product->description))
+            <div x-show="activeTab === 'description'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+                <div style="padding:24px;" class="prose prose-sm sm:prose-base lg:prose-lg max-w-none">{!! $product->description !!}</div>
+            </div>
+            @endif
+
+            <!-- Custom Tabs (admin-defined per product: Specifications, Ingredients, Size Chart, How to Use…) -->
             @foreach($customTabs as $ci => $ct)
             <div x-show="activeTab === 'custom-{{ $ci }}'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" style="display:none;">
                 <div style="padding:24px;" class="prose prose-sm sm:prose-base lg:prose-lg max-w-none">{!! $ct['content'] !!}</div>
