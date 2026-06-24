@@ -28,18 +28,20 @@
     background: transparent !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
 }
-/* Collapse arrow: dark on the white header (light), light on the dark header. */
-.fi-sidebar-header .fi-icon-btn {
+/* Collapse arrow: dark on the white header (light), light on the dark header.
+   The extra `.fi-sidebar` raises specificity above the white `.fi-sidebar .fi-icon-btn`
+   rule defined later in this file, so it wins regardless of source order. */
+.fi-sidebar .fi-sidebar-header .fi-icon-btn {
     color: rgba(15, 23, 42, 0.55) !important;
 }
-.fi-sidebar-header .fi-icon-btn:hover {
+.fi-sidebar .fi-sidebar-header .fi-icon-btn:hover {
     background: rgba(0, 0, 0, 0.06) !important;
     color: #0f172a !important;
 }
-.dark .fi-sidebar-header .fi-icon-btn {
+.dark .fi-sidebar .fi-sidebar-header .fi-icon-btn {
     color: rgba(255, 255, 255, 0.6) !important;
 }
-.dark .fi-sidebar-header .fi-icon-btn:hover {
+.dark .fi-sidebar .fi-sidebar-header .fi-icon-btn:hover {
     background: rgba(255, 255, 255, 0.08) !important;
     color: #fff !important;
 }
