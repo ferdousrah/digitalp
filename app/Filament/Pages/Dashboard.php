@@ -22,6 +22,7 @@ class Dashboard extends BaseDashboard
             \App\Filament\Widgets\TopCategoriesWidget::class,
             \App\Filament\Widgets\UserGrowthWidget::class,
             \App\Filament\Widgets\VisitorStatsWidget::class,
+            \App\Filament\Widgets\ServerPerformanceWidget::class,
             \App\Filament\Widgets\RevenueChartWidget::class,
             \App\Filament\Widgets\MonthlySalesChartWidget::class,
             \App\Filament\Widgets\OrdersByStatusWidget::class,
