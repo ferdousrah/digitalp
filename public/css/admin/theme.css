@@ -24,14 +24,18 @@
     padding: 1.125rem 1.25rem !important;
 }
 
-/* The sidebar is permanently dark, so always show the dark-mode (light/white)
-   logo here — even when the panel itself is in light mode. Without this, the
-   light-mode logo would render invisibly on the dark sidebar. */
-.fi-sidebar-header .fi-logo.dark\:hidden {
-    display: none !important;
+/* Light theme: the sidebar stays dark, so give the logo a white badge to keep
+   a dark/coloured logo clearly visible. */
+.fi-sidebar-header .fi-logo {
+    background: #fff !important;
+    padding: 0.35rem 0.6rem !important;
+    border-radius: 0.5rem !important;
 }
-.fi-sidebar-header .fi-logo.dark\:flex {
-    display: flex !important;
+/* Dark theme: no badge — logo sits transparently on the dark sidebar, as before. */
+.dark .fi-sidebar-header .fi-logo {
+    background: transparent !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
 }
 
 /* Sidebar close/collapse button (toggle) */
