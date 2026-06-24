@@ -40,7 +40,13 @@ class AdminPanelProvider extends PanelProvider
 
     protected function resolveFaviconUrl(): ?string
     {
-        $path = $this->safeSetting('site_favicon');
+        return $this->settingImageUrl('site_favicon');
+    }
+
+    /** Resolve a stored image setting to a public URL, or null. DB-safe. */
+    protected function settingImageUrl(string $key): ?string
+    {
+        $path = $this->safeSetting($key);
         if (!$path) return null;
         try {
             return Storage::disk('public')->url($path);
@@ -61,15 +67,13 @@ class AdminPanelProvider extends PanelProvider
 
             // ── Branding (closures = deferred to render time, DB-safe) ──
             ->brandName(fn () => $this->safeSetting('site_name', 'Digital Support Admin'))
-            ->brandLogo(function () {
-                $logoPath = $this->safeSetting('site_logo');
-                if (!$logoPath) return null;
-                try {
-                    return Storage::disk('public')->url($logoPath);
-                } catch (\Throwable $e) {
-                    return null;
-                }
-            })
+            // Light-mode logo (shown on the light login page). Falls back to the site logo.
+            ->brandLogo(fn () => $this->settingImageUrl('admin_logo_light')
+                ?? $this->settingImageUrl('site_logo'))
+            // Dark-mode logo (also forced in the always-dark sidebar via theme.css).
+            ->darkModeBrandLogo(fn () => $this->settingImageUrl('admin_logo_dark')
+                ?? $this->settingImageUrl('admin_logo_light')
+                ?? $this->settingImageUrl('site_logo'))
             ->brandLogoHeight('2.25rem')
             ->favicon($this->resolveFaviconUrl())
 

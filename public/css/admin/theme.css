@@ -17,9 +17,21 @@
 }
 
 .fi-sidebar-header {
-    background: rgba(0, 0, 0, 0.15) !important;
+    /* Transparent so it blends seamlessly into the sidebar gradient
+       (no mismatched black band behind the logo). */
+    background: transparent !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
     padding: 1.125rem 1.25rem !important;
+}
+
+/* The sidebar is permanently dark, so always show the dark-mode (light/white)
+   logo here — even when the panel itself is in light mode. Without this, the
+   light-mode logo would render invisibly on the dark sidebar. */
+.fi-sidebar-header .fi-logo.dark\:hidden {
+    display: none !important;
+}
+.fi-sidebar-header .fi-logo.dark\:flex {
+    display: flex !important;
 }
 
 /* Sidebar close/collapse button (toggle) */
