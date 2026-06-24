@@ -45,9 +45,43 @@ class ServerPerformanceWidget extends Widget
         ];
     }
 
-    /** Current PHP memory usage vs the configured limit. */
+    /**
+     * Server RAM usage. Prefers real system memory from /proc/meminfo (Linux),
+     * and falls back to the PHP process memory vs memory_limit (e.g. on Windows).
+     */
     protected function memoryMetric(): array
     {
+        if (is_readable('/proc/meminfo')) {
+            $info = @file_get_contents('/proc/meminfo');
+            if ($info) {
+                $read = function (string $key) use ($info): ?int {
+                    if (preg_match('/^' . preg_quote($key, '/') . ':\s+(\d+)\s*kB/mi', $info, $m)) {
+                        return (int) $m[1] * 1024; // kB -> bytes
+                    }
+                    return null;
+                };
+
+                $total = $read('MemTotal');
+                $avail = $read('MemAvailable') ?? $read('MemFree');
+
+                if ($total && $avail !== null) {
+                    $used    = max($total - $avail, 0);
+                    $percent = (int) round($used / $total * 100);
+
+                    return [
+                        'scope'   => 'system',
+                        'used'    => $used,
+                        'free'    => $avail,
+                        'limit'   => $total,
+                        'peak'    => null,
+                        'percent' => $percent,
+                        'status'  => $percent >= 90 ? 'critical' : ($percent >= 80 ? 'warn' : 'ok'),
+                    ];
+                }
+            }
+        }
+
+        // Fallback: PHP process memory vs the configured memory_limit.
         $used  = memory_get_usage(true);
         $peak  = memory_get_peak_usage(true);
         $limit = $this->parseBytes(ini_get('memory_limit'));
@@ -55,15 +89,15 @@ class ServerPerformanceWidget extends Widget
         if ($limit <= 0) {
             // -1 == unlimited
             return [
-                'used' => $used, 'peak' => $peak, 'limit' => null,
-                'percent' => null, 'status' => 'ok',
+                'scope' => 'php', 'used' => $used, 'peak' => $peak, 'limit' => null,
+                'free' => null, 'percent' => null, 'status' => 'ok',
             ];
         }
 
         $percent = (int) min(100, round($used / $limit * 100));
 
         return [
-            'used' => $used, 'peak' => $peak, 'limit' => $limit,
+            'scope' => 'php', 'used' => $used, 'peak' => $peak, 'limit' => $limit, 'free' => null,
             'percent' => $percent,
             'status'  => $percent >= 90 ? 'critical' : ($percent >= 75 ? 'warn' : 'ok'),
         ];

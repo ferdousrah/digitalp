@@ -53,7 +53,11 @@
                     <div style="height:100%; width:{{ $memory['percent'] ?? 4 }}%; background:{{ $col($memory['status']) }}; border-radius:999px; transition:width .6s;"></div>
                 </div>
                 <div class="ds-text-muted" style="font-size:0.72rem; margin-top:0.45rem;">
-                    {{ $fmt($memory['used']) }} / {{ $fmt($memory['limit']) }}
+                    @if(($memory['scope'] ?? '') === 'system')
+                        {{ $fmt($memory['used']) }} / {{ $fmt($memory['limit']) }} · {{ $fmt($memory['free']) }} free
+                    @else
+                        {{ $fmt($memory['used']) }} / {{ $fmt($memory['limit']) }} <span style="opacity:.7;">(PHP limit)</span>
+                    @endif
                 </div>
             </div>
 
