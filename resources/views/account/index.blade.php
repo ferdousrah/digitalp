@@ -44,6 +44,10 @@
                         <svg style="width:16px; height:16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
                         Wishlist
                     </a>
+                    <a href="#address-book" class="acc-nav" style="display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:8px; text-decoration:none; font-size:0.9rem; font-weight:600; color:#475569;">
+                        <svg style="width:16px; height:16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        Address Book
+                    </a>
                     <form method="POST" action="{{ route('logout') }}" style="margin:0; margin-top:6px; padding-top:10px; border-top:1px solid #f1f5f9;">
                         @csrf
                         <button type="submit" style="display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:8px; text-decoration:none; font-size:0.9rem; font-weight:600; color:#ef4444; background:none; border:none; cursor:pointer; width:100%; text-align:left;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='transparent'">
@@ -134,6 +138,124 @@
                         </div>
                     </form>
                 </div>
+
+                {{-- Address Book --}}
+                <div id="address-book" x-data="addressBook()" style="background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:28px; margin-top:28px;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+                        <div>
+                            <h2 style="margin:0 0 4px; font-size:1.1rem; font-weight:800; color:#0f172a;">Address Book</h2>
+                            <p style="margin:0; color:#64748b; font-size:0.88rem;">Saved addresses for faster checkout.</p>
+                        </div>
+                        <button type="button" @click="openAdd()" style="flex-shrink:0; display:inline-flex; align-items:center; gap:6px; padding:10px 16px; background:#f97316; color:#fff; border:none; border-radius:8px; font-weight:700; font-size:0.82rem; cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='#ea6c0a'" onmouseout="this.style.background='#f97316'">+ Add address</button>
+                    </div>
+
+                    @if(session('address_success'))
+                    <div style="background:#f0fdf4; border:1px solid #bbf7d0; color:#15803d; border-radius:8px; padding:10px 14px; margin-top:14px; font-size:0.85rem;">{{ session('address_success') }}</div>
+                    @endif
+
+                    @if($addresses->isEmpty())
+                    <p style="margin:18px 0 0; color:#94a3b8; font-size:0.9rem;">No saved addresses yet. Add one for quicker checkout.</p>
+                    @else
+                    <div class="addr-grid" style="display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin-top:18px;">
+                        @foreach($addresses as $addr)
+                        <div style="border:1.5px solid {{ $addr->is_default ? '#f97316' : '#e2e8f0' }}; background:{{ $addr->is_default ? '#fff7ed' : '#fff' }}; border-radius:12px; padding:16px;">
+                            <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+                                @if($addr->label)<span style="background:#eef2ff; color:#4f46e5; font-size:0.68rem; font-weight:700; padding:2px 9px; border-radius:999px;">{{ $addr->label }}</span>@endif
+                                @if($addr->is_default)<span style="background:#f97316; color:#fff; font-size:0.68rem; font-weight:700; padding:2px 9px; border-radius:999px;">Default</span>@endif
+                            </div>
+                            <div style="font-weight:700; color:#0f172a; font-size:0.95rem;">{{ $addr->name }}</div>
+                            <div style="font-size:0.84rem; color:#475569; margin-top:2px;">{{ \App\Support\PhoneNormalizer::display($addr->phone) }}</div>
+                            <div style="font-size:0.84rem; color:#475569; margin-top:8px; line-height:1.5;">{{ $addr->address }}, {{ $addr->thana }}, {{ $addr->district }}</div>
+                            <div style="display:flex; gap:14px; margin-top:14px; align-items:center;">
+                                <button type="button" @click='openEdit(@json($addr))' style="background:none; border:none; padding:0; cursor:pointer; color:#f97316; font-size:0.82rem; font-weight:700;">Edit</button>
+                                @unless($addr->is_default)
+                                <form method="POST" action="{{ route('account.addresses.default', $addr) }}" style="margin:0;">@csrf
+                                    <button type="submit" style="background:none; border:none; padding:0; cursor:pointer; color:#475569; font-size:0.82rem; font-weight:600;">Set default</button>
+                                </form>
+                                @endunless
+                                <form method="POST" action="{{ route('account.addresses.destroy', $addr) }}" style="margin:0;" onsubmit="return confirm('Remove this address?')">@csrf @method('DELETE')
+                                    <button type="submit" style="background:none; border:none; padding:0; cursor:pointer; color:#ef4444; font-size:0.82rem; font-weight:600;">Delete</button>
+                                </form>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                    @endif
+
+                    {{-- Add/Edit modal — flex-centering lives in a class so Alpine's x-show
+                         (which toggles inline display) doesn't wipe it and push the box top-left. --}}
+                    <style>.addr-modal-overlay{position:fixed;inset:0;z-index:9990;display:flex;align-items:center;justify-content:center;padding:16px;}</style>
+                    <div x-show="open" x-cloak @keydown.escape.window="open = false" class="addr-modal-overlay">
+                        <div @click="open = false" style="position:absolute; inset:0; background:rgba(15,23,42,0.5);"></div>
+                        <div style="position:relative; z-index:1; background:#fff; border-radius:14px; width:100%; max-width:480px; max-height:90vh; overflow-y:auto; padding:24px;">
+                            <h3 x-text="form.id ? 'Edit address' : 'Add new address'" style="margin:0 0 16px; font-size:1.05rem; font-weight:800; color:#0f172a;"></h3>
+                            <form :action="form.id ? '{{ url('account/addresses') }}/' + form.id : '{{ route('account.addresses.store') }}'" method="POST">
+                                @csrf
+                                <input type="hidden" name="_method" :value="form.id ? 'PUT' : 'POST'">
+                                <input type="hidden" name="label" :value="form.label">
+
+                                <div style="display:flex; gap:8px; margin-bottom:14px;">
+                                    <template x-for="lbl in ['Home','Office']" :key="lbl">
+                                        <button type="button" @click="form.label = lbl"
+                                            :style="'flex:1; padding:9px; border-radius:8px; font-size:0.85rem; font-weight:600; cursor:pointer; border:1.5px solid ' + (form.label === lbl ? '#f97316;background:#fff7ed;color:#f97316' : '#e2e8f0;background:#fff;color:#475569')"
+                                            x-text="lbl"></button>
+                                    </template>
+                                </div>
+
+                                <input type="text" name="name" x-model="form.name" required maxlength="120" placeholder="Full name" style="{{ $rvInput ?? 'width:100%;padding:11px 14px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:0.9rem;outline:none;box-sizing:border-box;margin-bottom:10px;' }}">
+                                <input type="text" name="phone" x-model="form.phone" required maxlength="20" placeholder="Phone (01XXXXXXXXX)" style="width:100%;padding:11px 14px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:0.9rem;outline:none;box-sizing:border-box;margin-bottom:10px;">
+                                <select name="district" x-model="form.district" @change="fetchThanas()" required style="width:100%;padding:11px 14px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:0.9rem;outline:none;box-sizing:border-box;margin-bottom:10px;background:#fff;">
+                                    <option value="">Select District</option>
+                                    @foreach($districts as $d)<option value="{{ $d }}">{{ $d }}</option>@endforeach
+                                </select>
+                                <select name="thana" x-model="form.thana" required style="width:100%;padding:11px 14px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:0.9rem;outline:none;box-sizing:border-box;margin-bottom:10px;background:#fff;">
+                                    <option value="">Select Thana / Upazila</option>
+                                    <template x-for="t in thanas" :key="t"><option :value="t" x-text="t"></option></template>
+                                </select>
+                                <textarea name="address" x-model="form.address" required rows="2" maxlength="500" placeholder="House no, road, area..." style="width:100%;padding:11px 14px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:0.9rem;outline:none;box-sizing:border-box;resize:vertical;margin-bottom:10px;"></textarea>
+
+                                <label style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:#475569; cursor:pointer; margin-bottom:16px;">
+                                    <input type="checkbox" name="is_default" value="1" x-model="form.is_default" style="width:16px; height:16px; accent-color:#f97316;">
+                                    Set as default address
+                                </label>
+
+                                <div style="display:flex; gap:10px; justify-content:flex-end;">
+                                    <button type="button" @click="open = false" style="padding:10px 18px; background:#f1f5f9; color:#475569; border:none; border-radius:8px; font-weight:600; font-size:0.85rem; cursor:pointer;">Cancel</button>
+                                    <button type="submit" style="padding:10px 22px; background:#f97316; color:#fff; border:none; border-radius:8px; font-weight:700; font-size:0.85rem; cursor:pointer;">Save address</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                function addressBook() {
+                    return {
+                        open: false,
+                        thanas: [],
+                        form: { id: null, label: 'Home', name: '', phone: '', district: '', thana: '', address: '', is_default: false },
+                        openAdd() {
+                            this.form = { id: null, label: 'Home', name: '', phone: '', district: '', thana: '', address: '', is_default: false };
+                            this.thanas = [];
+                            this.open = true;
+                        },
+                        openEdit(a) {
+                            this.form = { id: a.id, label: a.label || 'Home', name: a.name, phone: a.phone, district: a.district, thana: a.thana, address: a.address, is_default: !!a.is_default };
+                            this.fetchThanas(a.thana);
+                            this.open = true;
+                        },
+                        async fetchThanas(keepThana = null) {
+                            if (!this.form.district) { this.thanas = []; return; }
+                            try {
+                                const r = await fetch('{{ route('checkout.thanas') }}?district=' + encodeURIComponent(this.form.district));
+                                const d = await r.json();
+                                this.thanas = d.thanas || [];
+                                this.form.thana = keepThana && this.thanas.includes(keepThana) ? keepThana : '';
+                            } catch (e) { this.thanas = []; }
+                        },
+                    }
+                }
+                </script>
 
                 {{-- Recent orders --}}
                 @if($recent->count() > 0)

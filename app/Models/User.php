@@ -31,6 +31,12 @@ class User extends Authenticatable implements FilamentUser
             : null;
     }
 
+    /** Saved delivery/billing addresses (default first, then newest). */
+    public function addresses(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Address::class)->orderByDesc('is_default')->latest();
+    }
+
     protected $hidden = [
         'password',
         'remember_token',

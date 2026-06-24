@@ -19,6 +19,8 @@ class AccountController extends Controller
             'user'       => $user,
             'orderCount' => $orderCount,
             'recent'     => $recent,
+            'addresses'  => $user->addresses()->get(),
+            'districts'  => \App\Services\BangladeshGeoService::districts(),
         ]);
     }
 

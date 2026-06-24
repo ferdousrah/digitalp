@@ -180,6 +180,12 @@ Route::middleware('auth')->prefix('account')->name('account.')->group(function (
     Route::get('/orders/{orderNumber}',   [AccountController::class, 'showOrder'])->name('orders.show');
     Route::post('/orders/{orderNumber}/cancel', [AccountController::class, 'cancelOrder'])->name('orders.cancel');
     Route::post('/profile',               [AccountController::class, 'updateProfile'])->name('profile.update');
+
+    // Address book
+    Route::post('/addresses',                    [\App\Http\Controllers\AddressController::class, 'store'])->name('addresses.store');
+    Route::put('/addresses/{address}',           [\App\Http\Controllers\AddressController::class, 'update'])->name('addresses.update');
+    Route::delete('/addresses/{address}',        [\App\Http\Controllers\AddressController::class, 'destroy'])->name('addresses.destroy');
+    Route::post('/addresses/{address}/default',  [\App\Http\Controllers\AddressController::class, 'setDefault'])->name('addresses.default');
 });
 
 // Checkout
