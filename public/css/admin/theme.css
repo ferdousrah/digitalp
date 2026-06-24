@@ -17,25 +17,39 @@
 }
 
 .fi-sidebar-header {
-    /* Transparent so it blends seamlessly into the sidebar gradient
-       (no mismatched black band behind the logo). */
+    /* Light theme: the whole logo section is white. */
+    background: #fff !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+    padding: 1.125rem 1.25rem !important;
+    position: relative !important;
+}
+/* Dark theme: blend into the dark sidebar gradient (no white, as before). */
+.dark .fi-sidebar-header {
     background: transparent !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
-    padding: 1.125rem 1.25rem !important;
+}
+/* Collapse arrow: dark on the white header (light), light on the dark header. */
+.fi-sidebar-header .fi-icon-btn {
+    color: rgba(15, 23, 42, 0.55) !important;
+}
+.fi-sidebar-header .fi-icon-btn:hover {
+    background: rgba(0, 0, 0, 0.06) !important;
+    color: #0f172a !important;
+}
+.dark .fi-sidebar-header .fi-icon-btn {
+    color: rgba(255, 255, 255, 0.6) !important;
+}
+.dark .fi-sidebar-header .fi-icon-btn:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: #fff !important;
 }
 
-/* Light theme: the sidebar stays dark, so give the logo a white badge to keep
-   a dark/coloured logo clearly visible. */
-.fi-sidebar-header .fi-logo {
-    background: #fff !important;
-    padding: 0.35rem 0.6rem !important;
-    border-radius: 0.5rem !important;
-}
-/* Dark theme: no badge — logo sits transparently on the dark sidebar, as before. */
-.dark .fi-sidebar-header .fi-logo {
-    background: transparent !important;
-    padding: 0 !important;
-    border-radius: 0 !important;
+/* Centre the logo in the sidebar header; the collapse arrow stays at the edge. */
+.fi-sidebar-header > div:first-child {
+    position: absolute !important;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
 }
 
 /* Sidebar close/collapse button (toggle) */
